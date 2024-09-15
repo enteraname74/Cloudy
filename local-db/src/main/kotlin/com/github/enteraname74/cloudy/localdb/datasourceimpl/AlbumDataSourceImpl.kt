@@ -1,0 +1,62 @@
+package com.github.enteraname74.cloudy.localdb.datasourceimpl
+
+import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.localdb.table.AlbumTable
+import com.github.enteraname74.cloudy.localdb.table.toAlbum
+import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.upsert
+import java.util.*
+
+class AlbumDataSourceImpl : AlbumDataSource {
+    override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
+        dbQuery {
+            AlbumTable
+                .selectAll()
+                .where {
+                    (AlbumTable.name eq albumName) and (AlbumTable.artistName eq albumArtist) and (AlbumTable.userId eq userId)
+                }.firstOrNull()
+                ?.toAlbum()
+        }
+
+    override suspend fun upsert(album: Album): Album =
+        dbQuery {
+            AlbumTable.upsert {
+                it[id] = album.id
+                it[name] = album.name
+                it[userId] = album.userId
+                it[coverPath] = album.coverPath
+                it[addedDate] = album.addedDate
+                it[nbPlayed] = album.nbPlayed
+                it[isInQuickAccess] = album.isInQuickAccess
+                it[artistId] = album.artistId
+                it[artistName] = album.artistName
+            }
+
+            AlbumTable
+                .selectAll()
+                .where { AlbumTable.id eq album.id }
+                .first()
+                .toAlbum()!!
+        }
+
+    override suspend fun getAllOfUser(userId: UUID): List<Album> =
+        dbQuery {
+            AlbumTable
+                .selectAll()
+                .where { AlbumTable.userId eq userId }
+                .mapNotNull { it.toAlbum() }
+        }
+
+    override suspend fun deleteById(albumId: UUID) {
+        dbQuery {
+            AlbumTable.deleteWhere {
+                AlbumTable.id eq albumId
+            }
+        }
+    }
+}
