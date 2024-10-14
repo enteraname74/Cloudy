@@ -4,8 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.auth.TOKEN_ROLE_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.auth.TOKEN_USERNAME_CLAIM_KEY
+import com.github.enteraname74.cloudy.config.util.Messages
 import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.client.engine.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
@@ -38,7 +38,7 @@ internal fun Application.configureAuthentication() {
             challenge { _, _ ->
                 call.respond(
                     status = HttpStatusCode.Unauthorized,
-                    message = "Token is missing, not valid or has expired",
+                    message = Messages.Auth.TOKEN_ERROR,
                 )
             }
         }

@@ -21,4 +21,6 @@ data class Album(
     @Serializable(with = UUIDSerializer::class)
     val artistId: UUID,
     val artistName: String,
-)
+    @Serializable(with = LocalDateTimeSerializer::class)
+    override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
+): UpdatableElement

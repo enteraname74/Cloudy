@@ -18,4 +18,6 @@ data class Artist(
     var addedDate: LocalDateTime = LocalDateTime.now(),
     var nbPlayed: Int = 0,
     var isInQuickAccess: Boolean = false,
-)
+    @Serializable(with = LocalDateTimeSerializer::class)
+    override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
+): UpdatableElement

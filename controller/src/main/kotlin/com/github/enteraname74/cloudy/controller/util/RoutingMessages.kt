@@ -17,6 +17,13 @@ object RoutingMessages {
         const val FILE_NOT_FOUND = "Couldn't find the music file."
         const val SONG_DELETED = "This song has been deleted."
         const val SONG_UPDATED = "This song has been updated."
+        const val SONG_NOT_POSSESSED_BY_USER = "This song is not possessed by the user."
+    }
+
+    object Artist {
+        const val ARTIST_UPDATED = "This artist has been updated."
+        const val ARTIST_DELETED = "This artist has been deleted."
+        const val ARTIST_NOT_POSSESSED_BY_USER = "This artist is not possessed by the user."
     }
 
     object Generic {

@@ -13,5 +13,5 @@ fun Application.configureApplication() {
     configureSerialization()
     configureHTTP()
     configureSockets()
-    configureSecurity()
+    configureStatusPage()
 }

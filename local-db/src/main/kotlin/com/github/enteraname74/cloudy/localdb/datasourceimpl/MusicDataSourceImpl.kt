@@ -1,15 +1,13 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.localdb.table.AlbumTable.id
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.upsert
 import java.util.*
 
 class MusicDataSourceImpl: MusicDataSource {
@@ -30,19 +28,38 @@ class MusicDataSourceImpl: MusicDataSource {
                 it[artistId] = music.artistId
                 it[fingerprint] = music.fingerprint
                 it[path] = music.path
-                it[lastUpdateAt] = music.lastUpdatedAt
+                it[lastUpdateAt] = music.lastUpdateAt
             }
         }
     }
 
-    override suspend fun getFromInfo(
-        musicId: UUID,
-        userId: UUID,
-    ): Music? =
+    override suspend fun upsertAll(musics: List<Music>) {
+        dbQuery {
+            MusicTable.batchUpsert(musics) { music ->
+                this[id] = music.id
+                this[MusicTable.name] = music.name
+                this[MusicTable.userId] = music.userId
+                this[MusicTable.coverPath] = music.coverPath
+                this[MusicTable.album] = music.album
+                this[MusicTable.artist] = music.artist
+                this[MusicTable.duration] = music.duration
+                this[MusicTable.addedDate] = music.addedDate
+                this[MusicTable.nbPlayed] = music.nbPlayed
+                this[MusicTable.isInQuickAccess] = music.isInQuickAccess
+                this[MusicTable.albumId] = music.albumId
+                this[MusicTable.artistId] = music.artistId
+                this[MusicTable.fingerprint] = music.fingerprint
+                this[MusicTable.path] = music.path
+                this[MusicTable.lastUpdateAt] = music.lastUpdateAt
+            }
+        }
+    }
+
+    override suspend fun getFromId(musicId: UUID): Music? =
         dbQuery {
             MusicTable
                 .selectAll()
-                .where { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
+                .where { MusicTable.id eq musicId }
                 .firstOrNull()
                 ?.toMusic()
         }
@@ -79,19 +96,19 @@ class MusicDataSourceImpl: MusicDataSource {
                 .count() > 0
         }
 
-    override suspend fun allFromAlbum(albumId: UUID, userId: UUID): List<Music> =
+    override suspend fun allFromAlbum(albumId: UUID): List<Music> =
         dbQuery {
             MusicTable
                 .selectAll()
-                .where { (MusicTable.albumId eq albumId) and (MusicTable.userId eq userId) }
+                .where { MusicTable.albumId eq albumId }
                 .mapNotNull { it.toMusic() }
         }
 
-    override suspend fun allFromArtist(artistId: UUID, userId: UUID): List<Music> =
+    override suspend fun allFromArtist(artistId: UUID): List<Music> =
         dbQuery {
             MusicTable
                 .selectAll()
-                .where { (MusicTable.artistId eq artistId) and (MusicTable.userId eq userId) }
+                .where { MusicTable.artistId eq artistId }
                 .mapNotNull { it.toMusic() }
         }
 }

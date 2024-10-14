@@ -25,5 +25,5 @@ fun Music.fromModifiedMusic(modifiedMusic: ModifiedMusic): Music =
         artist = modifiedMusic.artist,
         nbPlayed = modifiedMusic.nbPlayed,
         isInQuickAccess = modifiedMusic.isInQuickAccess,
-        lastUpdatedAt = LocalDateTime.now(),
+        lastUpdateAt = LocalDateTime.now(),
     )

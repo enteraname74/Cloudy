@@ -17,5 +17,7 @@ data class Playlist(
     @Serializable(with = LocalDateTimeSerializer::class)
     var addedDate: LocalDateTime = LocalDateTime.now(),
     var nbPlayed: Int = 0,
-    var isInQuickAccess: Boolean = false
-)
+    var isInQuickAccess: Boolean = false,
+    @Serializable(with = LocalDateTimeSerializer::class)
+    override val lastUpdateAt: LocalDateTime = LocalDateTime.now()
+): UpdatableElement

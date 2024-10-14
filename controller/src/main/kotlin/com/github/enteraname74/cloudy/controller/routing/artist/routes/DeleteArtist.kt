@@ -1,4 +1,4 @@
-package com.github.enteraname74.cloudy.controller.routing.music.routes
+package com.github.enteraname74.cloudy.controller.routing.artist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
@@ -6,21 +6,20 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
-import com.github.enteraname74.cloudy.domain.service.MusicFileService
-import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
+import com.github.enteraname74.cloudy.domain.service.ArtistService
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.delete
 import org.koin.ktor.ext.inject
-import java.util.*
+import java.util.UUID
 
-fun Route.deleteSong() {
-    val musicService by inject<MusicService>()
-    val musicFileService by inject<MusicFileService>()
+fun Route.deleteArtist() {
+    val artistService by inject<ArtistService>()
 
-    delete("/{musicId}") {
-        val musicId: UUID = try {
-            UUID.fromString(call.parameters["musicId"])
+    delete("/{artistId}") {
+        val artistId: UUID = try {
+            UUID.fromString(call.parameters["artistId"])
         } catch (_: Exception) {
             return@delete badRequest(
                 message = RoutingMessages.Generic.WRONG_ID
@@ -30,30 +29,27 @@ fun Route.deleteSong() {
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
-        val isMusicPossessedByUser: Boolean = musicService.isMusicPossessedByUser(
-            musicId = musicId,
+        val isArtistPossessedByUser = artistService.isArtistPossessedByUser(
+            artistId = artistId,
             userId = userId,
         )
 
-        if (!isMusicPossessedByUser) {
+        if (!isArtistPossessedByUser) {
             return@delete response(
                 status = HttpStatusCode.Forbidden,
-                message = RoutingMessages.Music.SONG_NOT_POSSESSED_BY_USER,
+                message = RoutingMessages.Artist.ARTIST_NOT_POSSESSED_BY_USER,
             )
         }
 
-        musicFileService.deleteMusicFile(
-            musicId = musicId,
+        val hasBeenDeleted = artistService.deleteArtist(
+            artistId = artistId,
             username = username,
-        )
-        val hasBeenDeleted = musicService.deleteById(
-            musicId = musicId,
         )
 
         if (hasBeenDeleted) {
             response(
                 status = HttpStatusCode.OK,
-                message = RoutingMessages.Music.SONG_DELETED,
+                message = RoutingMessages.Artist.ARTIST_DELETED,
             )
         } else {
             response(
