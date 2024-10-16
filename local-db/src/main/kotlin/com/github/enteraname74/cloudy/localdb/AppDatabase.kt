@@ -20,13 +20,24 @@ object AppDatabase {
         }
     }
 
+    private fun initDatabase(
+        dbName: String,
+    ) {
+        SchemaUtils.createDatabase(dbName)
+    }
+
     fun connectToDatabase(
         url: String,
-        driver: String
+        driver: String,
+        user: String = "",
+        password: String = "",
     ) {
-        Database.connect(
+        println("Will connect to db with following info: url = $url, driver = $driver, user = $user, password = $password")
+        val db = Database.connect(
             url = url,
             driver = driver,
+            user = user,
+            password = password,
         )
         initTables()
     }
