@@ -8,4 +8,6 @@ import java.time.LocalDateTime
 data class PaginatedRequest(
     @Serializable(with = LocalDateTimeSerializer::class)
     val lastUpdateAt: LocalDateTime? = null,
+    val page: Int? = null,
+    val limitPerPage: Int? = null,
 )

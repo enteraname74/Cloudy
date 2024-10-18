@@ -38,8 +38,10 @@ class ArtistRepositoryImpl(
         paginatedRequest: PaginatedRequest,
     ): List<Artist> =
         artistDataSource
-            .getAllOfUser(userId)
-            .paginated(paginatedRequest)
+            .getAllOfUser(
+                userId = userId,
+                paginatedRequest = paginatedRequest,
+            )
 
     override suspend fun deleteById(artistId: UUID) {
         artistDataSource.deleteById(artistId)

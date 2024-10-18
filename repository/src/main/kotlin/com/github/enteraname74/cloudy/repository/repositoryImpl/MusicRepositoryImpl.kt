@@ -41,8 +41,10 @@ class MusicRepositoryImpl(
         paginatedRequest: PaginatedRequest,
     ): List<Music> =
         musicDataSource
-            .getAllOfUser(userId = userId)
-            .paginated(paginatedRequest)
+            .getAllOfUser(
+                userId = userId,
+                paginatedRequest = paginatedRequest,
+            )
 
     override suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)

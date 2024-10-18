@@ -14,7 +14,7 @@ internal object ArtistTable: UUIDTable() {
     val addedDate = datetime("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
-    val lastUpdatedAt = datetime("lastUpdatedAt").default(LocalDateTime.now())
+    val lastUpdateAt = datetime("lastUpdatedAt").default(LocalDateTime.now())
 }
 
 internal fun ResultRow.toArtist(): Artist? =
@@ -27,7 +27,7 @@ internal fun ResultRow.toArtist(): Artist? =
             nbPlayed = this[ArtistTable.nbPlayed],
             isInQuickAccess = this[ArtistTable.isInQuickAccess],
             userId = this[ArtistTable.userId].value,
-            lastUpdateAt = this[ArtistTable.lastUpdatedAt],
+            lastUpdateAt = this[ArtistTable.lastUpdateAt],
         )
     } catch (_: Exception) {
         null

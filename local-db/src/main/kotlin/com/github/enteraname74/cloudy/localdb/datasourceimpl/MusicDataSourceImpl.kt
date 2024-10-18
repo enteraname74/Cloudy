@@ -1,16 +1,19 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable.id
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
-class MusicDataSourceImpl: MusicDataSource {
+class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music) {
         dbQuery {
             MusicTable.upsert {
@@ -72,11 +75,18 @@ class MusicDataSourceImpl: MusicDataSource {
         }
     }
 
-    override suspend fun getAllOfUser(userId: UUID): List<Music> =
+    override suspend fun getAllOfUser(
+        userId: UUID,
+        paginatedRequest: PaginatedRequest,
+    ): List<Music> =
         dbQuery {
             MusicTable
                 .selectAll()
-                .where { MusicTable.userId eq userId }
+                .where {
+                    (MusicTable.userId eq userId) and
+                            (MusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
+                }
+                .paginated(paginatedRequest)
                 .mapNotNull { it.toMusic() }
         }
 

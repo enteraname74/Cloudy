@@ -1,9 +1,12 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.toAlbum
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -69,11 +72,18 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
     }
 
-    override suspend fun getAllOfUser(userId: UUID): List<Album> =
+    override suspend fun getAllOfUser(
+        userId: UUID,
+        paginatedRequest: PaginatedRequest,
+    ): List<Album> =
         dbQuery {
             AlbumTable
                 .selectAll()
-                .where { AlbumTable.userId eq userId }
+                .where {
+                    (AlbumTable.userId eq userId) and
+                            (AlbumTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
+                }
+                .paginated(paginatedRequest)
                 .mapNotNull { it.toAlbum() }
         }
 

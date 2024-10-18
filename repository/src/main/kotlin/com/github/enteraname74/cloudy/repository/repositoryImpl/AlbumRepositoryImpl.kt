@@ -4,7 +4,6 @@ import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
-import com.github.enteraname74.cloudy.repository.util.paginated
 import java.time.LocalDateTime
 import java.util.*
 
@@ -56,8 +55,10 @@ class AlbumRepositoryImpl(
         paginatedRequest: PaginatedRequest,
     ): List<Album> =
         albumDataSource
-            .getAllOfUser(userId)
-            .paginated(paginatedRequest)
+            .getAllOfUser(
+                userId = userId,
+                paginatedRequest = paginatedRequest,
+            )
 
     override suspend fun deleteById(albumId: UUID) {
         albumDataSource.deleteById(albumId)
