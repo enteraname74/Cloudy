@@ -17,15 +17,11 @@ spec:
     spec:
       containers:
         - name: api
-          image: "cloudy-docker-image:0.0.8"
+          image: "cloudy-docker-image:0.0.11"
           imagePullPolicy: Never
           ports:
             - containerPort: 80
               name: http
-          livenessProbe:
-            httpGet:
-              path: "/"
-              port: 80
           env:
             - name: ACOUSTID_API_KEY
               valueFrom:

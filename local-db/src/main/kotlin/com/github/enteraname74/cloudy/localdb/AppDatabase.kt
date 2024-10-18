@@ -11,6 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object AppDatabase {
     private fun initTables() {
         transaction {
+            println("DATABASE -- Will create missing tables and columns")
             SchemaUtils.createMissingTablesAndColumns(
                 MusicTable,
                 ArtistTable,
@@ -22,8 +23,14 @@ object AppDatabase {
 
     private fun initDatabase(
         dbName: String,
+        db: Database?,
     ) {
-        SchemaUtils.createDatabase(dbName)
+        transaction(db) {
+            println("DATABASE -- Will create database $dbName")
+            connection.autoCommit = true
+            SchemaUtils.createDatabase(dbName)
+            connection.autoCommit = false
+        }
     }
 
     fun connectToDatabase(
@@ -33,12 +40,13 @@ object AppDatabase {
         password: String = "",
     ) {
         println("Will connect to db with following info: url = $url, driver = $driver, user = $user, password = $password")
-        val db = Database.connect(
+        Database.connect(
             url = url,
             driver = driver,
             user = user,
             password = password,
         )
+//        initDatabase("api_db_DOS", db)
         initTables()
     }
 }

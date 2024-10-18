@@ -14,7 +14,7 @@ repositories {
 ktor {
     docker {
         localImageName.set("cloudy-docker-image")
-        imageTag.set("0.0.8")
+        imageTag.set("0.0.11")
         jreVersion.set(JavaVersion.VERSION_17)
     }
 }

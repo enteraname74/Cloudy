@@ -5,9 +5,9 @@ metadata:
   labels:
     app: db
 spec:
-  storageClassName: manual
+  # storageClassName: manual
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   resources:
     requests:
       storage: 10Gi

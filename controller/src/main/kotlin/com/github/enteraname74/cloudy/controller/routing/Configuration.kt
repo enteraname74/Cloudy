@@ -16,6 +16,9 @@ fun Application.configureRouting() {
         musicRouting()
         albumRouting()
         artistRouting()
+        get("/hello") {
+            call.respondText("Hello Ktor My Beloved!")
+        }
         authenticatedRoutes {
             get("/admin") {
                 if (isAdmin()) {

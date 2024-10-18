@@ -24,12 +24,10 @@ spec:
               protocol: TCP
           env:
             - name: POSTGRES_DB
-              value: "api_db"
-#            - name: POSTGRES_DB
-#              valueFrom:
-#                secretKeyRef:
-#                  key: db_name
-#                  name: db-secret
+              valueFrom:
+                secretKeyRef:
+                  key: db_name
+                  name: db-secret
             - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
@@ -41,9 +39,14 @@ spec:
                   key: db_password
                   name: db-secret
           volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: db-volume
+            - name: db-volume
+              mountPath: /var/lib/postgresql/data
+#            - name: init-db
+#              mountPath: /docker-entrypoint-initdb.d/
       volumes:
+#        - name: init-db
+#          configMap:
+#            name: init-db
         - name: db-volume
           persistentVolumeClaim:
             claimName: db-volume-claim
