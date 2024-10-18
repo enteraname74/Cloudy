@@ -5,6 +5,9 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.UUID
 
 interface AlbumRepository {
+    suspend fun getFromId(
+        albumId: UUID,
+    ): Album?
     suspend fun getFromInformation(
         albumName: String,
         albumArtist: String,
@@ -18,4 +21,5 @@ interface AlbumRepository {
     ): List<Album>
     suspend fun deleteById(albumId: UUID)
     suspend fun allOfArtist(artistId: UUID): List<Album>
+    suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean
 }

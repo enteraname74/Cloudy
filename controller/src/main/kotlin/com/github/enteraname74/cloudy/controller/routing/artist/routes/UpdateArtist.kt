@@ -42,7 +42,10 @@ fun Route.updateArtist() {
             modifiedArtist = modifiedArtist,
         )
 
-        artistService.upsert(modifiedArtist = updatedArtist)
+        artistService.upsert(
+            modifiedArtist = updatedArtist,
+            userId = userId,
+        )
 
         response(
             status = HttpStatusCode.OK,

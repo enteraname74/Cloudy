@@ -37,7 +37,7 @@ class MusicService(
         )
 
         val album: Album = getOrCreateAlbumUseCase(
-            albumName = musicInformationResult.name,
+            albumName = musicInformationResult.album,
             userId = user.id,
             artistId = artist.id,
             artistName = artist.name,

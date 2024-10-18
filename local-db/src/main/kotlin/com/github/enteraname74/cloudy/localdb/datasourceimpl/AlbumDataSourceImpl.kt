@@ -10,6 +10,16 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
 class AlbumDataSourceImpl : AlbumDataSource {
+    override suspend fun getFromId(albumId: UUID): Album? =
+        dbQuery {
+            AlbumTable
+                .selectAll()
+                .where {
+                    AlbumTable.id eq albumId
+                }.firstOrNull()
+                ?.toAlbum()
+        }
+
     override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
         dbQuery {
             AlbumTable
@@ -81,5 +91,14 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 .selectAll()
                 .where { AlbumTable.artistId eq  artistId }
                 .mapNotNull { it.toAlbum() }
+        }
+
+    override suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean =
+        dbQuery {
+            AlbumTable
+                .selectAll()
+                .where {
+                    (AlbumTable.id eq albumId) and (AlbumTable.userId eq userId)
+                }.count() > 0
         }
 }

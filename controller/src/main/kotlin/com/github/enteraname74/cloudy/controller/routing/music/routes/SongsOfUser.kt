@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.getLocalDateTimeFromQueryParam
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import io.ktor.server.application.*
@@ -17,7 +18,9 @@ fun Route.songsOfUser() {
 
     get("/ofUser") {
         val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
-        val lastUpdateAt: LocalDateTime? = getLocalDateTimeFromQueryParam(key = "lastUpdateAt")
+        val lastUpdateAt: LocalDateTime? = getLocalDateTimeFromQueryParam(
+            key = ServerUtil.Keys.LAST_UPDATE_AT_KEY,
+        )
 
         val paginatedRequest = PaginatedRequest(
             lastUpdateAt = lastUpdateAt

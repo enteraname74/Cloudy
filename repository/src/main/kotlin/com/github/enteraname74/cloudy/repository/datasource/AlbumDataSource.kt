@@ -4,6 +4,9 @@ import com.github.enteraname74.cloudy.domain.model.Album
 import java.util.*
 
 interface AlbumDataSource {
+    suspend fun getFromId(
+        albumId: UUID,
+    ): Album?
     suspend fun getFromInformation(
         albumName: String,
         albumArtist: String,
@@ -14,4 +17,5 @@ interface AlbumDataSource {
     suspend fun getAllOfUser(userId: UUID): List<Album>
     suspend fun deleteById(albumId: UUID)
     suspend fun allOfArtist(artistId: UUID): List<Album>
+    suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean
 }

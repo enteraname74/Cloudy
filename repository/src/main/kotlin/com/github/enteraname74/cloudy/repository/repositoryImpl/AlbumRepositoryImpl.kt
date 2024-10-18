@@ -11,6 +11,11 @@ import java.util.*
 class AlbumRepositoryImpl(
     private val albumDataSource: AlbumDataSource
 ): AlbumRepository {
+    override suspend fun getFromId(albumId: UUID): Album? =
+        albumDataSource.getFromId(
+            albumId = albumId,
+        )
+
     override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
         albumDataSource.getFromInformation(
             albumName = albumName,
@@ -21,6 +26,12 @@ class AlbumRepositoryImpl(
     override suspend fun allOfArtist(artistId: UUID): List<Album> =
         albumDataSource.allOfArtist(
             artistId = artistId,
+        )
+
+    override suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean =
+        albumDataSource.isAlbumPossessedByUser(
+            userId = userId,
+            albumId = albumId,
         )
 
     override suspend fun upsert(album: Album): Album =

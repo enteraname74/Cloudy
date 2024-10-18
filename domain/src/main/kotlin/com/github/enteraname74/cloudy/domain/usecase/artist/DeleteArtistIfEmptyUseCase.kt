@@ -12,6 +12,8 @@ class DeleteArtistIfEmptyUseCase(
         val isArtistEmpty = musicRepository
             .allFromArtist(artistId = artistId).isEmpty()
 
+        println("Artist $artistId is empty? $isArtistEmpty")
+
         if (isArtistEmpty) artistRepository.deleteById(artistId = artistId)
     }
 }

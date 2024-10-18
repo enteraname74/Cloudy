@@ -7,4 +7,8 @@ object ServerUtil {
     fun buildRoute(value: String): String =
         "http://$HOST:$PORT/$value"
 
+
+    object Keys {
+        const val LAST_UPDATE_AT_KEY: String = "lastUpdateAt"
+    }
 }

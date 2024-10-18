@@ -26,6 +26,12 @@ object RoutingMessages {
         const val ARTIST_NOT_POSSESSED_BY_USER = "This artist is not possessed by the user."
     }
 
+    object Album {
+        const val ALBUM_UPDATED = "This album has been updated."
+        const val ALBUM_DELETED = "This album has been deleted."
+        const val ALBUM_NOT_POSSESSED_BY_USER = "This album is not possessed by the user."
+    }
+
     object Generic {
         const val MISSING_TOKEN_INFORMATION = "Missing information from token."
         const val WRONG_ID = "The given id is incorrect."

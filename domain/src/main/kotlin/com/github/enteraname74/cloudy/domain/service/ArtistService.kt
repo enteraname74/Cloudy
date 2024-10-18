@@ -26,31 +26,55 @@ class ArtistService(
             paginatedRequest = paginatedRequest,
         )
 
-    suspend fun upsert(modifiedArtist: Artist) {
+    suspend fun upsert(
+        modifiedArtist: Artist,
+        userId: UUID,
+    ) {
         // We fetch the songs and albums of the artist
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(artistId = modifiedArtist.id)
         val albumsOfArtist: List<Album> = albumRepository.allOfArtist(artistId = modifiedArtist.id)
 
-        val updatedArtist: Artist = artistRepository.upsert(modifiedArtist)
+        /*
+        We check if an artist with the same name exist.
+        If that's the case, we will redirect songs and albums of the modified artist to this one.
+        The modified artist will then be deleted.
+         */
+        val artistInfoToUse: Artist? = artistRepository.getFromInformation(
+            name = modifiedArtist.name,
+            userId = userId,
+        )
 
-        // The only important part of the artist in a song is its name.
-        if (songsOfArtist.firstOrNull()?.artist != updatedArtist.name) {
+        // The only important part of the artist in a song is its name and its id.
+        if (songsOfArtist.firstOrNull()?.artist != modifiedArtist.name) {
             val updatedSongs = songsOfArtist.map {
                 it.copy(
-                    artist = updatedArtist.name,
+                    artistId = artistInfoToUse?.id ?: modifiedArtist.id,
+                    artist = modifiedArtist.name,
                 )
             }
             musicRepository.upsertAll(updatedSongs)
         }
 
         // Same for the albums
-        if (albumsOfArtist.firstOrNull()?.artistName != updatedArtist.name) {
+        if (albumsOfArtist.firstOrNull()?.artistName != modifiedArtist.name) {
             val updatedAlbums = albumsOfArtist.map {
                 it.copy(
-                    artistName = updatedArtist.name,
+                    artistId = artistInfoToUse?.id ?: modifiedArtist.id,
+                    artistName = modifiedArtist.name,
                 )
             }
             albumRepository.upsertAll(updatedAlbums)
+        }
+
+        if (artistInfoToUse != null) {
+            artistRepository.deleteById(artistId = modifiedArtist.id)
+            artistRepository.upsert(
+                artistInfoToUse.copy(
+                    isInQuickAccess = modifiedArtist.isInQuickAccess,
+                )
+            )
+        } else {
+            artistRepository.upsert(modifiedArtist)
         }
     }
 
@@ -72,7 +96,7 @@ class ArtistService(
     ): Boolean {
         artistRepository.getFromId(artistId = artistId) ?: return false
 
-        // We first delete all the music file of the artist
+        // We first delete all the music files of the artist
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(
             artistId = artistId,
         )
