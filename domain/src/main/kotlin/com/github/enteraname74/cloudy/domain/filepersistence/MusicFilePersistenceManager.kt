@@ -92,6 +92,6 @@ class MusicFilePersistenceManager {
 
 
     companion object {
-        private const val MUSIC_FOLDER = "app/musics"
+        private const val MUSIC_FOLDER = "app/songs"
     }
 }
