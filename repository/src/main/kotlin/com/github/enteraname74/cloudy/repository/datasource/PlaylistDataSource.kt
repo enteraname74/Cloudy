@@ -1,10 +1,10 @@
-package com.github.enteraname74.cloudy.domain.repository
+package com.github.enteraname74.cloudy.repository.datasource
 
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.*
 
-interface PlaylistRepository {
+interface PlaylistDataSource {
     suspend fun getFromId(
         playlistId: UUID
     ): Playlist?

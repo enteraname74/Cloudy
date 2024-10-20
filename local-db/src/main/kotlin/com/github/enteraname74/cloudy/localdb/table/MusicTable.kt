@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 internal object MusicTable: UUIDTable() {
     val name = varchar("name", 128)
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val coverPath = varchar("coverPath", 128).nullable()
+    val coverPath = text("coverPath").nullable()
     val album = varchar("album", 128)
     val artist = varchar("artist", 128)
     val path = varchar("path", 255)

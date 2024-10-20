@@ -13,6 +13,7 @@ data class Playlist(
     @Serializable(with = UUIDSerializer::class)
     val userId: UUID,
     val name: String,
+    val coverPath: String?,
     val isFavorite: Boolean = false,
     @Serializable(with = LocalDateTimeSerializer::class)
     var addedDate: LocalDateTime = LocalDateTime.now(),

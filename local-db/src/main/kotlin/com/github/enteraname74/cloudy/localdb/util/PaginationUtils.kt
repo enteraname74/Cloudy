@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.Query
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
 import java.time.LocalDateTime
 
-fun Query.paginated(
+internal fun Query.paginated(
     paginatedRequest: PaginatedRequest,
 
 ): Query =
@@ -19,7 +19,7 @@ fun Query.paginated(
         this
     }
 
-infix fun Column<LocalDateTime>.updatedAfter(other: LocalDateTime?): Op<Boolean> =
+internal infix fun Column<LocalDateTime>.updatedAfter(other: LocalDateTime?): Op<Boolean> =
     (other?.let { lastUpdateAt ->
         this greaterEq lastUpdateAt
     } ?: Op.TRUE)

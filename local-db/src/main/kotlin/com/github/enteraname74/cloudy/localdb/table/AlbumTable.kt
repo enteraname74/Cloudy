@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 internal object AlbumTable: UUIDTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val name = varchar("name", 128)
-    val coverPath = varchar("coverPath", 128).nullable()
+    val coverPath = text("coverPath").nullable()
     val addedDate = datetime("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
