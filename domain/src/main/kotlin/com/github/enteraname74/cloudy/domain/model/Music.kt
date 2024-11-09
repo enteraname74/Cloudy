@@ -21,7 +21,7 @@ data class Music(
     @Serializable(with = LocalDateTimeSerializer::class)
     val addedDate: LocalDateTime = LocalDateTime.now(),
     @Serializable(with = LocalDateTimeSerializer::class)
-    val lastUpdatedAt: LocalDateTime = LocalDateTime.now(),
+    override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
     @Serializable(with = UUIDSerializer::class)
@@ -29,4 +29,4 @@ data class Music(
     @Serializable(with = UUIDSerializer::class)
     val artistId: UUID,
     val fingerprint: String,
-)
+): UpdatableElement

@@ -30,6 +30,8 @@ class MusicFileService(
             message = FILE_CANNOT_BE_SAVED,
         )
 
+        println("UPLOAD -- Service -- got file id: $fileId")
+
         val temporalSavedFile: File = musicFilePersistenceManager.getById(
             musicId = fileId,
             username = user.username,
@@ -37,12 +39,15 @@ class MusicFileService(
             message = FILE_CANNOT_BE_SAVED,
         )
 
+        println("UPLOAD -- Service -- got tmp file: $temporalSavedFile")
 
         val musicInformationResult: MusicInformationResult = musicInformationRetriever.getInformationAboutMusicFile(
             musicFile = temporalSavedFile,
             musicId = fileId,
             shouldSearchForMetadata = shouldSearchForMetadata,
         )
+
+        println("UPLOAD -- Service -- got info: $musicInformationResult")
 
         return when (musicInformationResult) {
             MusicInformationResult.Error -> {

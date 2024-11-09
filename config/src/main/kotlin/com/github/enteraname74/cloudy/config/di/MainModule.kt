@@ -7,6 +7,7 @@ internal val mainModule = module {
         otherModule,
         datasourceModule,
         repositoryModule,
+        useCaseModule,
         serviceModule,
     )
 }

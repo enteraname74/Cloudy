@@ -24,42 +24,42 @@ class MusicInformationRetrieverImpl: MusicInformationRetriever {
     ): MusicInformationResult {
         val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
 
-        val fingerprintData: FingerprintData = fingerprintRetriever
-            .getFingerprintFromMusic(musicPath = musicFile.path) ?:
-            return MusicInformationResult.Error
+        val fingerprintData: FingerprintData? = fingerprintRetriever
+            .getFingerprintFromMusic(musicPath = musicFile.path) // ?:
+//            return MusicInformationResult.Error
 
-        if (!shouldSearchForMetadata) {
+        if (!shouldSearchForMetadata || fingerprintData == null) {
             return MusicInformationResult.FileMetadata(
                 name = fileMetadata.name,
                 artist = fileMetadata.artist,
                 album = fileMetadata.album,
-                fingerprint = fingerprintData.fingerprint.hashed(),
+                fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
                 coverPath = null,
                 duration = fileMetadata.duration,
                 musicId = musicId,
             )
+        } else {
+            val acoustidClient = AcoustidApiClient()
+            val finalMetadata = acoustidClient.getMusicMetadata(
+                fingerprintData = fingerprintData,
+                fileMetadata = fileMetadata
+            ).replaceBlank()
+
+            val coverPath: String? = remoteMusicCoverRetriever.getCoverURL(
+                musicName = finalMetadata.name,
+                musicArtist = finalMetadata.artist,
+            )
+
+            return MusicInformationResult.FileMetadata(
+                name = finalMetadata.name,
+                artist = finalMetadata.artist,
+                album = finalMetadata.album,
+                fingerprint = fingerprintData.fingerprint.hashed(),
+                coverPath = coverPath,
+                duration = finalMetadata.duration,
+                musicId = musicId,
+            )
         }
-
-        val acoustidClient = AcoustidApiClient()
-        val finalMetadata = acoustidClient.getMusicMetadata(
-            fingerprintData = fingerprintData,
-            fileMetadata = fileMetadata
-        ).replaceBlank()
-
-        val coverPath: String? = remoteMusicCoverRetriever.getCoverURL(
-            musicName = finalMetadata.name,
-            musicArtist = finalMetadata.artist,
-        )
-
-        return MusicInformationResult.FileMetadata(
-            name = finalMetadata.name,
-            artist = finalMetadata.artist,
-            album = finalMetadata.album,
-            fingerprint = fingerprintData.fingerprint.hashed(),
-            coverPath = coverPath,
-            duration = finalMetadata.duration,
-            musicId = musicId,
-        )
     }
 
     private fun ByteArray.toHex() =

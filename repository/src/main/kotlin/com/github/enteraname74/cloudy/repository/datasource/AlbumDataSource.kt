@@ -10,6 +10,8 @@ interface AlbumDataSource {
         userId: UUID
     ): Album?
     suspend fun upsert(album: Album): Album
+    suspend fun upsertAll(albums: List<Album>)
     suspend fun getAllOfUser(userId: UUID): List<Album>
     suspend fun deleteById(albumId: UUID)
+    suspend fun allOfArtist(artistId: UUID): List<Album>
 }

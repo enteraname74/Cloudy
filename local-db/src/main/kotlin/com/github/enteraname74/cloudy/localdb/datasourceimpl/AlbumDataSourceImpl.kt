@@ -5,11 +5,8 @@ import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.toAlbum
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.upsert
 import java.util.*
 
 class AlbumDataSourceImpl : AlbumDataSource {
@@ -35,6 +32,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 it[isInQuickAccess] = album.isInQuickAccess
                 it[artistId] = album.artistId
                 it[artistName] = album.artistName
+                it[lastUpdateAt] = album.lastUpdateAt
             }
 
             AlbumTable
@@ -43,6 +41,23 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 .first()
                 .toAlbum()!!
         }
+
+    override suspend fun upsertAll(albums: List<Album>) {
+        dbQuery {
+            AlbumTable.batchUpsert(albums) { album ->
+                this[AlbumTable.id] = album.id
+                this[AlbumTable.name] = album.name
+                this[AlbumTable.userId] = album.userId
+                this[AlbumTable.coverPath] = album.coverPath
+                this[AlbumTable.addedDate] = album.addedDate
+                this[AlbumTable.nbPlayed] = album.nbPlayed
+                this[AlbumTable.isInQuickAccess] = album.isInQuickAccess
+                this[AlbumTable.artistId] = album.artistId
+                this[AlbumTable.artistName] = album.artistName
+                this[AlbumTable.lastUpdateAt] = album.lastUpdateAt
+            }
+        }
+    }
 
     override suspend fun getAllOfUser(userId: UUID): List<Album> =
         dbQuery {
@@ -59,4 +74,12 @@ class AlbumDataSourceImpl : AlbumDataSource {
             }
         }
     }
+
+    override suspend fun allOfArtist(artistId: UUID): List<Album> =
+        dbQuery {
+            AlbumTable
+                .selectAll()
+                .where { AlbumTable.artistId eq  artistId }
+                .mapNotNull { it.toAlbum() }
+        }
 }

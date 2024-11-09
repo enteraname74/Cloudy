@@ -4,21 +4,33 @@ import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
+import com.github.enteraname74.cloudy.repository.util.paginated
 import java.time.LocalDateTime
 import java.util.*
 
 class MusicRepositoryImpl(
     private val musicDataSource: MusicDataSource,
-): MusicRepository {
+) : MusicRepository {
     override suspend fun upsert(music: Music) {
-        musicDataSource.upsert(music)
+        musicDataSource.upsert(
+            music.copy(
+                lastUpdateAt = LocalDateTime.now()
+            )
+        )
     }
 
-    override suspend fun getFromInfo(musicId: UUID, userId: UUID): Music? =
-        musicDataSource.getFromInfo(
-            musicId = musicId,
-            userId = userId,
+    override suspend fun upsertAll(musics: List<Music>) {
+        musicDataSource.upsertAll(
+            musics.map {
+                it.copy(
+                    lastUpdateAt = LocalDateTime.now(),
+                )
+            }
         )
+    }
+
+    override suspend fun getFromId(musicId: UUID): Music? =
+        musicDataSource.getFromId(musicId = musicId)
 
     override suspend fun deleteById(musicId: UUID) {
         musicDataSource.deleteById(musicId)
@@ -30,10 +42,7 @@ class MusicRepositoryImpl(
     ): List<Music> =
         musicDataSource
             .getAllOfUser(userId = userId)
-            .filter {
-                val dateToCompare = paginatedRequest.lastUpdateAt ?: LocalDateTime.now()
-                it.lastUpdatedAt.isAfter(dateToCompare) || it.lastUpdatedAt.isEqual(dateToCompare)
-            }
+            .paginated(paginatedRequest)
 
     override suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)
@@ -44,9 +53,9 @@ class MusicRepositoryImpl(
             userId = userId,
         )
 
-    override suspend fun allFromAlbum(albumId: UUID, userId: UUID): List<Music> =
-        musicDataSource.allFromAlbum(albumId, userId)
+    override suspend fun allFromAlbum(albumId: UUID): List<Music> =
+        musicDataSource.allFromAlbum(albumId)
 
-    override suspend fun allFromArtist(artistId: UUID, userId: UUID): List<Music> =
-        musicDataSource.allFromArtist(artistId, userId)
+    override suspend fun allFromArtist(artistId: UUID): List<Music> =
+        musicDataSource.allFromArtist(artistId)
 }

@@ -5,6 +5,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 import org.jetbrains.exposed.sql.ReferenceOption
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.datetime
+import java.time.LocalDateTime
 
 internal object ArtistTable: UUIDTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
@@ -13,6 +14,7 @@ internal object ArtistTable: UUIDTable() {
     val addedDate = datetime("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
+    val lastUpdatedAt = datetime("lastUpdatedAt").default(LocalDateTime.now())
 }
 
 internal fun ResultRow.toArtist(): Artist? =
@@ -25,6 +27,7 @@ internal fun ResultRow.toArtist(): Artist? =
             nbPlayed = this[ArtistTable.nbPlayed],
             isInQuickAccess = this[ArtistTable.isInQuickAccess],
             userId = this[ArtistTable.userId].value,
+            lastUpdateAt = this[ArtistTable.lastUpdatedAt],
         )
     } catch (_: Exception) {
         null

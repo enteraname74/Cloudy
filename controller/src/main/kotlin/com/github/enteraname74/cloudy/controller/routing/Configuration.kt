@@ -16,14 +16,10 @@ fun Application.configureRouting() {
         musicRouting()
         albumRouting()
         artistRouting()
+        get("/hello") {
+            call.respondText("Hello Ktor My Beloved!")
+        }
         authenticatedRoutes {
-
-            get("/hello") {
-//                val principal = call.principal<JWTPrincipal>()
-//                val username = principal!!.payload.getClaim("username").asString()
-//                val expiresAt = principal.expiresAt?.time?.minus(System.currentTimeMillis())
-//                call.respondText("Hello, $username! Token is expired at $expiresAt ms.")
-            }
             get("/admin") {
                 if (isAdmin()) {
                     call.respondText("Hello admin!")

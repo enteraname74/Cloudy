@@ -41,7 +41,7 @@ internal fun ResultRow.toMusic(): Music? =
             userId = this[MusicTable.userId].value,
             fingerprint = this[MusicTable.fingerprint],
             path = this[MusicTable.path],
-            lastUpdatedAt = this[MusicTable.lastUpdateAt]
+            lastUpdateAt = this[MusicTable.lastUpdateAt]
         )
     } catch (_: Exception) {
         null

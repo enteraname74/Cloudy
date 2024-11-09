@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      name: api
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: "cloudy-docker-image:0.0.14"
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: ACOUSTID_API_KEY
+              valueFrom:
+                  secretKeyRef:
+                    key: acoustid
+                    name: api-secret
+            - name: AUTH_SECRET
+              valueFrom:
+                  secretKeyRef:
+                    key: auth
+                    name: api-secret
+            - name: HOST
+              valueFrom:
+                  secretKeyRef:
+                    key: host
+                    name: api-secret
+            - name: PORT
+              valueFrom:
+                  secretKeyRef:
+                    key: port
+                    name: api-secret
+            - name: DB_DRIVER
+              valueFrom:
+                secretKeyRef:
+                  key: db_driver
+                  name: db-secret
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  key: db_url
+                  name: db-secret
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: db_username
+                  name: db-secret
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: db_password
+                  name: db-secret
+          volumeMounts:
+            - name: api-volume
+              mountPath: /app/musics
+      volumes:
+        - name: api-volume
+          persistentVolumeClaim:
+            claimName: api-volume-claim
+      restartPolicy: Always
+      

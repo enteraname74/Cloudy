@@ -22,6 +22,23 @@ class ArtistDataSourceImpl: ArtistDataSource {
                 ?.toArtist()
         }
 
+    override suspend fun getFromId(artistId: UUID): Artist? =
+        dbQuery {
+            ArtistTable
+                .selectAll()
+                .where { ArtistTable.id eq artistId }
+                .firstOrNull()
+                ?.toArtist()
+        }
+
+    override suspend fun isArtistPossessedByUser(userId: UUID, artistId: UUID): Boolean =
+        dbQuery {
+            ArtistTable
+                .selectAll()
+                .where { (ArtistTable.id eq artistId) and (ArtistTable.userId eq userId) }
+                .count() > 0
+        }
+
     override suspend fun upsert(artist: Artist): Artist =
         dbQuery {
             ArtistTable.upsert {
@@ -32,6 +49,7 @@ class ArtistDataSourceImpl: ArtistDataSource {
                 it[addedDate] = artist.addedDate
                 it[nbPlayed] = artist.nbPlayed
                 it[isInQuickAccess] = artist.isInQuickAccess
+                it[lastUpdatedAt] = artist.lastUpdateAt
             }
 
             ArtistTable

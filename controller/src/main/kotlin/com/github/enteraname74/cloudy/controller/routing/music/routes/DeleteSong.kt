@@ -30,13 +30,24 @@ fun Route.deleteSong() {
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
+        val isMusicPossessedByUser: Boolean = musicService.isMusicPossessedByUser(
+            musicId = musicId,
+            userId = userId,
+        )
+
+        if (!isMusicPossessedByUser) {
+            return@delete response(
+                status = HttpStatusCode.Forbidden,
+                message = RoutingMessages.Music.SONG_NOT_POSSESSED_BY_USER,
+            )
+        }
+
         musicFileService.deleteMusicFile(
             musicId = musicId,
             username = username,
         )
         val hasBeenDeleted = musicService.deleteById(
             musicId = musicId,
-            userId = userId,
         )
 
         if (hasBeenDeleted) {
@@ -47,7 +58,7 @@ fun Route.deleteSong() {
         } else {
             response(
                 status = HttpStatusCode.NotFound,
-                message = RoutingMessages.Music.FILE_NOT_FOUND,
+                message = RoutingMessages.Generic.WRONG_ID,
             )
         }
     }

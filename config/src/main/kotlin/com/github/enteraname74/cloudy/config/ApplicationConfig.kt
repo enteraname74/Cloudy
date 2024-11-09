@@ -12,6 +12,6 @@ fun Application.configureApplication() {
     configureDatabase()
     configureSerialization()
     configureHTTP()
-    configureSockets()
-    configureSecurity()
+//    configureSockets()
+    configureStatusPage()
 }
