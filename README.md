@@ -38,7 +38,7 @@ minikube image load controller/build/jib-image.tar
 ### Lancer minikube
 
 ```
-minikube start
+minikube start --vm-driver=docker
 ```
 
 Pensez à créer un tunnel pour que l'api soit accessible.

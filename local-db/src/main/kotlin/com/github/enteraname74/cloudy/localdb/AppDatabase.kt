@@ -21,18 +21,6 @@ object AppDatabase {
         }
     }
 
-    private fun initDatabase(
-        dbName: String,
-        db: Database?,
-    ) {
-        transaction(db) {
-            println("DATABASE -- Will create database $dbName")
-            connection.autoCommit = true
-            SchemaUtils.createDatabase(dbName)
-            connection.autoCommit = false
-        }
-    }
-
     fun connectToDatabase(
         url: String,
         driver: String,
