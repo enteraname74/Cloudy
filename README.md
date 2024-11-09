@@ -50,7 +50,7 @@ minikube tunnel
 ### Utiliser Kubernetes pour déployer l'application
 
 ```
- kubectl apply -f k8s
+kubectl apply -f k8s
 ```
 
 ### Accéder à l'api
