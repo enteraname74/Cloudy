@@ -46,7 +46,6 @@ object AppDatabase {
             user = user,
             password = password,
         )
-//        initDatabase("api_db_DOS", db)
         initTables()
     }
 }

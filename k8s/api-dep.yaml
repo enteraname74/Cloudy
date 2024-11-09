@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: "cloudy-docker-image:0.0.11"
+          image: "cloudy-docker-image:0.0.14"
           imagePullPolicy: Never
           ports:
             - containerPort: 80
@@ -63,5 +63,12 @@ spec:
                 secretKeyRef:
                   key: db_password
                   name: db-secret
+          volumeMounts:
+            - name: api-volume
+              mountPath: /app/musics
+      volumes:
+        - name: api-volume
+          persistentVolumeClaim:
+            claimName: api-volume-claim
       restartPolicy: Always
       
