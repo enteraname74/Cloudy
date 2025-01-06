@@ -36,6 +36,7 @@ class MusicFilePersistenceManager {
     suspend fun saveFile(username: String, file: MultiPartData): UUID? {
         var fileId: UUID? = null
         file.forEachPart { part ->
+            println("UPLOAD -- MFP -- got part to analyze")
             when(part) {
                 is PartData.FormItem -> {}
                 is PartData.FileItem -> {
@@ -47,11 +48,14 @@ class MusicFilePersistenceManager {
                         !FileUtils.isMusicFile(part = part) ||
                         fileExtension == null
                         ) {
+                        println("UPLOAD -- MFP -- the given file is not a music file")
                         return@forEachPart
                     }
 
                     val fileBytes = part.streamProvider().readBytes()
                     if (fileBytes.isEmpty()) return@forEachPart
+
+                    println("UPLOAD -- MFP -- file is not empty, will analyze")
 
                     if (fileId == null) {
                         fileId = UUID.randomUUID()
@@ -61,6 +65,8 @@ class MusicFilePersistenceManager {
                     val filepath = "${getUserDirectory(username)}/$filename"
 
                     val fileToSave = File(filepath)
+
+                    println("UPLOAD -- MFP -- will save file: $fileToSave")
                     fileToSave.parentFile?.mkdirs()
                     fileToSave.writeBytes(fileBytes)
                 }

@@ -14,7 +14,8 @@ dependencies {
     implementation(project(":repository"))
 
     implementation(libs.bundles.exposed)
-    implementation(libs.sqlite.jdbc)
+//    implementation(libs.sqlite.jdbc)
+    implementation(libs.postgresql)
 }
 
 tasks.test {

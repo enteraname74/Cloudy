@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: init-db
+data:
+  init.sql: |
+    CREATE DATABASE IF NOT EXISTS api_db_TRES;

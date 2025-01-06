@@ -27,6 +27,7 @@ fun Route.upload() {
     val userService by inject<UserService>()
 
     post("/upload") {
+        println("UPLOAD -- Start upload process")
         val multipartData: MultiPartData = call.receiveMultipart()
         val contentLength = call.request.header(HttpHeaders.ContentLength)?.toLong()
             ?: return@post badRequest(message = RoutingMessages.Music.NO_FILE_DATA)
@@ -58,6 +59,8 @@ fun Route.upload() {
             file = multipartData,
             shouldSearchForMetadata = shouldSearchForMetadata,
         )
+
+        println("UPLOAD -- Got service result: $serviceResult")
 
         when(serviceResult) {
             is ServiceResult.Error -> {

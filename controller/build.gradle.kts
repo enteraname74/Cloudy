@@ -11,6 +11,14 @@ repositories {
     mavenCentral()
 }
 
+ktor {
+    docker {
+        localImageName.set("cloudy-docker-image")
+        imageTag.set("0.0.14")
+        jreVersion.set(JavaVersion.VERSION_17)
+    }
+}
+
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 
