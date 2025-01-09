@@ -44,4 +44,7 @@ class UserService(
             ServiceResult.Error()
         }
     }
+
+    suspend fun getAll(): List<User> =
+        userRepository.getAll()
 }

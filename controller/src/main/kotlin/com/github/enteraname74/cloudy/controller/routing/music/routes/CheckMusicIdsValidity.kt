@@ -1,29 +1,33 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
-import com.github.enteraname74.cloudy.controller.ext.getPaginatedRequestFromQueryParam
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
 
-fun Route.songsOfUser() {
+fun Route.checkMusicIdsValidity() {
     val musicService by inject<MusicService>()
 
-    get("/ofUser") {
-        val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
+    get("/check") {
+        val userId = getUserIdFromToken() ?: return@get missingTokenInformation()
 
-        val data = musicService.getAllOfUser(
+        val idsToCheck: List<String> = call.receive()
+        val uuidList = idsToCheck
+            .mapNotNull { UUIDUtils.fromString(it) }
+            .distinct()
+
+        val list = musicService.getDeletedMusicsIds(
+            idsToCheck = uuidList,
             userId = userId,
-            paginatedRequest = getPaginatedRequestFromQueryParam(),
         )
 
         call.respond(
-            data
+            list.map { it.toString() }
         )
     }
 }

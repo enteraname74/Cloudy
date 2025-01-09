@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -18,13 +19,11 @@ fun Route.getMusicFile() {
     val musicFileService by inject<MusicFileService>()
 
     get("/{musicId}") {
-        val musicId: UUID = try {
-            UUID.fromString(call.parameters["musicId"])
-        } catch (_: Exception) {
-            return@get badRequest(
-                message = RoutingMessages.Generic.WRONG_ID
-            )
-        }
+        val musicId: UUID = UUIDUtils.fromString(
+            call.parameters["musicId"]
+        ) ?: return@get badRequest(
+            message = RoutingMessages.Generic.WRONG_ID
+        )
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 

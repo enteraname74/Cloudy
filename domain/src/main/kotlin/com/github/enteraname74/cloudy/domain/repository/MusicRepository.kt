@@ -11,7 +11,7 @@ interface MusicRepository {
     suspend fun deleteById(musicId: UUID)
     suspend fun getAllOfUser(
         userId: UUID,
-        paginatedRequest: PaginatedRequest,
+        paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Music>
     suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean
     suspend fun doesMusicExists(fingerprint: String, userId: UUID): Boolean

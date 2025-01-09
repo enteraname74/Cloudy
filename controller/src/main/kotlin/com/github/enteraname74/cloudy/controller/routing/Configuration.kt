@@ -6,12 +6,14 @@ import com.github.enteraname74.cloudy.controller.routing.album.albumRouting
 import com.github.enteraname74.cloudy.controller.routing.artist.artistRouting
 import com.github.enteraname74.cloudy.controller.routing.auth.authRouting
 import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
+import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
+        userRoutes()
         authRouting()
         musicRouting()
         albumRouting()

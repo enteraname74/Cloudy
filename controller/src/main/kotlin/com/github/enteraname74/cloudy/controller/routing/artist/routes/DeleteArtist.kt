@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.call
@@ -18,13 +19,11 @@ fun Route.deleteArtist() {
     val artistService by inject<ArtistService>()
 
     delete("/{artistId}") {
-        val artistId: UUID = try {
-            UUID.fromString(call.parameters["artistId"])
-        } catch (_: Exception) {
-            return@delete badRequest(
-                message = RoutingMessages.Generic.WRONG_ID
-            )
-        }
+        val artistId: UUID = UUIDUtils.fromString(
+            call.parameters["artistId"]
+        ) ?: return@delete badRequest(
+            message = RoutingMessages.Generic.WRONG_ID
+        )
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()

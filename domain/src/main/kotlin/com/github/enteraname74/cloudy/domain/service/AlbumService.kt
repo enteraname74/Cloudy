@@ -57,8 +57,6 @@ class AlbumService(
         modifiedAlbum: Album,
         userId: UUID,
     ) {
-        println("ALBUM -- We will update modified album: $modifiedAlbum")
-
         // We fetch the songs of the album to update
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
 
@@ -76,8 +74,6 @@ class AlbumService(
             )
         )
 
-        println("ALBUM -- Got existing artist: $existingArtist")
-
         /*
         We check if an album with the same name and artist exist.
         If that's the case, we will redirect the songs of the modified album to this one.
@@ -89,13 +85,10 @@ class AlbumService(
             userId = userId,
         )
 
-        println("ALBUM -- Got existing album: $albumInfoToUse")
-
         if (
             songsOfAlbum.firstOrNull()?.album != modifiedAlbum.name
             || songsOfAlbum.firstOrNull()?.artist != modifiedAlbum.artistName
         ) {
-            println("ALBUM -- Will update songs info with album id: ${albumInfoToUse?.id ?: modifiedAlbum.id}")
             val updatedSongs = songsOfAlbum.map {
                 it.copy(
                     albumId = albumInfoToUse?.id ?: modifiedAlbum.id,

@@ -33,4 +33,11 @@ class UserDataSourceImpl: UserDataSource {
                 .first()
                 .toUser()!!
         }
+
+    override suspend fun getAll(): List<User> =
+        dbQuery {
+            UserTable
+                .selectAll()
+                .mapNotNull { it.toUser() }
+        }
 }

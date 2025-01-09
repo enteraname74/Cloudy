@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.AlbumService
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -16,13 +17,11 @@ fun Route.deleteAlbum() {
     val albumService by inject<AlbumService>()
 
     delete("/{albumId}") {
-        val albumId: UUID = try {
-            UUID.fromString(call.parameters["albumId"])
-        } catch (_: Exception) {
-            return@delete badRequest(
-                message = RoutingMessages.Generic.WRONG_ID
-            )
-        }
+        val albumId: UUID = UUIDUtils.fromString(
+            call.parameters["albumId"]
+        ) ?: return@delete badRequest(
+            message = RoutingMessages.Generic.WRONG_ID
+        )
 
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 

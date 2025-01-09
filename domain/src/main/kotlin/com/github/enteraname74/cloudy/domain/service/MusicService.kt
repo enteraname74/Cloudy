@@ -119,6 +119,23 @@ class MusicService(
             musicId = musicId,
         )
 
+
+    /**
+     * Given a list of music ids to check,
+     * returns a list of all the ids of the initial list that are not present
+     * in the db.
+     */
+    suspend fun getDeletedMusicsIds(
+        idsToCheck: List<UUID>,
+        userId: UUID
+    ): List<UUID> {
+        val allMusicOfUser: List<UUID> = musicRepository.getAllOfUser(
+            userId = userId,
+        ).map { it.id }
+
+        return idsToCheck.filterNot { it in allMusicOfUser }
+    }
+
     private fun musicInformationToMusic(
         userId: UUID,
         albumId: UUID,

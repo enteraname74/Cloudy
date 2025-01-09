@@ -12,4 +12,7 @@ class UserRepositoryImpl(
 
     override suspend fun upsert(user: User): User =
         userDataSource.upsert(user = user)
+
+    override suspend fun getAll(): List<User> =
+        userDataSource.getAll()
 }

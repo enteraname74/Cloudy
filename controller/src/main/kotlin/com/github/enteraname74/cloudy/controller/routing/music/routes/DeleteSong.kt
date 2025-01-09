@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.*
@@ -19,13 +20,11 @@ fun Route.deleteSong() {
     val musicFileService by inject<MusicFileService>()
 
     delete("/{musicId}") {
-        val musicId: UUID = try {
-            UUID.fromString(call.parameters["musicId"])
-        } catch (_: Exception) {
-            return@delete badRequest(
-                message = RoutingMessages.Generic.WRONG_ID
-            )
-        }
+        val musicId: UUID = UUIDUtils.fromString(
+            call.parameters["musicId"]
+        ) ?: return@delete badRequest(
+            message = RoutingMessages.Generic.WRONG_ID
+        )
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
