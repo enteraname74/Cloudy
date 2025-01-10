@@ -59,7 +59,7 @@ class MusicFileService(
                         musicId = fileId,
                         username = user.username,
                     )
-                    ServiceResult.Error(message = MUSIC_ALREADY_SAVED)
+                    ServiceResult.Ok(data = MUSIC_ALREADY_SAVED)
                 } else {
                     ServiceResult.Ok(
                         data = musicInformationResult,

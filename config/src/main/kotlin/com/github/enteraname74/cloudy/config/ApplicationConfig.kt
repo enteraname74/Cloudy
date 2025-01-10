@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.config.plugin.configureHTTP
 import com.github.enteraname74.cloudy.config.plugin.configureSerialization
 import com.github.enteraname74.cloudy.config.plugin.configureSockets
 import io.ktor.server.application.*
+import io.ktor.util.pipeline.*
 
 fun Application.configureApplication() {
     configureDI()
@@ -15,3 +16,5 @@ fun Application.configureApplication() {
 //    configureSockets()
     configureStatusPage()
 }
+
+typealias ApplicationContext = PipelineContext<Unit, ApplicationCall>

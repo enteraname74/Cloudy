@@ -32,8 +32,13 @@ object RoutingMessages {
         const val ALBUM_NOT_POSSESSED_BY_USER = "This album is not possessed by the user."
     }
 
-    object Generic {
+    object Auth {
         const val MISSING_TOKEN_INFORMATION = "Missing information from token."
+        const val NOT_A_REFRESH_TOKEN = "The given token is not a refresh token."
+    }
+
+    object Generic {
+
         const val WRONG_ID = "The given id is incorrect."
     }
 }

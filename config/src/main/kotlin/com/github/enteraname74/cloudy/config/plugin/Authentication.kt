@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.config.plugin
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.config.auth.TOKEN_ROLE_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.auth.TOKEN_USERNAME_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.util.Messages
@@ -12,7 +13,6 @@ import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.ktor.util.pipeline.*
 
 internal fun Application.configureAuthentication() {
     val secret = environment.config.property("jwt.secret").getString()
@@ -53,7 +53,15 @@ fun Routing.authenticatedRoutes(
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.isAdmin(): Boolean {
+fun Route.authenticatedRoutes(
+    block: Route.() -> Unit
+) {
+    authenticate(AUTH_NAME) {
+        block()
+    }
+}
+
+fun ApplicationContext.isAdmin(): Boolean {
     val principal = call.principal<JWTPrincipal>()
     val role: String = principal?.payload?.getClaim(TOKEN_ROLE_CLAIM_KEY)?.asString() ?: return false
 

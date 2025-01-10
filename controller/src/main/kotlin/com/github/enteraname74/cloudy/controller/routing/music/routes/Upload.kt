@@ -8,6 +8,7 @@ import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
+import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
 import com.github.enteraname74.cloudy.domain.service.MusicService
@@ -17,6 +18,7 @@ import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
@@ -70,15 +72,12 @@ fun Route.upload() {
                 val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
                 val path: String = ServerUtil.buildRoute(value = "music/${musicInformationResult.musicId}")
 
-                musicService.saveAndCreateMissingAlbumAndArtist(
+                val savedMusic: Music = musicService.saveAndCreateMissingAlbumAndArtist(
                     user = user,
                     musicInformationResult = musicInformationResult,
                     musicPath = path,
                 )
-                response(
-                    status = HttpStatusCode.Accepted,
-                    message = RoutingMessages.Music.FILE_SAVED
-                )
+                call.respond(savedMusic)
             }
         }
     }

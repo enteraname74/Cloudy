@@ -6,6 +6,6 @@ enum class UserType(val value: String) {
 
     companion object {
         fun fromString(value: String): UserType =
-            entries.firstOrNull { it.value == value } ?: User
+            entries.find { it.value == value } ?: User
     }
 }

@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.controller.ext
 
+import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import io.ktor.server.application.*
@@ -7,7 +8,7 @@ import io.ktor.util.pipeline.*
 import java.time.LocalDateTime
 
 
-fun PipelineContext<Unit, ApplicationCall>.getLocalDateTimeFromQueryParam(key: String): LocalDateTime? {
+fun ApplicationContext.getLocalDateTimeFromQueryParam(key: String): LocalDateTime? {
     return try {
         val stringDate: String = call.request.queryParameters[key] ?: return null
         LocalDateTime.parse(stringDate)
@@ -16,7 +17,7 @@ fun PipelineContext<Unit, ApplicationCall>.getLocalDateTimeFromQueryParam(key: S
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.getIntegerFromQueryParam(key: String): Int? {
+fun ApplicationContext.getIntegerFromQueryParam(key: String): Int? {
     return try {
         call.request.queryParameters[key]?.toInt() ?: return null
     } catch (_: Exception) {
@@ -24,7 +25,7 @@ fun PipelineContext<Unit, ApplicationCall>.getIntegerFromQueryParam(key: String)
     }
 }
 
-fun PipelineContext<Unit, ApplicationCall>.getPaginatedRequestFromQueryParam(): PaginatedRequest =
+fun ApplicationContext.getPaginatedRequestFromQueryParam(): PaginatedRequest =
     PaginatedRequest(
         lastUpdateAt = getLocalDateTimeFromQueryParam(key = ServerUtil.Keys.LAST_UPDATE_AT_KEY),
         page = getIntegerFromQueryParam(key = ServerUtil.Keys.PAGE_KEY),

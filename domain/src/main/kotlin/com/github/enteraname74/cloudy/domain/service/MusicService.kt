@@ -28,7 +28,7 @@ class MusicService(
         user: User,
         musicPath: String,
         musicInformationResult: MusicInformationResult.FileMetadata,
-    ) {
+    ): Music {
 
         val artist: Artist = getOrCreateArtistUseCase(
             artistName = musicInformationResult.artist,
@@ -53,6 +53,7 @@ class MusicService(
         )
 
         musicRepository.upsert(music)
+        return music
     }
 
     suspend fun upsert(

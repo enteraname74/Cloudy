@@ -4,6 +4,7 @@ package com.github.enteraname74.cloudy.controller.routing.auth.routes
 import com.github.enteraname74.cloudy.config.auth.generateToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
+import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
@@ -36,9 +37,8 @@ fun Route.logIn() {
 
             is ServiceResult.Ok -> {
                 val authenticatedUser = (serviceResult.data as User)
-                val token: String = generateToken(user = authenticatedUser)
                 call.respond(
-                    message = hashMapOf("token" to token)
+                    buildUserTokens(user = authenticatedUser)
                 )
             }
         }
