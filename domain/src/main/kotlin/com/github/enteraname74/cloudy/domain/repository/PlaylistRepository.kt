@@ -13,7 +13,7 @@ interface PlaylistRepository {
         userId: UUID,
     ): Playlist?
     suspend fun upsert(playlist: Playlist): Playlist
-    suspend fun deleteById(playlistId: UUID)
+    suspend fun deleteById(playlistId: UUID): Boolean
     suspend fun allOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,

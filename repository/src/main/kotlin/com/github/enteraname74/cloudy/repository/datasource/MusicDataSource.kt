@@ -5,10 +5,10 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.*
 
 interface MusicDataSource {
-    suspend fun upsert(music: Music)
+    suspend fun upsert(music: Music): Music
     suspend fun upsertAll(musics: List<Music>)
     suspend fun getFromId(musicId: UUID): Music?
-    suspend fun deleteById(musicId: UUID)
+    suspend fun deleteById(musicId: UUID): Boolean
     suspend fun getAllOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,

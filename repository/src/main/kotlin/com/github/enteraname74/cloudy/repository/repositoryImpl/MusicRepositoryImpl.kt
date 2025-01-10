@@ -4,20 +4,18 @@ import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
-import com.github.enteraname74.cloudy.repository.util.paginated
 import java.time.LocalDateTime
 import java.util.*
 
 class MusicRepositoryImpl(
     private val musicDataSource: MusicDataSource,
 ) : MusicRepository {
-    override suspend fun upsert(music: Music) {
+    override suspend fun upsert(music: Music): Music =
         musicDataSource.upsert(
             music.copy(
                 lastUpdateAt = LocalDateTime.now()
             )
         )
-    }
 
     override suspend fun upsertAll(musics: List<Music>) {
         musicDataSource.upsertAll(
@@ -32,9 +30,8 @@ class MusicRepositoryImpl(
     override suspend fun getFromId(musicId: UUID): Music? =
         musicDataSource.getFromId(musicId = musicId)
 
-    override suspend fun deleteById(musicId: UUID) {
+    override suspend fun deleteById(musicId: UUID): Boolean =
         musicDataSource.deleteById(musicId)
-    }
 
     override suspend fun getAllOfUser(
         userId: UUID,

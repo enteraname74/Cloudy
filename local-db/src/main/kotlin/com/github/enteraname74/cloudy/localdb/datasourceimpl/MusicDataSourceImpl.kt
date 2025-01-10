@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import java.util.*
 
 class MusicDataSourceImpl : MusicDataSource {
-    override suspend fun upsert(music: Music) {
+    override suspend fun upsert(music: Music): Music =
         dbQuery {
             MusicTable.upsert {
                 it[id] = music.id
@@ -33,8 +33,13 @@ class MusicDataSourceImpl : MusicDataSource {
                 it[path] = music.path
                 it[lastUpdateAt] = music.lastUpdateAt
             }
+
+            MusicTable
+                .selectAll()
+                .where { MusicTable.id eq music.id }
+                .first()
+                .toMusic()!!
         }
-    }
 
     override suspend fun upsertAll(musics: List<Music>) {
         dbQuery {
@@ -67,13 +72,12 @@ class MusicDataSourceImpl : MusicDataSource {
                 ?.toMusic()
         }
 
-    override suspend fun deleteById(musicId: UUID) {
+    override suspend fun deleteById(musicId: UUID): Boolean =
         dbQuery {
             MusicTable.deleteWhere {
                 MusicTable.id eq musicId
-            }
+            } > 0
         }
-    }
 
     override suspend fun getAllOfUser(
         userId: UUID,

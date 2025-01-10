@@ -57,13 +57,12 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
                 .toPlaylist()!!
         }
 
-    override suspend fun deleteById(playlistId: UUID) {
+    override suspend fun deleteById(playlistId: UUID): Boolean =
         dbQuery {
             PlaylistTable.deleteWhere {
                 PlaylistTable.id eq playlistId
-            }
+            } > 0
         }
-    }
 
     override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
         dbQuery {

@@ -16,6 +16,7 @@ internal fun Application.configureSerialization() {
                 serializersModule = SerializersModule {
                     this.contextual(UUIDSerializer)
                 }
+                encodeDefaults = true
             }
         )
     }

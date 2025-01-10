@@ -29,7 +29,7 @@ class ArtistService(
     suspend fun upsert(
         modifiedArtist: Artist,
         userId: UUID,
-    ) {
+    ): Artist {
         // We fetch the songs and albums of the artist
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(artistId = modifiedArtist.id)
         val albumsOfArtist: List<Album> = albumRepository.allOfArtist(artistId = modifiedArtist.id)
@@ -66,7 +66,7 @@ class ArtistService(
             albumRepository.upsertAll(updatedAlbums)
         }
 
-        if (artistInfoToUse != null) {
+        return if (artistInfoToUse != null) {
             artistRepository.deleteById(artistId = modifiedArtist.id)
             artistRepository.upsert(
                 artistInfoToUse.copy(
@@ -94,8 +94,6 @@ class ArtistService(
         artistId: UUID,
         username: String,
     ): Boolean {
-        artistRepository.getFromId(artistId = artistId) ?: return false
-
         // We first delete all the music files of the artist
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(
             artistId = artistId,
@@ -108,8 +106,6 @@ class ArtistService(
         }
 
         // We then delete the artist
-        artistRepository.deleteById(artistId = artistId)
-
-        return true
+        return artistRepository.deleteById(artistId = artistId)
     }
 }

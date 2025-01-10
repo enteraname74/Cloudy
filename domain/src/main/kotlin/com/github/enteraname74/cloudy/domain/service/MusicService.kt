@@ -59,7 +59,7 @@ class MusicService(
     suspend fun upsert(
         modifiedMusic: Music,
         userId: UUID,
-    ) {
+    ): Music {
         // We get or create the artist of the modified music
         val artist: Artist = getOrCreateArtistUseCase(
             artistName = modifiedMusic.artist,
@@ -81,12 +81,14 @@ class MusicService(
             albumId = album.id,
             artistId = artist.id,
         )
-        musicRepository.upsert(musicWithCorrectIds)
+        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
 
         // We check if the legacy album and artist can be deleted
         deleteAlbumIfEmptyUseCase(albumId = modifiedMusic.albumId)
 
         deleteArtistIfEmptyUseCase(artistId = modifiedMusic.artistId)
+
+        return savedMusic
     }
 
     suspend fun deleteById(musicId: UUID): Boolean {

@@ -56,7 +56,7 @@ class AlbumService(
     suspend fun upsert(
         modifiedAlbum: Album,
         userId: UUID,
-    ) {
+    ): Album {
         // We fetch the songs of the album to update
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
 
@@ -100,7 +100,7 @@ class AlbumService(
             musicRepository.upsertAll(updatedSongs)
         }
 
-        if (albumInfoToUse != null) {
+        val savedAlbum: Album = if (albumInfoToUse != null) {
             albumRepository.deleteById(albumId = modifiedAlbum.id)
             albumRepository.upsert(
                 album = albumInfoToUse.copy(
@@ -117,5 +117,7 @@ class AlbumService(
 
         // If the artist of the album has changed, we check if we can delete the old one.
         deleteArtistIfEmptyUseCase(artistId = modifiedAlbum.artistId)
+
+        return savedAlbum
     }
 }

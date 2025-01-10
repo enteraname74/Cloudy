@@ -12,6 +12,7 @@ import com.github.enteraname74.cloudy.domain.service.AlbumService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
+import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import java.util.*
@@ -41,14 +42,11 @@ fun Route.updateAlbum() {
             modifiedAlbum = modifiedAlbum,
         )
 
-        albumService.upsert(
+        val savedAlbum: Album = albumService.upsert(
             modifiedAlbum = updatedAlbum,
             userId = userId,
         )
 
-        response(
-            status = HttpStatusCode.OK,
-            message = RoutingMessages.Album.ALBUM_UPDATED,
-        )
+        call.respond(savedAlbum)
     }
 }

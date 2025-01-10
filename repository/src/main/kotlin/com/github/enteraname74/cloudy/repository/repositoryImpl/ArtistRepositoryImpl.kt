@@ -43,7 +43,6 @@ class ArtistRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun deleteById(artistId: UUID) {
+    override suspend fun deleteById(artistId: UUID) =
         artistDataSource.deleteById(artistId)
-    }
 }

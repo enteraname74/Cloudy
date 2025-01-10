@@ -69,15 +69,24 @@ fun Route.upload() {
                 badRequest(message = serviceResult.message.orEmpty())
             }
             is ServiceResult.Ok -> {
-                val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
-                val path: String = ServerUtil.buildRoute(value = "music/${musicInformationResult.musicId}")
+                when(serviceResult.data) {
+                    is MusicInformationResult.FileMetadata -> {
+                        val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
+                        val path: String = ServerUtil.buildRoute(value = "music/${musicInformationResult.musicId}")
 
-                val savedMusic: Music = musicService.saveAndCreateMissingAlbumAndArtist(
-                    user = user,
-                    musicInformationResult = musicInformationResult,
-                    musicPath = path,
-                )
-                call.respond(savedMusic)
+                        val savedMusic: Music = musicService.saveAndCreateMissingAlbumAndArtist(
+                            user = user,
+                            musicInformationResult = musicInformationResult,
+                            musicPath = path,
+                        )
+                        call.respond(savedMusic)
+                    }
+                    else -> {
+                        serviceResult.data?.let {
+                            call.respond(it.toString())
+                        }
+                    }
+                }
             }
         }
     }

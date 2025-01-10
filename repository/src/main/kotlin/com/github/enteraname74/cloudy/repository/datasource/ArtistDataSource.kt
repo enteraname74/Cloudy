@@ -16,5 +16,5 @@ interface ArtistDataSource {
         userId: UUID,
         paginatedRequest: PaginatedRequest,
     ): List<Artist>
-    suspend fun deleteById(artistId: UUID)
+    suspend fun deleteById(artistId: UUID): Boolean
 }

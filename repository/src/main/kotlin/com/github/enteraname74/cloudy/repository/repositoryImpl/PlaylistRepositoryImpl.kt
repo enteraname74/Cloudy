@@ -25,11 +25,10 @@ class PlaylistRepositoryImpl(
             playlist = playlist,
         )
 
-    override suspend fun deleteById(playlistId: UUID) {
+    override suspend fun deleteById(playlistId: UUID) =
         playlistDataSource.deleteById(
             playlistId = playlistId,
         )
-    }
 
     override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
         playlistDataSource.allOfUser(

@@ -77,11 +77,10 @@ class ArtistDataSourceImpl : ArtistDataSource {
                 .mapNotNull { it.toArtist() }
         }
 
-    override suspend fun deleteById(artistId: UUID) {
+    override suspend fun deleteById(artistId: UUID): Boolean =
         dbQuery {
             ArtistTable.deleteWhere {
                 ArtistTable.id eq artistId
-            }
+            } > 0
         }
-    }
 }

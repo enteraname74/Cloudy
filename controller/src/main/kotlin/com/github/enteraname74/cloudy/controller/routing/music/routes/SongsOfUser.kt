@@ -4,10 +4,13 @@ import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.getPaginatedRequestFromQueryParam
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.koin.ktor.ext.inject
 import java.util.*
 
@@ -17,13 +20,11 @@ fun Route.songsOfUser() {
     get("/ofUser") {
         val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
 
-        val data = musicService.getAllOfUser(
+        val data: List<Music> = musicService.getAllOfUser(
             userId = userId,
             paginatedRequest = getPaginatedRequestFromQueryParam(),
         )
 
-        call.respond(
-            data
-        )
+        call.respond(data)
     }
 }
