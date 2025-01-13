@@ -25,8 +25,7 @@ class MusicInformationRetrieverImpl: MusicInformationRetriever {
         val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
 
         val fingerprintData: FingerprintData? = fingerprintRetriever
-            .getFingerprintFromMusic(musicPath = musicFile.path) // ?:
-//            return MusicInformationResult.Error
+            .getFingerprintFromMusic(musicPath = musicFile.path)
 
         if (!shouldSearchForMetadata || fingerprintData == null) {
             return MusicInformationResult.FileMetadata(
@@ -34,7 +33,7 @@ class MusicInformationRetrieverImpl: MusicInformationRetriever {
                 artist = fileMetadata.artist,
                 album = fileMetadata.album,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
-                coverPath = null,
+                coverPath = "music/cover/$musicId",
                 duration = fileMetadata.duration,
                 musicId = musicId,
             )

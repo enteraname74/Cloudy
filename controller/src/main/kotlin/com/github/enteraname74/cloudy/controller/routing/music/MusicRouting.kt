@@ -13,6 +13,7 @@ fun Routing.musicRouting() {
             deleteSong()
             updateSong()
             checkMusicIdsValidity()
+            getMusicCover()
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.metadata.fingerprint
 
+import io.ktor.util.logging.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -17,6 +18,7 @@ internal class FingerprintRetriever {
             var duration = ""
 
             while (line != null) {
+                println("FingerprintRetriever -- getFingerprintFromMusic -- got line of fpcalc $line ")
                 if (isDurationField(line)) duration = getValue(line)
                 else if (isFingerprintField(line)) fingerprint = getValue(line)
 
@@ -24,6 +26,8 @@ internal class FingerprintRetriever {
             }
 
             val exitCode = process.waitFor()
+
+            println("FingerprintRetriever -- getFingerprintFromMusic -- got infos ${process.info()} $exitCode, $duration, $fingerprint")
             if (exitCode == 0) {
                 // Successfully calculated fingerprint
                 FingerprintData(
@@ -34,7 +38,8 @@ internal class FingerprintRetriever {
                 null
             }
 
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("FingerprintRetriever -- getFingerprintFromMusic -- EXCEPTION: ${e.message}")
             null
         }
 
