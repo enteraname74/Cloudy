@@ -74,16 +74,6 @@ class MusicService(
             )
         }
 
-        // We set the links between the artists and the music:
-        artists.forEach {
-            musicArtistRepository.upsert(
-                musicArtist = MusicArtist(
-                    musicId = modifiedMusic.id,
-                    artistId = it.id,
-                )
-            )
-        }
-
         val previousArtists: List<Artist> = artistRepository
             .getArtistsOfMusic(musicId = modifiedMusic.id)
 
@@ -107,6 +97,16 @@ class MusicService(
         )
         val savedMusic = musicRepository.upsert(musicWithCorrectIds)
 
+        // We set the links between the artists and the music:
+        artists.forEach {
+            musicArtistRepository.upsert(
+                musicArtist = MusicArtist(
+                    musicId = modifiedMusic.id,
+                    artistId = it.id,
+                )
+            )
+        }
+
         // We check if the legacy album and artist can be deleted
         deleteAlbumIfEmptyUseCase(albumId = modifiedMusic.albumId)
 
@@ -117,20 +117,21 @@ class MusicService(
         return savedMusic
     }
 
-    suspend fun deleteById(musicId: UUID): Boolean {
-        val music: Music = musicRepository.getFromId(musicId = musicId) ?: return false
-        val artistsOfMusic: List<Artist> = artistRepository.getArtistsOfMusic(musicId = musicId)
-        musicRepository.deleteById(musicId)
+    suspend fun deleteAll(musicIds: List<UUID>) {
+        musicIds.forEach { musicId ->
+            val music: Music = musicRepository.getFromId(musicId = musicId) ?: return
+            val artistsOfMusic: List<Artist> = artistRepository.getArtistsOfMusic(musicId = musicId)
 
-        // We check if we can delete the album of the music:
-        deleteAlbumIfEmptyUseCase(albumId = music.albumId)
+            // We check if we can delete the album of the music:
+            deleteAlbumIfEmptyUseCase(albumId = music.albumId)
 
-        // We then check if we can delete the artist of the music:
-        artistsOfMusic.forEach {
-            deleteArtistIfEmptyUseCase(artistId = it.id)
+            // We then check if we can delete the artist of the music:
+            artistsOfMusic.forEach {
+                deleteArtistIfEmptyUseCase(artistId = it.id)
+            }
         }
 
-        return true
+        musicRepository.deleteAll(musicIds)
     }
 
     suspend fun getAllOfUser(

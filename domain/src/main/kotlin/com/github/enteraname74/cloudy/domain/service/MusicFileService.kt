@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
+import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
@@ -23,7 +24,7 @@ class MusicFileService(
         file: MultiPartData,
         shouldSearchForMetadata: Boolean,
     ): ServiceResult {
-        val fileId: UUID = musicFilePersistenceManager.saveFile(
+        val savedFileData: Pair<UUID, CustomMusicMetadata?> = musicFilePersistenceManager.saveFile(
             username = user.username,
             file = file,
         ) ?: return ServiceResult.Error(
@@ -31,7 +32,7 @@ class MusicFileService(
         )
 
         val temporalSavedFile: File = musicFilePersistenceManager.getById(
-            musicId = fileId,
+            musicId = savedFileData.first,
             username = user.username,
         ) ?: return ServiceResult.Error(
             message = FILE_CANNOT_BE_SAVED,
@@ -39,7 +40,8 @@ class MusicFileService(
 
         val musicInformationResult: MusicInformationResult = musicInformationRetriever.getInformationAboutMusicFile(
             musicFile = temporalSavedFile,
-            musicId = fileId,
+            musicId = savedFileData.first,
+            customMetadata = savedFileData.second,
             shouldSearchForMetadata = shouldSearchForMetadata,
         )
 
@@ -56,7 +58,7 @@ class MusicFileService(
                     )
                 ) {
                     musicFilePersistenceManager.deleteFile(
-                        musicId = fileId,
+                        musicId = savedFileData.first,
                         username = user.username,
                     )
                     ServiceResult.Ok(data = MUSIC_ALREADY_SAVED)

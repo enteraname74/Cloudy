@@ -2,7 +2,6 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.localdb.table.AlbumTable.id
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
@@ -12,6 +11,7 @@ import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
 
 class MusicDataSourceImpl : MusicDataSource {
@@ -44,7 +44,7 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsertAll(musics: List<Music>) {
         dbQuery {
             MusicTable.batchUpsert(musics) { music ->
-                this[id] = music.id
+                this[MusicTable.id] = music.id
                 this[MusicTable.name] = music.name
                 this[MusicTable.userId] = music.userId
                 this[MusicTable.coverPath] = music.coverPath
@@ -74,9 +74,17 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun deleteById(musicId: UUID): Boolean =
         dbQuery {
             MusicTable.deleteWhere {
-                MusicTable.id eq musicId
+                id eq musicId
             } > 0
         }
+
+    override suspend fun deleteAll(ids: List<UUID>) {
+        dbQuery {
+            MusicTable.deleteWhere {
+                id inList ids
+            }
+        }
+    }
 
     override suspend fun getAllOfUser(
         userId: UUID,
@@ -122,7 +130,7 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicTable.join(
                 otherTable = MusicArtistTable,
                 joinType = JoinType.INNER,
-                onColumn = id,
+                onColumn = MusicTable.id,
                 otherColumn = MusicArtistTable.musicId,
                 additionalConstraint = { MusicArtistTable.artistId eq artistId }
             )

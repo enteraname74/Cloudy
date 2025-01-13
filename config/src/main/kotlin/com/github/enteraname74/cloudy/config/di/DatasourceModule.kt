@@ -13,4 +13,5 @@ internal val datasourceModule = module {
     singleOf(::ArtistDataSourceImpl) bind ArtistDataSource::class
     singleOf(::AlbumDataSourceImpl) bind AlbumDataSource::class
     singleOf(::PlaylistDataSourceImpl) bind PlaylistDataSource::class
+    singleOf(::MusicArtistDataSourceImpl) bind MusicArtistDataSource::class
 }

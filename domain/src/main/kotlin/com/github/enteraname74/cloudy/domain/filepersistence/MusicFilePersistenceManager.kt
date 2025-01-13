@@ -1,5 +1,7 @@
 package com.github.enteraname74.cloudy.domain.filepersistence
 
+import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
+import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.FileUtils
 import io.ktor.http.content.*
 import java.io.File
@@ -33,11 +35,14 @@ class MusicFilePersistenceManager {
     /**
      * Saves a file and return its id.
      */
-    suspend fun saveFile(username: String, file: MultiPartData): UUID? {
+    suspend fun saveFile(username: String, file: MultiPartData): Pair<UUID, CustomMusicMetadata?>? {
         var fileId: UUID? = null
+        var customMetadata: CustomMusicMetadata? = null
         file.forEachPart { part ->
             when(part) {
-                is PartData.FormItem -> {}
+                is PartData.FormItem -> {
+                    customMetadata = CloudyJson.decodeFromString(part.value)
+                }
                 is PartData.FileItem -> {
                     val fileExtension = FileUtils.getFileExtension(
                         fileName = part.originalFileName.orEmpty()
@@ -70,7 +75,9 @@ class MusicFilePersistenceManager {
             part.dispose()
         }
 
-        return fileId
+        return fileId?.let {
+            Pair(it, customMetadata)
+        }
     }
 
     fun getById(musicId: UUID, username: String): File? {

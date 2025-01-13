@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.metadata.musicinformation
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
+import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.metadata.acoustid.AcoustidApiClient
 import com.github.enteraname74.cloudy.metadata.cover.RemoteMusicCoverRetriever
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
@@ -12,7 +13,7 @@ import java.io.File
 import java.security.MessageDigest
 import java.util.*
 
-class MusicInformationRetrieverImpl: MusicInformationRetriever {
+class MusicInformationRetrieverImpl : MusicInformationRetriever {
     private val metadataManager = MusicFileMetadataManager()
     private val fingerprintRetriever = FingerprintRetriever()
     private val remoteMusicCoverRetriever = RemoteMusicCoverRetriever()
@@ -20,6 +21,7 @@ class MusicInformationRetrieverImpl: MusicInformationRetriever {
     override suspend fun getInformationAboutMusicFile(
         musicFile: File,
         musicId: UUID,
+        customMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean,
     ): MusicInformationResult {
         val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
@@ -27,14 +29,15 @@ class MusicInformationRetrieverImpl: MusicInformationRetriever {
         val fingerprintData: FingerprintData? = fingerprintRetriever
             .getFingerprintFromMusic(musicPath = musicFile.path)
 
+        // TODO: Handle duration missing for OPUS format (JaudioTagger crashing)
         if (!shouldSearchForMetadata || fingerprintData == null) {
             return MusicInformationResult.FileMetadata(
-                name = fileMetadata.name,
-                artist = fileMetadata.artist,
-                album = fileMetadata.album,
+                name = customMetadata?.name ?: fileMetadata.name,
+                artist = customMetadata?.artists?.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: fileMetadata.artist,
+                album = customMetadata?.album ?: fileMetadata.album,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
                 coverPath = "music/cover/$musicId",
-                duration = fileMetadata.duration,
+                duration = customMetadata?.duration ?: fileMetadata.duration,
                 musicId = musicId,
             )
         } else {

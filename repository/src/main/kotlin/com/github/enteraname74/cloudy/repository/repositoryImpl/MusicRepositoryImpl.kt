@@ -33,6 +33,10 @@ class MusicRepositoryImpl(
     override suspend fun deleteById(musicId: UUID): Boolean =
         musicDataSource.deleteById(musicId)
 
+    override suspend fun deleteAll(ids: List<UUID>) {
+        musicDataSource.deleteAll(ids)
+    }
+
     override suspend fun getAllOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,

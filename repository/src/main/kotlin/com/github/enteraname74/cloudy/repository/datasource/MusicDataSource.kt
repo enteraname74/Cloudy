@@ -9,6 +9,7 @@ interface MusicDataSource {
     suspend fun upsertAll(musics: List<Music>)
     suspend fun getFromId(musicId: UUID): Music?
     suspend fun deleteById(musicId: UUID): Boolean
+    suspend fun deleteAll(ids: List<UUID>)
     suspend fun getAllOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,

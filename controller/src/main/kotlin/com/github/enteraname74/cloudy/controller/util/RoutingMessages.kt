@@ -1,5 +1,7 @@
 package com.github.enteraname74.cloudy.controller.util
 
+import java.util.UUID
+
 object RoutingMessages {
     object User {
         const val USERNAME_TAKEN = "The username is already taken."
@@ -15,9 +17,12 @@ object RoutingMessages {
         const val FILE_TOO_HEAVY = "The file is too heavy."
         const val FILE_SAVED = "File saved."
         const val FILE_NOT_FOUND = "Couldn't find the music file."
-        const val SONG_DELETED = "This song has been deleted."
+        const val SONGS_DELETED = "Songs have been deleted."
         const val SONG_UPDATED = "This song has been updated."
         const val SONG_NOT_POSSESSED_BY_USER = "This song is not possessed by the user."
+
+        fun songNotPossessedByUser(musicId: UUID): String =
+            "The song with id: $musicId is not possessed by the user."
     }
 
     object Artist {
