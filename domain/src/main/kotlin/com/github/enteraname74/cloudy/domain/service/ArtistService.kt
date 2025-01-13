@@ -47,10 +47,7 @@ class ArtistService(
         // The only important part of the artist in a song is its name and its id.
         if (songsOfArtist.firstOrNull()?.artist != modifiedArtist.name) {
             val updatedSongs = songsOfArtist.map {
-                it.copy(
-                    artistId = artistInfoToUse?.id ?: modifiedArtist.id,
-                    artist = modifiedArtist.name,
-                )
+                it.copy(artist = modifiedArtist.name)
             }
             musicRepository.upsertAll(updatedSongs)
         }

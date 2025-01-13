@@ -1,5 +1,6 @@
-package com.github.enteraname74.cloudy.controller.routing.user.model
+package com.github.enteraname74.cloudy.controller.routing.user.routes
 
+import com.github.enteraname74.cloudy.controller.routing.user.model.toUsableUser
 import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.server.application.*
 import io.ktor.server.response.*

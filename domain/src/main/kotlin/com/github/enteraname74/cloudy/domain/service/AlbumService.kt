@@ -92,7 +92,6 @@ class AlbumService(
             val updatedSongs = songsOfAlbum.map {
                 it.copy(
                     albumId = albumInfoToUse?.id ?: modifiedAlbum.id,
-                    artistId = existingArtist.id,
                     album = modifiedAlbum.name,
                     artist = existingArtist.name,
                 )

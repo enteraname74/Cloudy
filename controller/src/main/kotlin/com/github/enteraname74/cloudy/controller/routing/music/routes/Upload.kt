@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.routing.music.model.MusicMetadata
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
@@ -30,6 +31,8 @@ fun Route.upload() {
 
     post("/upload") {
         println("UPLOAD -- Start upload process")
+        val metadata: MusicMetadata = call.receive()
+        println("metadata: $metadata")
         val multipartData: MultiPartData = call.receiveMultipart()
         val contentLength = call.request.header(HttpHeaders.ContentLength)?.toLong()
             ?: return@post badRequest(message = RoutingMessages.Music.NO_FILE_DATA)

@@ -10,7 +10,8 @@ class DeleteArtistIfEmptyUseCase(
 ) {
     suspend operator fun invoke(artistId: UUID) {
         val isArtistEmpty = musicRepository
-            .allFromArtist(artistId = artistId).isEmpty()
+            .allFromArtist(artistId = artistId)
+            .isEmpty()
 
         if (isArtistEmpty) artistRepository.deleteById(artistId = artistId)
     }

@@ -20,7 +20,6 @@ internal object MusicTable: UUIDTable() {
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
     val albumId = reference("albumId", AlbumTable.id, ReferenceOption.CASCADE)
-    val artistId = reference("artistId", ArtistTable.id, ReferenceOption.CASCADE)
     val fingerprint = varchar("fingerprint", 128).default("")
 }
 
@@ -37,7 +36,6 @@ internal fun ResultRow.toMusic(): Music? =
             nbPlayed = this[MusicTable.nbPlayed],
             isInQuickAccess = this[MusicTable.isInQuickAccess],
             albumId = this[MusicTable.albumId].value,
-            artistId = this[MusicTable.artistId].value,
             userId = this[MusicTable.userId].value,
             fingerprint = this[MusicTable.fingerprint],
             path = this[MusicTable.path],

@@ -12,9 +12,9 @@ data class ModifiedMusic(
     val id: UUID,
     val name: String,
     val album: String,
-    val artist: String,
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
+    val artists: List<String>,
 )
 
 fun Music.fromModifiedMusic(modifiedMusic: ModifiedMusic): Music =
@@ -22,7 +22,6 @@ fun Music.fromModifiedMusic(modifiedMusic: ModifiedMusic): Music =
         id = modifiedMusic.id,
         name = modifiedMusic.name,
         album = modifiedMusic.album,
-        artist = modifiedMusic.artist,
         nbPlayed = modifiedMusic.nbPlayed,
         isInQuickAccess = modifiedMusic.isInQuickAccess,
         lastUpdateAt = LocalDateTime.now(),

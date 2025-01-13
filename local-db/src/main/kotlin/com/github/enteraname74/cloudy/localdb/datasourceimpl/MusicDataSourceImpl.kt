@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable.id
+import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
@@ -28,7 +29,6 @@ class MusicDataSourceImpl : MusicDataSource {
                 it[nbPlayed] = music.nbPlayed
                 it[isInQuickAccess] = music.isInQuickAccess
                 it[albumId] = music.albumId
-                it[artistId] = music.artistId
                 it[fingerprint] = music.fingerprint
                 it[path] = music.path
                 it[lastUpdateAt] = music.lastUpdateAt
@@ -55,7 +55,6 @@ class MusicDataSourceImpl : MusicDataSource {
                 this[MusicTable.nbPlayed] = music.nbPlayed
                 this[MusicTable.isInQuickAccess] = music.isInQuickAccess
                 this[MusicTable.albumId] = music.albumId
-                this[MusicTable.artistId] = music.artistId
                 this[MusicTable.fingerprint] = music.fingerprint
                 this[MusicTable.path] = music.path
                 this[MusicTable.lastUpdateAt] = music.lastUpdateAt
@@ -120,9 +119,14 @@ class MusicDataSourceImpl : MusicDataSource {
 
     override suspend fun allFromArtist(artistId: UUID): List<Music> =
         dbQuery {
-            MusicTable
+            MusicTable.join(
+                otherTable = MusicArtistTable,
+                joinType = JoinType.INNER,
+                onColumn = id,
+                otherColumn = MusicArtistTable.musicId,
+                additionalConstraint = { MusicArtistTable.artistId eq artistId }
+            )
                 .selectAll()
-                .where { MusicTable.artistId eq artistId }
                 .mapNotNull { it.toMusic() }
         }
 }

@@ -3,11 +3,13 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
+import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.toArtist
 import com.github.enteraname74.cloudy.localdb.util.dbQuery
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
+import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
@@ -80,7 +82,22 @@ class ArtistDataSourceImpl : ArtistDataSource {
     override suspend fun deleteById(artistId: UUID): Boolean =
         dbQuery {
             ArtistTable.deleteWhere {
-                ArtistTable.id eq artistId
+                id eq artistId
             } > 0
+        }
+
+    override suspend fun getArtistsOfMusic(musicId: UUID): List<Artist> =
+        dbQuery {
+            ArtistTable.join(
+                otherTable = MusicArtistTable,
+                joinType = JoinType.INNER,
+                onColumn = ArtistTable.id,
+                otherColumn = MusicArtistTable.artistId,
+                additionalConstraint = {
+                    MusicArtistTable.musicId eq musicId
+                }
+            )
+                .selectAll()
+                .mapNotNull { it.toArtist() }
         }
 }

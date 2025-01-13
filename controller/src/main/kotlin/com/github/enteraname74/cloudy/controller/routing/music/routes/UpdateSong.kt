@@ -41,9 +41,10 @@ fun Route.updateSong() {
 
         val updatedMusic: Music = matchingMusic.fromModifiedMusic(modifiedMusicInfo)
 
-        val music: Music = musicService.upsert(
+        val music: Music = musicService.update(
             modifiedMusic = updatedMusic,
             userId = userId,
+            newArtists = modifiedMusicInfo.artists,
         )
 
         call.respond(music)
