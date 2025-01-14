@@ -103,24 +103,24 @@ class MusicService(
 
         // We remove the links between the music and the previous artists that are not in the updated list of artists:
         val artistsToUnlink: List<Artist> = previousArtists.filter { it.name !in newArtistsNames }
-        artistsToUnlink.forEach {
-            musicArtistRepository.delete(
-                musicArtist = MusicArtist(
+        musicArtistRepository.deleteAll(
+            ids = artistsToUnlink.map {
+                MusicArtist(
                     musicId = modifiedMusic.id,
                     artistId = it.id,
-                )
-            )
-        }
+                ).id
+            }
+        )
 
         // We set the links between the artists and the music:
-        newArtists.forEach {
-            musicArtistRepository.upsert(
-                musicArtist = MusicArtist(
+        musicArtistRepository.upsertAll(
+            musicArtists = newArtists.map {
+                MusicArtist(
                     musicId = modifiedMusic.id,
                     artistId = it.id,
                 )
-            )
-        }
+            }
+        )
 
         // We update the album of the music and its artist name
         val musicWithCorrectIds = modifiedMusic.copy(
@@ -155,8 +155,8 @@ class MusicService(
                 .mapNotNull { it.albumId }
                 .distinct()
                 .forEach { albumId ->
-                albumRepository.getFromId(albumId)?.let { add(it) }
-            }
+                    albumRepository.getFromId(albumId)?.let { add(it) }
+                }
         }
 
         musicRepository.deleteAll(musicIds)

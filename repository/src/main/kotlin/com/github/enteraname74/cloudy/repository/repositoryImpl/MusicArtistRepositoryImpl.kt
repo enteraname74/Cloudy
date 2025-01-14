@@ -16,6 +16,14 @@ class MusicArtistRepositoryImpl(
         musicArtistDataSource.delete(musicArtist)
     }
 
+    override suspend fun upsertAll(musicArtists: List<MusicArtist>) {
+        musicArtistDataSource.upsertAll(musicArtists)
+    }
+
+    override suspend fun deleteAll(ids: List<String>) {
+        musicArtistDataSource.deleteAll(ids)
+    }
+
     override suspend fun isInMultipleArtist(musicId: UUID): Boolean =
         musicArtistDataSource.isInMultipleArtist(musicId)
 }

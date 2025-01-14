@@ -3,10 +3,13 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.UUID
 
@@ -14,7 +17,9 @@ class AlbumService(
     private val albumRepository: AlbumRepository,
     private val musicRepository: MusicRepository,
     private val artistRepository: ArtistRepository,
+    private val musicArtistRepository: MusicArtistRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
+    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
 ) {
     suspend fun getFromId(albumId: UUID): Album? =
         albumRepository.getFromId(
@@ -60,6 +65,8 @@ class AlbumService(
         // We fetch the songs of the album to update
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
 
+        val previousArtist: Artist? = artistRepository.getFromId(modifiedAlbum.artistId)
+
         /*
         If there is no existing artist from the album's artist name, we create one.
          */
@@ -72,6 +79,30 @@ class AlbumService(
                 userId = userId,
                 coverPath = modifiedAlbum.coverPath,
             )
+        )
+
+        /*
+        We link the existing artist to each song of the albums.
+        We also remove the link from the previous one.
+         */
+
+        previousArtist?.let { artist ->
+            musicArtistRepository.deleteAll(
+                ids = songsOfAlbum.map {
+                    MusicArtist(
+                        musicId = it.id,
+                        artistId = artist.id
+                    ).id
+                }
+            )
+        }
+        musicArtistRepository.upsertAll(
+            musicArtists = songsOfAlbum.map {
+                MusicArtist(
+                    musicId = it.id,
+                    artistId = existingArtist.id,
+                )
+            }
         )
 
         /*
@@ -93,7 +124,7 @@ class AlbumService(
                 it.copy(
                     albumId = albumInfoToUse?.id ?: modifiedAlbum.id,
                     album = modifiedAlbum.name,
-                    artist = existingArtist.name,
+                    artist = getArtistNameForMusicUseCase(it.id)
                 )
             }
             musicRepository.upsertAll(updatedSongs)
