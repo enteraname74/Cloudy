@@ -6,12 +6,11 @@ import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
-import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.UUID
+import java.util.*
 
 class ArtistService(
     private val artistRepository: ArtistRepository,
@@ -124,5 +123,22 @@ class ArtistService(
         }
 
         return hasBeenDeleted
+    }
+
+    /**
+     * Given a list of artist ids to check,
+     * returns a list of all the ids of the initial list that are not present
+     * in the db.
+     */
+    suspend fun getDeletedArtistIds(
+        idsToCheck: List<UUID>,
+        userId: UUID
+    ): List<UUID> {
+        val allArtistsOfUser: List<UUID> = artistRepository
+            .getAllOfUser(
+                userId = userId,
+            ).map { it.id }
+
+        return idsToCheck.filterNot { it in allArtistsOfUser }
     }
 }

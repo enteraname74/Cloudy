@@ -15,7 +15,7 @@ interface ArtistRepository {
     suspend fun upsert(artist: Artist): Artist
     suspend fun getAllOfUser(
         userId: UUID,
-        paginatedRequest: PaginatedRequest,
+        paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Artist>
     suspend fun deleteById(artistId: UUID): Boolean
 

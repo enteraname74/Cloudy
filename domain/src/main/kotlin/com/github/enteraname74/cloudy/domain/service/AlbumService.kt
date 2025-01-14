@@ -152,4 +152,20 @@ class AlbumService(
 
         return savedAlbum
     }
+
+    /**
+     * Given a list of album ids to check,
+     * returns a list of all the ids of the initial list that are not present
+     * in the db.
+     */
+    suspend fun getDeletedMusicsIds(
+        idsToCheck: List<UUID>,
+        userId: UUID
+    ): List<UUID> {
+        val allAlbumOfUser: List<UUID> = albumRepository.getAllOfUser(
+            userId = userId,
+        ).map { it.id }
+
+        return idsToCheck.filterNot { it in allAlbumOfUser }
+    }
 }
