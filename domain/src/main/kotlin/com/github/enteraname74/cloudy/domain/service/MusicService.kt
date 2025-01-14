@@ -6,12 +6,14 @@ import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.*
@@ -19,11 +21,13 @@ import java.util.*
 class MusicService(
     private val musicRepository: MusicRepository,
     private val artistRepository: ArtistRepository,
+    private val albumRepository: AlbumRepository,
     private val musicArtistRepository: MusicArtistRepository,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
     private val deleteAlbumIfEmptyUseCase: DeleteAlbumIfEmptyUseCase,
+    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
 ) {
 
     suspend fun getFromId(musicId: UUID): Music? =
@@ -57,16 +61,24 @@ class MusicService(
         )
 
         musicRepository.upsert(music)
+
+        musicArtistRepository.upsert(
+            musicArtist = MusicArtist(
+                musicId = music.id,
+                artistId = artist.id,
+            )
+        )
+
         return music
     }
 
     suspend fun update(
         modifiedMusic: Music,
-        newArtists: List<String>,
+        newArtistsNames: List<String>,
         userId: UUID,
     ): Music {
         // We get or create the artist of the modified music
-        val artists: List<Artist> = newArtists.map { name ->
+        val newArtists: List<Artist> = newArtistsNames.map { name ->
             getOrCreateArtistUseCase(
                 artistName = name,
                 userId = userId,
@@ -78,7 +90,7 @@ class MusicService(
             .getArtistsOfMusic(musicId = modifiedMusic.id)
 
         val firstArtist: Artist =
-            artists.firstOrNull() ?: previousArtists.first()
+            newArtists.firstOrNull() ?: previousArtists.first()
 
         // We get or create the album of the modified music
         val album: Album = getOrCreateAlbumUseCase(
@@ -89,16 +101,19 @@ class MusicService(
             coverPath = modifiedMusic.coverPath,
         )
 
-        // We update the album of the music
-        val musicWithCorrectIds = modifiedMusic.copy(
-            albumId = album.id,
-            artist = newArtists.takeIf { it.isNotEmpty() }?.joinToString(", ")
-                ?: previousArtists.joinToString(", "),
-        )
-        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
+        // We remove the links between the music and the previous artists that are not in the updated list of artists:
+        val artistsToUnlink: List<Artist> = previousArtists.filter { it.name !in newArtistsNames }
+        artistsToUnlink.forEach {
+            musicArtistRepository.delete(
+                musicArtist = MusicArtist(
+                    musicId = modifiedMusic.id,
+                    artistId = it.id,
+                )
+            )
+        }
 
         // We set the links between the artists and the music:
-        artists.forEach {
+        newArtists.forEach {
             musicArtistRepository.upsert(
                 musicArtist = MusicArtist(
                     musicId = modifiedMusic.id,
@@ -107,8 +122,17 @@ class MusicService(
             )
         }
 
+        // We update the album of the music and its artist name
+        val musicWithCorrectIds = modifiedMusic.copy(
+            albumId = album.id,
+            artist = getArtistNameForMusicUseCase(modifiedMusic.id),
+        )
+        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
+
         // We check if the legacy album and artist can be deleted
-        deleteAlbumIfEmptyUseCase(albumId = modifiedMusic.albumId)
+        modifiedMusic.albumId?.let {
+            deleteAlbumIfEmptyUseCase(albumId = it)
+        }
 
         previousArtists.forEach {
             deleteArtistIfEmptyUseCase(artistId = it.id)
@@ -118,20 +142,33 @@ class MusicService(
     }
 
     suspend fun deleteAll(musicIds: List<UUID>) {
-        musicIds.forEach { musicId ->
-            val music: Music = musicRepository.getFromId(musicId = musicId) ?: return
-            val artistsOfMusic: List<Artist> = artistRepository.getArtistsOfMusic(musicId = musicId)
 
-            // We check if we can delete the album of the music:
-            deleteAlbumIfEmptyUseCase(albumId = music.albumId)
+        val musicsToDelete = musicRepository.getAll(musicIds)
+        val relatedArtists: List<Artist> = buildList {
+            musicsToDelete.forEach { music ->
+                addAll(artistRepository.getArtistsOfMusic(musicId = music.id))
+            }
+        }.distinct()
 
-            // We then check if we can delete the artist of the music:
-            artistsOfMusic.forEach {
-                deleteArtistIfEmptyUseCase(artistId = it.id)
+        val relatedAlbums: List<Album> = buildList {
+            musicsToDelete
+                .mapNotNull { it.albumId }
+                .distinct()
+                .forEach { albumId ->
+                albumRepository.getFromId(albumId)?.let { add(it) }
             }
         }
 
         musicRepository.deleteAll(musicIds)
+
+
+        relatedArtists.forEach {
+            deleteArtistIfEmptyUseCase(artistId = it.id)
+        }
+
+        relatedAlbums.forEach {
+            deleteAlbumIfEmptyUseCase(albumId = it.id)
+        }
     }
 
     suspend fun getAllOfUser(

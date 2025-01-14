@@ -18,7 +18,6 @@ internal class FingerprintRetriever {
             var duration = ""
 
             while (line != null) {
-                println("FingerprintRetriever -- getFingerprintFromMusic -- got line of fpcalc $line ")
                 if (isDurationField(line)) duration = getValue(line)
                 else if (isFingerprintField(line)) fingerprint = getValue(line)
 
@@ -27,7 +26,6 @@ internal class FingerprintRetriever {
 
             val exitCode = process.waitFor()
 
-            println("FingerprintRetriever -- getFingerprintFromMusic -- got infos ${process.info()} $exitCode, $duration, $fingerprint")
             if (exitCode == 0) {
                 // Successfully calculated fingerprint
                 FingerprintData(

@@ -5,7 +5,7 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
-import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
@@ -16,7 +16,7 @@ import java.util.*
 
 class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
-        dbQuery {
+        suspendedTransaction {
             MusicTable.upsert {
                 it[id] = music.id
                 it[name] = music.name
@@ -42,7 +42,7 @@ class MusicDataSourceImpl : MusicDataSource {
         }
 
     override suspend fun upsertAll(musics: List<Music>) {
-        dbQuery {
+        suspendedTransaction {
             MusicTable.batchUpsert(musics) { music ->
                 this[MusicTable.id] = music.id
                 this[MusicTable.name] = music.name
@@ -63,7 +63,7 @@ class MusicDataSourceImpl : MusicDataSource {
     }
 
     override suspend fun getFromId(musicId: UUID): Music? =
-        dbQuery {
+        suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where { MusicTable.id eq musicId }
@@ -71,15 +71,23 @@ class MusicDataSourceImpl : MusicDataSource {
                 ?.toMusic()
         }
 
+    override suspend fun getAll(ids: List<UUID>): List<Music> =
+        suspendedTransaction {
+            MusicTable
+                .selectAll()
+                .where { MusicTable.id inList ids }
+                .mapNotNull { it.toMusic() }
+        }
+
     override suspend fun deleteById(musicId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             MusicTable.deleteWhere {
                 id eq musicId
             } > 0
         }
 
     override suspend fun deleteAll(ids: List<UUID>) {
-        dbQuery {
+        suspendedTransaction {
             MusicTable.deleteWhere {
                 id inList ids
             }
@@ -90,7 +98,7 @@ class MusicDataSourceImpl : MusicDataSource {
         userId: UUID,
         paginatedRequest: PaginatedRequest,
     ): List<Music> =
-        dbQuery {
+        suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where {
@@ -102,7 +110,7 @@ class MusicDataSourceImpl : MusicDataSource {
         }
 
     override suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
@@ -110,7 +118,7 @@ class MusicDataSourceImpl : MusicDataSource {
         }
 
     override suspend fun doesMusicExists(fingerprint: String, userId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where { (MusicTable.fingerprint eq fingerprint) and (MusicTable.userId eq userId) }
@@ -118,7 +126,7 @@ class MusicDataSourceImpl : MusicDataSource {
         }
 
     override suspend fun allFromAlbum(albumId: UUID): List<Music> =
-        dbQuery {
+        suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where { MusicTable.albumId eq albumId }
@@ -126,7 +134,7 @@ class MusicDataSourceImpl : MusicDataSource {
         }
 
     override suspend fun allFromArtist(artistId: UUID): List<Music> =
-        dbQuery {
+        suspendedTransaction {
             MusicTable.join(
                 otherTable = MusicArtistTable,
                 joinType = JoinType.INNER,

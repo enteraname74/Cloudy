@@ -30,6 +30,9 @@ class MusicRepositoryImpl(
     override suspend fun getFromId(musicId: UUID): Music? =
         musicDataSource.getFromId(musicId = musicId)
 
+    override suspend fun getAll(ids: List<UUID>): List<Music> =
+        musicDataSource.getAll(ids)
+
     override suspend fun deleteById(musicId: UUID): Boolean =
         musicDataSource.deleteById(musicId)
 

@@ -12,14 +12,14 @@ internal object MusicTable: UUIDTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val coverPath = text("coverPath").nullable()
     val album = varchar("album", 128)
-    val artist = varchar("artist", 128)
+    val artist = mediumText("artist")
     val path = varchar("path", 255)
     val duration = long("duration")
     val addedDate = datetime("addedDate")
     val lastUpdateAt = datetime("lastUpdateAt").default(LocalDateTime.now())
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
-    val albumId = reference("albumId", AlbumTable.id, ReferenceOption.CASCADE)
+    val albumId = reference("albumId", AlbumTable.id, ReferenceOption.CASCADE).nullable()
     val fingerprint = varchar("fingerprint", 128).default("")
 }
 
@@ -35,7 +35,7 @@ internal fun ResultRow.toMusic(): Music? =
             addedDate = this[MusicTable.addedDate],
             nbPlayed = this[MusicTable.nbPlayed],
             isInQuickAccess = this[MusicTable.isInQuickAccess],
-            albumId = this[MusicTable.albumId].value,
+            albumId = this[MusicTable.albumId]?.value,
             userId = this[MusicTable.userId].value,
             fingerprint = this[MusicTable.fingerprint],
             path = this[MusicTable.path],

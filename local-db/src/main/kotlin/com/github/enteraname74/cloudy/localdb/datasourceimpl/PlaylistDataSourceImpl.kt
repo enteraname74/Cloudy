@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.toPlaylist
-import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
@@ -17,7 +17,7 @@ import java.util.*
 
 class PlaylistDataSourceImpl: PlaylistDataSource {
     override suspend fun getFromId(playlistId: UUID): Playlist? =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable
                 .selectAll()
                 .where {
@@ -27,7 +27,7 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
         }
 
     override suspend fun getFromInformation(name: String, userId: UUID): Playlist? =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable
                 .selectAll()
                 .where {
@@ -37,7 +37,7 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
         }
 
     override suspend fun upsert(playlist: Playlist): Playlist =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable.upsert {
                 it[id] = playlist.id
                 it[userId] = playlist.userId
@@ -58,14 +58,14 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
         }
 
     override suspend fun deleteById(playlistId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable.deleteWhere {
                 PlaylistTable.id eq playlistId
             } > 0
         }
 
     override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable
                 .selectAll()
                 .where {
@@ -77,7 +77,7 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
         }
 
     override suspend fun isPlaylistPossessedByUser(userId: UUID, playlistId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             PlaylistTable
                 .selectAll()
                 .where {

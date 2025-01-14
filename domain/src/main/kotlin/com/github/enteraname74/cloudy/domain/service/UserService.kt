@@ -16,7 +16,11 @@ class UserService(
     suspend fun getUserFromUsername(username: String): User? =
         userRepository.getFromUsername(username = username)
 
-    suspend fun createUser(username: String, password: String): ServiceResult {
+    suspend fun createUser(
+        username: String,
+        password: String,
+        isAdmin: Boolean = false,
+    ): ServiceResult {
         val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
             password = password,
         ) ?: return ServiceResult.Error()
@@ -24,6 +28,7 @@ class UserService(
         val user = User(
             username = username,
             hashedPassword = hashedPassword,
+            isAdmin = isAdmin,
         )
 
         val savedUser: User = userRepository.upsert(user = user)

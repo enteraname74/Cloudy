@@ -6,7 +6,10 @@ import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
+import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.UUID
 
@@ -14,6 +17,8 @@ class ArtistService(
     private val artistRepository: ArtistRepository,
     private val musicRepository: MusicRepository,
     private val albumRepository: AlbumRepository,
+    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
+    private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
 ) {
     private val musicFilePersistenceManager = MusicFilePersistenceManager()
 
@@ -95,14 +100,29 @@ class ArtistService(
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(
             artistId = artistId,
         )
-        songsOfArtist.forEach { song ->
+        val relatedArtists: List<Artist> = buildList {
+            songsOfArtist.forEach {
+                addAll(artistRepository.getArtistsOfMusic(it.id))
+            }
+        }.distinct()
+
+        // We delete the songs
+        songsOfArtist.forEach {
             musicFilePersistenceManager.deleteFile(
-                musicId = song.id,
+                musicId = it.id,
                 username = username,
             )
         }
+        musicRepository.deleteAll(ids = songsOfArtist.map { it.id })
 
         // We then delete the artist
-        return artistRepository.deleteById(artistId = artistId)
+        val hasBeenDeleted = artistRepository.deleteById(artistId = artistId)
+
+        // We check if we can delete the related artists (other artists of songs).
+        relatedArtists.forEach {
+            deleteArtistIfEmptyUseCase(it.id)
+        }
+
+        return hasBeenDeleted
     }
 }

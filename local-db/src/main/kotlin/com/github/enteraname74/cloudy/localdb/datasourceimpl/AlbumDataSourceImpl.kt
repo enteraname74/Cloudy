@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.toAlbum
-import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
@@ -14,7 +14,7 @@ import java.util.*
 
 class AlbumDataSourceImpl : AlbumDataSource {
     override suspend fun getFromId(albumId: UUID): Album? =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable
                 .selectAll()
                 .where {
@@ -24,7 +24,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
 
     override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable
                 .selectAll()
                 .where {
@@ -34,7 +34,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
 
     override suspend fun upsert(album: Album): Album =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable.upsert {
                 it[id] = album.id
                 it[name] = album.name
@@ -56,7 +56,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
 
     override suspend fun upsertAll(albums: List<Album>) {
-        dbQuery {
+        suspendedTransaction {
             AlbumTable.batchUpsert(albums) { album ->
                 this[AlbumTable.id] = album.id
                 this[AlbumTable.name] = album.name
@@ -76,7 +76,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         userId: UUID,
         paginatedRequest: PaginatedRequest,
     ): List<Album> =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable
                 .selectAll()
                 .where {
@@ -88,7 +88,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
 
     override suspend fun deleteById(albumId: UUID) {
-        dbQuery {
+        suspendedTransaction {
             AlbumTable.deleteWhere {
                 AlbumTable.id eq albumId
             }
@@ -96,7 +96,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
     }
 
     override suspend fun allOfArtist(artistId: UUID): List<Album> =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable
                 .selectAll()
                 .where { AlbumTable.artistId eq  artistId }
@@ -104,7 +104,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
         }
 
     override suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             AlbumTable
                 .selectAll()
                 .where {

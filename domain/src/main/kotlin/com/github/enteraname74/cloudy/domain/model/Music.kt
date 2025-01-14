@@ -25,6 +25,6 @@ data class Music(
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
     @Serializable(with = UUIDSerializer::class)
-    val albumId: UUID,
+    val albumId: UUID?,
     val fingerprint: String,
 ): UpdatableElement

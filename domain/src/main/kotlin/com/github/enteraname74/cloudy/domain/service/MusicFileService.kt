@@ -95,7 +95,7 @@ class MusicFileService(
     }
 
     companion object {
-        private const val MAX_USER_DIRECTORY_SIZE_IN_GB = 10
+        private val MAX_USER_DIRECTORY_SIZE_IN_GB = System.getenv("TOTAL_SPACE_PER_FOLDER")?.toIntOrNull() ?: 10
         private const val FILE_CANNOT_BE_SAVED = "File cannot be saved."
         private const val MUSIC_ALREADY_SAVED = "This song was already saved before."
     }

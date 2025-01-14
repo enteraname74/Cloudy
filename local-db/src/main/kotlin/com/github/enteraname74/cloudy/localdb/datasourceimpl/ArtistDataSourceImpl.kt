@@ -5,7 +5,7 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.toArtist
-import com.github.enteraname74.cloudy.localdb.util.dbQuery
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
@@ -19,7 +19,7 @@ import java.util.*
 
 class ArtistDataSourceImpl : ArtistDataSource {
     override suspend fun getFromInformation(name: String, userId: UUID): Artist? =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable
                 .selectAll()
                 .where { (ArtistTable.name eq name) and (ArtistTable.userId eq userId) }
@@ -28,7 +28,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
 
     override suspend fun getFromId(artistId: UUID): Artist? =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable
                 .selectAll()
                 .where { ArtistTable.id eq artistId }
@@ -37,7 +37,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
 
     override suspend fun isArtistPossessedByUser(userId: UUID, artistId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable
                 .selectAll()
                 .where { (ArtistTable.id eq artistId) and (ArtistTable.userId eq userId) }
@@ -45,7 +45,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
 
     override suspend fun upsert(artist: Artist): Artist =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable.upsert {
                 it[id] = artist.id
                 it[userId] = artist.userId
@@ -68,7 +68,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
         userId: UUID,
         paginatedRequest: PaginatedRequest,
     ): List<Artist> =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable
                 .selectAll()
                 .where {
@@ -80,14 +80,14 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
 
     override suspend fun deleteById(artistId: UUID): Boolean =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable.deleteWhere {
                 id eq artistId
             } > 0
         }
 
     override suspend fun getArtistsOfMusic(musicId: UUID): List<Artist> =
-        dbQuery {
+        suspendedTransaction {
             ArtistTable.join(
                 otherTable = MusicArtistTable,
                 joinType = JoinType.INNER,

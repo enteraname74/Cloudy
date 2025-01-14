@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
-import com.github.enteraname74.cloudy.config.auth.generateToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
@@ -8,7 +7,6 @@ import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*

@@ -8,6 +8,7 @@ interface MusicRepository {
     suspend fun upsert(music: Music): Music
     suspend fun upsertAll(musics: List<Music>)
     suspend fun getFromId(musicId: UUID): Music?
+    suspend fun getAll(ids: List<UUID>): List<Music>
     suspend fun deleteById(musicId: UUID): Boolean
     suspend fun deleteAll(ids: List<UUID>)
     suspend fun getAllOfUser(
