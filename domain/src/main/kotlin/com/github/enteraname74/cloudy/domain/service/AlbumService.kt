@@ -91,7 +91,8 @@ class AlbumService(
                 ids = songsOfAlbum.map {
                     MusicArtist(
                         musicId = it.id,
-                        artistId = artist.id
+                        artistId = artist.id,
+                        userId = userId,
                     ).id
                 }
             )
@@ -101,6 +102,7 @@ class AlbumService(
                 MusicArtist(
                     musicId = it.id,
                     artistId = existingArtist.id,
+                    userId = userId,
                 )
             }
         )

@@ -12,4 +12,5 @@ internal val serviceModule = module {
     singleOf(::PlaylistService)
     singleOf(::UserService)
     singleOf(::CoverService)
+    singleOf(::MusicArtistService)
 }

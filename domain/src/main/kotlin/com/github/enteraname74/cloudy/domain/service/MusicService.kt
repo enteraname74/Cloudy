@@ -66,6 +66,7 @@ class MusicService(
             musicArtist = MusicArtist(
                 musicId = music.id,
                 artistId = artist.id,
+                userId = user.id,
             )
         )
 
@@ -108,6 +109,7 @@ class MusicService(
                 MusicArtist(
                     musicId = modifiedMusic.id,
                     artistId = it.id,
+                    userId = userId,
                 ).id
             }
         )
@@ -118,6 +120,7 @@ class MusicService(
                 MusicArtist(
                     musicId = modifiedMusic.id,
                     artistId = it.id,
+                    userId = userId,
                 )
             }
         )
