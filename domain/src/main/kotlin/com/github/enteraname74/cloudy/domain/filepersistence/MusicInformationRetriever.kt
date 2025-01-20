@@ -18,7 +18,7 @@ sealed interface MusicInformationResult {
     data class FileMetadata(
         val musicId: UUID,
         val name: String,
-        val artist: String,
+        val artists: List<String>,
         val album: String,
         val coverPath: String?,
         val fingerprint: String,

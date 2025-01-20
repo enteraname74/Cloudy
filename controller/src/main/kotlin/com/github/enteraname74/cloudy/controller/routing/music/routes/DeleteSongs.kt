@@ -19,7 +19,7 @@ fun Route.deleteSongs() {
     val musicService by inject<MusicService>()
     val musicFileService by inject<MusicFileService>()
 
-    delete("") {
+    delete {
         val musicIds: List<String> = call.receive()
         val uuids: List<UUID> = musicIds.mapNotNull { UUIDUtils.fromString(it) }
 

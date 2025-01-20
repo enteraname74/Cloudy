@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
@@ -37,19 +38,23 @@ class MusicService(
         user: User,
         musicPath: String,
         musicInformationResult: MusicInformationResult.FileMetadata,
-    ): Music {
+    ): UploadedMusicData {
 
-        val artist: Artist = getOrCreateArtistUseCase(
-            artistName = musicInformationResult.artist,
-            userId = user.id,
-            coverPath = musicInformationResult.coverPath,
-        )
+        val artists: List<Artist> = musicInformationResult.artists.map { artistName ->
+            getOrCreateArtistUseCase(
+                artistName = artistName.trim(),
+                userId = user.id,
+                coverPath = musicInformationResult.coverPath,
+            )
+        }
+
+        val firstArtist = artists.first()
 
         val album: Album = getOrCreateAlbumUseCase(
             albumName = musicInformationResult.album,
             userId = user.id,
-            artistId = artist.id,
-            artistName = artist.name,
+            artistId = firstArtist.id,
+            artistName = firstArtist.name,
             coverPath = musicInformationResult.coverPath,
         )
 
@@ -62,15 +67,22 @@ class MusicService(
 
         musicRepository.upsert(music)
 
-        musicArtistRepository.upsert(
-            musicArtist = MusicArtist(
-                musicId = music.id,
-                artistId = artist.id,
-                userId = user.id,
+        artists.forEach { artist ->
+            musicArtistRepository.upsert(
+                musicArtist = MusicArtist(
+                    musicId = music.id,
+                    artistId = artist.id,
+                    userId = user.id,
+                )
             )
-        )
+        }
 
-        return music
+
+        return UploadedMusicData(
+            music = music,
+            artists = artists,
+            album = album,
+        )
     }
 
     suspend fun update(
@@ -219,7 +231,7 @@ class MusicService(
         userId = userId,
         name = musicInformationResult.name,
         album = musicInformationResult.album,
-        artist = musicInformationResult.artist,
+        artist = musicInformationResult.artists.joinToString(", "),
         duration = musicInformationResult.duration,
         coverPath = musicInformationResult.coverPath,
         fingerprint = musicInformationResult.fingerprint,

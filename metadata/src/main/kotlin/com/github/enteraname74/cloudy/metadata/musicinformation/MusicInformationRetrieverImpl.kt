@@ -33,7 +33,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
         if (!shouldSearchForMetadata || fingerprintData == null) {
             return MusicInformationResult.FileMetadata(
                 name = customMetadata?.name ?: fileMetadata.name,
-                artist = customMetadata?.artists?.takeIf { it.isNotEmpty() }?.joinToString(", ") ?: fileMetadata.artist,
+                artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: listOf(fileMetadata.artist),
                 album = customMetadata?.album ?: fileMetadata.album,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
                 coverPath = "music/cover/$musicId",
@@ -54,7 +54,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
 
             return MusicInformationResult.FileMetadata(
                 name = finalMetadata.name,
-                artist = finalMetadata.artist,
+                artists = listOf(finalMetadata.artist),
                 album = finalMetadata.album,
                 fingerprint = fingerprintData.fingerprint.hashed(),
                 coverPath = coverPath,

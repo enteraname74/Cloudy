@@ -9,6 +9,7 @@ import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
 import com.github.enteraname74.cloudy.domain.service.MusicService
@@ -33,11 +34,6 @@ fun Route.upload() {
         val multipartData: MultiPartData = call.receiveMultipart()
         val contentLength = call.request.header(HttpHeaders.ContentLength)?.toLong()
             ?: return@post badRequest(message = RoutingMessages.Music.NO_FILE_DATA)
-
-//        val metadata: CustomMusicMetadata? = getCustomMetadata(
-//            multipartData = multipartData,
-//        )
-//        println("metadata: $metadata")
 
         val username: String = getUsernameFromToken() ?: return@post missingTokenInformation()
 
@@ -78,12 +74,12 @@ fun Route.upload() {
                         val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
                         val path: String = ServerUtil.buildRoute(value = "music/${musicInformationResult.musicId}")
 
-                        val savedMusic: Music = musicService.saveAndCreateMissingAlbumAndArtist(
+                        val uploadedData: UploadedMusicData = musicService.saveAndCreateMissingAlbumAndArtist(
                             user = user,
                             musicInformationResult = musicInformationResult,
                             musicPath = path,
                         )
-                        call.respond(savedMusic)
+                        call.respond(uploadedData)
                     }
 
                     else -> {
