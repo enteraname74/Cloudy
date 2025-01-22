@@ -72,12 +72,11 @@ fun Route.upload() {
                 when (serviceResult.data) {
                     is MusicInformationResult.FileMetadata -> {
                         val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
-                        val path: String = ServerUtil.buildRoute(value = "music/${musicInformationResult.musicId}")
 
                         val uploadedData: UploadedMusicData = musicService.saveAndCreateMissingAlbumAndArtist(
                             user = user,
                             musicInformationResult = musicInformationResult,
-                            musicPath = path,
+                                musicPath = "music/${musicInformationResult.musicId}",
                         )
                         call.respond(uploadedData)
                     }

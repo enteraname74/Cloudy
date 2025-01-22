@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 fun Application.configureDatabase() {
     AppDatabase.connectToDatabase(
         url = environment.config.property("storage.url").getString(),
-//        url = "jdbc:postgresql://db:5432/postgres",
         driver = environment.config.property("storage.driver").getString(),
         user = environment.config.propertyOrNull("storage.user")?.getString().orEmpty(),
         password = environment.config.propertyOrNull("storage.password")?.getString().orEmpty(),

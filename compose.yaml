@@ -1,13 +1,35 @@
 services:
-  ktor:
-    image: cloudy-docker-image:0.0.8
-    restart: always
-    ports:
-      - "10.7.147.212:8080:8080"
+  postgres:
+    image: postgres:15
+    container_name: cloudy_postgres_db
     environment:
-      ACOUSTID_API_KEY: "b'CHjabLfl"
-      AUTH_SECRET: "SECRET"
-      HOST: "10.109.139.243"
-      PORT: "8080"
-      DB_URL: "jdbc:sqlite:cloudyDB.db?foreign_keys=on"
-      DB_DRIVER: "org.sqlite.JDBC"
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres_docker_data:/var/lib/postgresql/data:z
+
+  ktor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: no
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    environment:
+      ACOUSTID_API_KEY: ${ACOUSTID_API_KEY}
+      AUTH_SECRET: ${AUTH_SECRET}
+      PORT: ${PORT}
+      DB_URL: ${DB_URL}
+      DB_DRIVER: ${DB_DRIVER}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
+    volumes:
+      - ./app_docker_data:/app:z
