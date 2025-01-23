@@ -37,7 +37,6 @@ dependencies {
 
     implementation(libs.ktor.simple.cache)
     implementation(libs.ktor.server.netty)
-    implementation(libs.logback.classic)
 
     testImplementation(libs.kotlin.test.junit)
 

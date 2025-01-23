@@ -34,6 +34,8 @@ dependencies {
 
     // Status page
     implementation(libs.ktor.server.status.page)
+
+    api(libs.logback.classic)
 }
 
 tasks.test {

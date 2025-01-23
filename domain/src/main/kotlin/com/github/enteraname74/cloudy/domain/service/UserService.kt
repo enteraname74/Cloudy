@@ -50,6 +50,8 @@ class UserService(
         }
     }
 
-    suspend fun getAll(): List<User> =
-        userRepository.getAll()
+    suspend fun getAll(): List<User> {
+        return userRepository.getAll()
+    }
+
 }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "com.github.enteraname74.cloudy"
@@ -11,9 +10,8 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.ktor.serialization.kotlinx.json)
-    testImplementation(kotlin("test"))
-    implementation(project(":logging"))
+    implementation(libs.logback.classic)
+    implementation(libs.ktor.server.logging)
 }
 
 tasks.test {
