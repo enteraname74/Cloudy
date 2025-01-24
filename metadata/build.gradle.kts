@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":logging"))
 
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.bundles.ktor.client)

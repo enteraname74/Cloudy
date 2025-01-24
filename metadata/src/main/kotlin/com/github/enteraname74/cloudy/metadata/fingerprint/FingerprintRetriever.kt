@@ -1,10 +1,12 @@
 package com.github.enteraname74.cloudy.metadata.fingerprint
 
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.util.logging.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 internal class FingerprintRetriever {
+    private val logger = CloudyLogger(this::class)
 
     fun getFingerprintFromMusic(musicPath: String): FingerprintData? =
         try {
@@ -37,7 +39,7 @@ internal class FingerprintRetriever {
             }
 
         } catch (e: Exception) {
-            println("FingerprintRetriever -- getFingerprintFromMusic -- EXCEPTION: ${e.message}")
+            logger.error("Failed to retrieve fingerprint with error: ${e.message}")
             null
         }
 

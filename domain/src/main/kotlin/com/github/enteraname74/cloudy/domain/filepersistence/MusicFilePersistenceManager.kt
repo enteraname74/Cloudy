@@ -3,11 +3,13 @@ package com.github.enteraname74.cloudy.domain.filepersistence
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.FileUtils
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.http.content.*
 import java.io.File
 import java.util.*
 
 class MusicFilePersistenceManager {
+    private val logger = CloudyLogger(this::class)
 
     private fun getMusicIdFromFileName(fileName: String): UUID =
         UUID.fromString(
@@ -75,6 +77,10 @@ class MusicFilePersistenceManager {
             part.dispose()
         }
 
+        if (fileId == null) {
+            logger.error("Failed to save music file.")
+        }
+
         return fileId?.let {
             Pair(it, customMetadata)
         }
@@ -95,7 +101,10 @@ class MusicFilePersistenceManager {
             username = username,
         ) ?: return
 
-        fileToDelete.delete()
+        val hasBeenDeleted = fileToDelete.delete()
+        if (!hasBeenDeleted) {
+            logger.warn("Failed to delete music file with id $musicId.")
+        }
     }
 
 

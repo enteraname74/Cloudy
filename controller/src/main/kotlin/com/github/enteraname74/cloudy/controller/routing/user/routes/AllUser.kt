@@ -11,7 +11,6 @@ fun Route.allUser() {
     val userService by inject<UserService>()
 
     get {
-        call.application.environment.log.info("Getting all user")
         call.respond(
             userService.getAll().map { it.toUsableUser() }
         )
