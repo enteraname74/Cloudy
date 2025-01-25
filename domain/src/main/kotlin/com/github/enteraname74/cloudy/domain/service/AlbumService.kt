@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
@@ -18,6 +19,7 @@ class AlbumService(
     private val musicRepository: MusicRepository,
     private val artistRepository: ArtistRepository,
     private val musicArtistRepository: MusicArtistRepository,
+    private val musicFilePersistenceManager: MusicFilePersistenceManager,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
 ) {
@@ -44,18 +46,43 @@ class AlbumService(
             albumId = albumId,
         )
 
-    suspend fun deleteAlbum(
-        albumId: UUID,
-    ): Boolean {
-        val album: Album = albumRepository.getFromId(albumId) ?: return false
+    suspend fun deleteAll(
+        albumIds: List<UUID>,
+        username: String,
+    ) {
+        val albumsToDelete: List<Album> = albumRepository.getAll(albumIds)
+        val relatedMusics: List<Music> = buildList {
+            albumsToDelete.forEach {
+                addAll(
+                    musicRepository.allFromAlbum(
+                        albumId = it.id
+                    )
+                )
+            }
+        }
 
-        albumRepository.deleteById(albumId)
+        val relatedArtists: List<Artist> = buildList {
+            relatedMusics.forEach {
+                addAll(
+                    artistRepository.getArtistsOfMusic(
+                        musicId = it.id
+                    )
+                )
+            }
+        }.distinct()
 
-        deleteArtistIfEmptyUseCase(
-            artistId = album.artistId,
-        )
+        albumRepository.deleteAll(albumIds)
 
-        return true
+        relatedArtists.forEach {
+            deleteArtistIfEmptyUseCase(artistId = it.id)
+        }
+
+        relatedMusics.forEach { music ->
+            musicFilePersistenceManager.deleteFile(
+                musicId = music.id,
+                username = username,
+            )
+        }
     }
 
     suspend fun upsert(

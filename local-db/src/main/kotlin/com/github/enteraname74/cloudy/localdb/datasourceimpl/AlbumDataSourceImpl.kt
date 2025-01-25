@@ -4,12 +4,13 @@ import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.toAlbum
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
 
 class AlbumDataSourceImpl : AlbumDataSource {
@@ -21,6 +22,14 @@ class AlbumDataSourceImpl : AlbumDataSource {
                     AlbumTable.id eq albumId
                 }.firstOrNull()
                 ?.toAlbum()
+        }
+
+    override suspend fun getAll(albumIds: List<UUID>): List<Album> =
+        suspendedTransaction {
+            AlbumTable
+                .selectAll()
+                .where { AlbumTable.id inList albumIds }
+                .mapNotNull { it.toAlbum() }
         }
 
     override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
@@ -90,7 +99,15 @@ class AlbumDataSourceImpl : AlbumDataSource {
     override suspend fun deleteById(albumId: UUID) {
         suspendedTransaction {
             AlbumTable.deleteWhere {
-                AlbumTable.id eq albumId
+                id eq albumId
+            }
+        }
+    }
+
+    override suspend fun deleteAll(albumIds: List<UUID>) {
+        suspendedTransaction {
+            AlbumTable.deleteWhere {
+                id inList albumIds
             }
         }
     }

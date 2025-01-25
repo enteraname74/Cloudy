@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
@@ -7,7 +8,6 @@ import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
@@ -22,8 +22,8 @@ import java.util.*
 class MusicService(
     private val musicRepository: MusicRepository,
     private val artistRepository: ArtistRepository,
-    private val albumRepository: AlbumRepository,
     private val musicArtistRepository: MusicArtistRepository,
+    private val musicFilePersistenceManager: MusicFilePersistenceManager,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
@@ -156,7 +156,10 @@ class MusicService(
         return savedMusic
     }
 
-    suspend fun deleteAll(musicIds: List<UUID>) {
+    suspend fun deleteAll(
+        musicIds: List<UUID>,
+        username: String,
+    ) {
 
         val musicsToDelete = musicRepository.getAll(musicIds)
         val relatedArtists: List<Artist> = buildList {
@@ -165,24 +168,24 @@ class MusicService(
             }
         }.distinct()
 
-        val relatedAlbums: List<Album> = buildList {
-            musicsToDelete
-                .mapNotNull { it.albumId }
-                .distinct()
-                .forEach { albumId ->
-                    albumRepository.getFromId(albumId)?.let { add(it) }
-                }
-        }
-
         musicRepository.deleteAll(musicIds)
-
 
         relatedArtists.forEach {
             deleteArtistIfEmptyUseCase(artistId = it.id)
         }
 
-        relatedAlbums.forEach {
-            deleteAlbumIfEmptyUseCase(albumId = it.id)
+        musicsToDelete
+            .mapNotNull { it.albumId }
+            .distinct()
+            .forEach { albumId ->
+                deleteAlbumIfEmptyUseCase(albumId = albumId)
+            }
+
+        musicIds.forEach { musicId ->
+            musicFilePersistenceManager.deleteFile(
+                musicId = musicId,
+                username = username,
+            )
         }
     }
 

@@ -1,4 +1,4 @@
-package com.github.enteraname74.cloudy.controller.routing.music.routes
+package com.github.enteraname74.cloudy.controller.routing.album.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
@@ -6,7 +6,7 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
-import com.github.enteraname74.cloudy.domain.service.MusicService
+import com.github.enteraname74.cloudy.domain.service.AlbumService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -14,38 +14,38 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import java.util.*
 
-fun Route.deleteSongs() {
-    val musicService by inject<MusicService>()
+fun Route.deleteAlbums() {
+    val albumService by inject<AlbumService>()
 
     delete {
-        val musicIds: List<String> = call.receive()
-        val uuids: List<UUID> = musicIds.mapNotNull { UUIDUtils.fromString(it) }
+        val albumIds: List<String> = call.receive()
+        val uuids: List<UUID> = albumIds.mapNotNull { UUIDUtils.fromString(it) }
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
-        uuids.forEach { musicId ->
-            val isPossessedByUser = musicService.isMusicPossessedByUser(
-                musicId = musicId,
+        uuids.forEach { albumId ->
+            val isAlbumPossessedByUser = albumService.isAlbumPossessedByUser(
+                albumId = albumId,
                 userId = userId,
             )
 
-            if (!isPossessedByUser) {
+            if (!isAlbumPossessedByUser) {
                 return@delete response(
                     status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Music.songNotPossessedByUser(musicId),
+                    message = RoutingMessages.Album.ALBUM_NOT_POSSESSED_BY_USER,
                 )
             }
         }
 
-        musicService.deleteAll(
-            musicIds = uuids,
+        albumService.deleteAll(
+            albumIds = uuids,
             username = username,
         )
 
         response(
             status = HttpStatusCode.OK,
-            message = RoutingMessages.Music.SONGS_DELETED,
+            message = RoutingMessages.Album.ALBUMS_DELETED,
         )
     }
 }

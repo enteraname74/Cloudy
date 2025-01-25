@@ -46,6 +46,9 @@ class ArtistRepositoryImpl(
     override suspend fun deleteById(artistId: UUID) =
         artistDataSource.deleteById(artistId)
 
+    override suspend fun deleteAll(artistIds: List<UUID>) =
+        artistDataSource.deleteAll(artistIds)
+
     override suspend fun getArtistsOfMusic(musicId: UUID): List<Artist> =
         artistDataSource.getArtistsOfMusic(musicId)
 }

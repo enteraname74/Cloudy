@@ -8,6 +8,9 @@ interface AlbumRepository {
     suspend fun getFromId(
         albumId: UUID,
     ): Album?
+
+    suspend fun getAll(albumIds: List<UUID>): List<Album>
+
     suspend fun getFromInformation(
         albumName: String,
         albumArtist: String,
@@ -20,6 +23,7 @@ interface AlbumRepository {
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Album>
     suspend fun deleteById(albumId: UUID)
+    suspend fun deleteAll(albumIds: List<UUID>)
     suspend fun allOfArtist(artistId: UUID): List<Album>
     suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean
 }

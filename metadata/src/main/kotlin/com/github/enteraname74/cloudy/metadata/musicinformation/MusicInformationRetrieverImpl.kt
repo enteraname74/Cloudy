@@ -36,7 +36,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: listOf(fileMetadata.artist),
                 album = customMetadata?.album ?: fileMetadata.album,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
-                coverPath = "music/cover/$musicId",
+                coverPath = coverUrlFromFile(musicId),
                 duration = customMetadata?.duration ?: fileMetadata.duration,
                 musicId = musicId,
             )
@@ -57,12 +57,15 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 artists = listOf(finalMetadata.artist),
                 album = finalMetadata.album,
                 fingerprint = fingerprintData.fingerprint.hashed(),
-                coverPath = coverPath,
+                coverPath = coverPath ?: coverUrlFromFile(musicId),
                 duration = finalMetadata.duration,
                 musicId = musicId,
             )
         }
     }
+
+    private fun coverUrlFromFile(musicId: UUID): String =
+        "music/cover/$musicId"
 
     private fun ByteArray.toHex() =
         joinToString("") { "%02x".format(it) }

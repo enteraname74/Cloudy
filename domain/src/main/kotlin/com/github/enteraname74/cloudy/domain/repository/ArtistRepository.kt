@@ -18,6 +18,6 @@ interface ArtistRepository {
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Artist>
     suspend fun deleteById(artistId: UUID): Boolean
-
+    suspend fun deleteAll(artistIds: List<UUID>)
     suspend fun getArtistsOfMusic(musicId: UUID): List<Artist>
 }

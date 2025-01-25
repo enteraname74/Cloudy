@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
@@ -85,6 +86,14 @@ class ArtistDataSourceImpl : ArtistDataSource {
                 id eq artistId
             } > 0
         }
+
+    override suspend fun deleteAll(artistIds: List<UUID>) {
+        suspendedTransaction {
+            ArtistTable.deleteWhere {
+                id inList artistIds
+            }
+        }
+    }
 
     override suspend fun getArtistsOfMusic(musicId: UUID): List<Artist> =
         suspendedTransaction {

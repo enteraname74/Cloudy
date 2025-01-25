@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(project(":domain"))
     implementation(project(":repository"))
+    implementation(project(":logging"))
 
     implementation(libs.bundles.exposed)
     implementation(libs.sqlite.jdbc)

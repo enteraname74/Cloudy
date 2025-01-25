@@ -1,10 +1,12 @@
 package com.github.enteraname74.cloudy.metadata.cover
 
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.htppclient.defaultHttpClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 
 internal class RemoteMusicCoverRetriever {
+    private val logger = CloudyLogger(this::class)
 
     /**
      * Tries to retrieve a URL of the cover corresponding of a given music name and artist.
@@ -16,7 +18,8 @@ internal class RemoteMusicCoverRetriever {
         val path = "https://lyrist.vercel.app/api/$musicName/$musicArtist".replace(" ", "%20")
         val remoteCover: RemoteCover = defaultHttpClient.get(path).body()
         remoteCover.image
-    } catch (_: Exception) {
+    } catch (e: Exception) {
+        logger.error("Error while fetching cover url for music $musicName of artist $musicArtist. Error: ${e.message}")
         null
     }
 }

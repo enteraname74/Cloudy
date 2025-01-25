@@ -15,6 +15,9 @@ class AlbumRepositoryImpl(
             albumId = albumId,
         )
 
+    override suspend fun getAll(albumIds: List<UUID>): List<Album> =
+        albumDataSource.getAll(albumIds)
+
     override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
         albumDataSource.getFromInformation(
             albumName = albumName,
@@ -62,5 +65,9 @@ class AlbumRepositoryImpl(
 
     override suspend fun deleteById(albumId: UUID) {
         albumDataSource.deleteById(albumId)
+    }
+
+    override suspend fun deleteAll(albumIds: List<UUID>) {
+        albumDataSource.deleteAll(albumIds)
     }
 }

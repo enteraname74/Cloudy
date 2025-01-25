@@ -18,7 +18,6 @@ object RoutingMessages {
         const val FILE_SAVED = "File saved."
         const val FILE_NOT_FOUND = "Couldn't find the music file."
         const val SONGS_DELETED = "Songs have been deleted."
-        const val SONG_UPDATED = "This song has been updated."
         const val SONG_NOT_POSSESSED_BY_USER = "This song is not possessed by the user."
 
         fun songNotPossessedByUser(musicId: UUID): String =
@@ -26,14 +25,12 @@ object RoutingMessages {
     }
 
     object Artist {
-        const val ARTIST_UPDATED = "This artist has been updated."
-        const val ARTIST_DELETED = "This artist has been deleted."
+        const val ARTISTS_DELETED = "Artists have been deleted."
         const val ARTIST_NOT_POSSESSED_BY_USER = "This artist is not possessed by the user."
     }
 
     object Album {
-        const val ALBUM_UPDATED = "This album has been updated."
-        const val ALBUM_DELETED = "This album has been deleted."
+        const val ALBUMS_DELETED = "Albums have been deleted."
         const val ALBUM_NOT_POSSESSED_BY_USER = "This album is not possessed by the user."
     }
 
