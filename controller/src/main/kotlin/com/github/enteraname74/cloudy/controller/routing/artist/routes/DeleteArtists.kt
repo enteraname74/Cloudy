@@ -7,6 +7,7 @@ import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.ArtistService
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -17,7 +18,7 @@ import java.util.*
 fun Route.deleteArtists() {
     val artistService by inject<ArtistService>()
 
-    delete("/{artistId}") {
+    delete {
         val artistsIds: List<String> = call.receive()
         val uuids: List<UUID> = artistsIds.mapNotNull { UUIDUtils.fromString(it) }
 

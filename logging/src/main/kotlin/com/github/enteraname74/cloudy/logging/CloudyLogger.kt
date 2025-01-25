@@ -1,11 +1,12 @@
 package com.github.enteraname74.cloudy.logging
 
-import io.ktor.util.logging.KtorSimpleLogger
+import io.ktor.server.routing.*
+import io.ktor.util.logging.*
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
 class CloudyLogger<T : Any>(kClass: KClass<T>) {
-    private val logger = KtorSimpleLogger(kClass.simpleName ?: kClass.jvmName)
+    private val logger: Logger = KtorSimpleLogger(kClass.simpleName ?: kClass.jvmName)
 
     private fun String.format(
         feature: String?
@@ -17,6 +18,11 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
 
         return "$functionName$formattedFeature$this"
     }
+
+    fun trace(
+        message: String,
+        feature: String? = null
+    ) = logger.trace(message.format(feature = feature))
 
     fun info(
         message: String,
@@ -33,3 +39,5 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
         feature: String? = null
     ) = logger.error(message.format(feature = feature))
 }
+
+fun Route.CloudyLogger(): CloudyLogger<*> = CloudyLogger(this.application::class)

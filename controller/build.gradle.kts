@@ -29,6 +29,7 @@ application {
 dependencies {
     implementation(project(":domain"))
     implementation(project(":config"))
+    implementation(project(":logging"))
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.websockets)

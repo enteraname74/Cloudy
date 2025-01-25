@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(libs.logback.classic)
     implementation(libs.ktor.server.logging)
+    implementation(libs.ktor.server.core)
 }
 
 tasks.test {
