@@ -114,6 +114,42 @@ class MusicService(
             coverPath = modifiedMusic.coverPath,
         )
 
+        if (newArtistsNames.isNotEmpty()) {
+            updateArtistLinkOfMusic(
+                previousArtists = previousArtists,
+                newArtists = newArtists,
+                userId = userId,
+                newArtistsNames = newArtistsNames,
+                modifiedMusic = modifiedMusic,
+            )
+        }
+
+        // We update the album of the music and its artist name
+        val musicWithCorrectIds = modifiedMusic.copy(
+            albumId = album.id,
+            artist = getArtistNameForMusicUseCase(modifiedMusic.id),
+        )
+        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
+
+        // We check if the legacy album and artist can be deleted
+        modifiedMusic.albumId?.let {
+            deleteAlbumIfEmptyUseCase(albumId = it)
+        }
+
+        previousArtists.forEach {
+            deleteArtistIfEmptyUseCase(artistId = it.id)
+        }
+
+        return savedMusic
+    }
+
+    private suspend fun updateArtistLinkOfMusic(
+        previousArtists: List<Artist>,
+        newArtistsNames: List<String>,
+        newArtists: List<Artist>,
+        modifiedMusic: Music,
+        userId: UUID,
+    ) {
         // We remove the links between the music and the previous artists that are not in the updated list of artists:
         val artistsToUnlink: List<Artist> = previousArtists.filter { it.name !in newArtistsNames }
         musicArtistRepository.deleteAll(
@@ -136,24 +172,6 @@ class MusicService(
                 )
             }
         )
-
-        // We update the album of the music and its artist name
-        val musicWithCorrectIds = modifiedMusic.copy(
-            albumId = album.id,
-            artist = getArtistNameForMusicUseCase(modifiedMusic.id),
-        )
-        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
-
-        // We check if the legacy album and artist can be deleted
-        modifiedMusic.albumId?.let {
-            deleteAlbumIfEmptyUseCase(albumId = it)
-        }
-
-        previousArtists.forEach {
-            deleteArtistIfEmptyUseCase(artistId = it.id)
-        }
-
-        return savedMusic
     }
 
     suspend fun deleteAll(

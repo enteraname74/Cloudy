@@ -9,13 +9,14 @@ import com.github.enteraname74.cloudy.controller.routing.music.model.fromModifie
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
+import com.github.enteraname74.cloudy.logging.logger
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.UUID
+import java.util.*
 
 fun Route.updateSong() {
     val musicService by inject<MusicService>()
@@ -46,6 +47,8 @@ fun Route.updateSong() {
             userId = userId,
             newArtistsNames = modifiedMusicInfo.artists,
         )
+
+        logger.trace("Got response: $music")
 
         call.respond(music)
     }

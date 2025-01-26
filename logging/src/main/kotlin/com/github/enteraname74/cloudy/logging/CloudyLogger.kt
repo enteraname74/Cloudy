@@ -1,7 +1,10 @@
 package com.github.enteraname74.cloudy.logging
 
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.application
 import io.ktor.server.routing.*
 import io.ktor.util.logging.*
+import io.ktor.util.pipeline.PipelineContext
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -41,3 +44,5 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
 }
 
 fun Route.CloudyLogger(): CloudyLogger<*> = CloudyLogger(this.application::class)
+val PipelineContext<Unit, ApplicationCall>.logger: CloudyLogger<*>
+    get() = CloudyLogger(this.application::class)
