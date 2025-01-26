@@ -42,7 +42,7 @@ fun Route.updateAlbum() {
             modifiedAlbum = modifiedAlbum,
         )
 
-        val savedAlbum: Album = albumService.upsert(
+        val savedAlbum: Album = albumService.update(
             modifiedAlbum = updatedAlbum,
             userId = userId,
         )

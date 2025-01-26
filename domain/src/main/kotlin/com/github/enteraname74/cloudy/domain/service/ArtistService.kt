@@ -4,18 +4,23 @@ import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenc
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.*
 
 class ArtistService(
     private val artistRepository: ArtistRepository,
     private val musicRepository: MusicRepository,
+    private val musicArtistRepository: MusicArtistRepository,
     private val albumRepository: AlbumRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
+    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
 ) {
     private val musicFilePersistenceManager = MusicFilePersistenceManager()
 
@@ -28,7 +33,7 @@ class ArtistService(
             paginatedRequest = paginatedRequest,
         )
 
-    suspend fun upsert(
+    suspend fun update(
         modifiedArtist: Artist,
         userId: UUID,
     ): Artist {
@@ -41,40 +46,49 @@ class ArtistService(
         If that's the case, we will redirect songs and albums of the modified artist to this one.
         The modified artist will then be deleted.
          */
-        val artistInfoToUse: Artist? = artistRepository.getFromInformation(
+        val alreadyExistingArtist: Artist? = artistRepository.getFromInformation(
             name = modifiedArtist.name,
             userId = userId,
         )
 
-        // The only important part of the artist in a song is its name and its id.
-        if (songsOfArtist.firstOrNull()?.artist != modifiedArtist.name) {
-            val updatedSongs = songsOfArtist.map {
-                it.copy(artist = modifiedArtist.name)
-            }
-            musicRepository.upsertAll(updatedSongs)
-        }
-
-        // Same for the albums
-        if (albumsOfArtist.firstOrNull()?.artistName != modifiedArtist.name) {
-            val updatedAlbums = albumsOfArtist.map {
-                it.copy(
-                    artistId = artistInfoToUse?.id ?: modifiedArtist.id,
-                    artistName = modifiedArtist.name,
-                )
-            }
-            albumRepository.upsertAll(updatedAlbums)
-        }
-
-        return if (artistInfoToUse != null) {
+        val savedArtist: Artist = if (alreadyExistingArtist != null && alreadyExistingArtist.id != modifiedArtist.id) {
             artistRepository.deleteById(artistId = modifiedArtist.id)
+
+            // We redirect the songs of the modified artist to the already existing one :
+            musicArtistRepository.upsertAll(
+                musicArtists = songsOfArtist.map {
+                    MusicArtist(
+                        musicId = it.id,
+                        artistId = alreadyExistingArtist.id,
+                        userId = userId,
+                    )
+                }
+            )
+
             artistRepository.upsert(
-                artistInfoToUse.copy(
+                alreadyExistingArtist.copy(
                     isInQuickAccess = modifiedArtist.isInQuickAccess,
                 )
             )
         } else {
             artistRepository.upsert(modifiedArtist)
         }
+
+        val updatedSongs = songsOfArtist.map {
+            it.copy(artist = getArtistNameForMusicUseCase(it.id))
+        }
+        musicRepository.upsertAll(updatedSongs)
+
+        // We update/redirect albums of the artist with the new information
+        val updatedAlbums = albumsOfArtist.map {
+            it.copy(
+                artistId = savedArtist.id,
+                artistName = savedArtist.name,
+            )
+        }
+        albumRepository.upsertAll(updatedAlbums)
+
+        return savedArtist
     }
 
     suspend fun getFromId(artistId: UUID): Artist? =

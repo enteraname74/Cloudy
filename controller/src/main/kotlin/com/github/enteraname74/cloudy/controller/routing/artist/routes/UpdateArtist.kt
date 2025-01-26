@@ -43,7 +43,7 @@ fun Route.updateArtist() {
             modifiedArtist = modifiedArtist,
         )
 
-        val artist: Artist = artistService.upsert(
+        val artist: Artist = artistService.update(
             modifiedArtist = updatedArtist,
             userId = userId,
         )

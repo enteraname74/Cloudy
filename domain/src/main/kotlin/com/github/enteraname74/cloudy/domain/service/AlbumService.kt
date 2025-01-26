@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.UUID
 
@@ -22,6 +23,7 @@ class AlbumService(
     private val musicFilePersistenceManager: MusicFilePersistenceManager,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
+    private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
 ) {
     suspend fun getFromId(albumId: UUID): Album? =
         albumRepository.getFromId(
@@ -85,34 +87,27 @@ class AlbumService(
         }
     }
 
-    suspend fun upsert(
+    suspend fun update(
         modifiedAlbum: Album,
         userId: UUID,
     ): Album {
-        // We fetch the songs of the album to update
+        // We fetch the songs of the album to update and its artist
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
-
         val previousArtist: Artist? = artistRepository.getFromId(modifiedAlbum.artistId)
 
         /*
         If there is no existing artist from the album's artist name, we create one.
          */
-        val existingArtist: Artist = artistRepository.getFromInformation(
-            name = modifiedAlbum.artistName,
+        val existingArtist: Artist = getOrCreateArtistUseCase(
+            artistName = modifiedAlbum.artistName,
             userId = userId,
-        ) ?: artistRepository.upsert(
-            artist = Artist(
-                name = modifiedAlbum.artistName,
-                userId = userId,
-                coverPath = modifiedAlbum.coverPath,
-            )
+            coverPath = modifiedAlbum.coverPath,
         )
 
         /*
         We link the existing artist to each song of the albums.
         We also remove the link from the previous one.
          */
-
         previousArtist?.let { artist ->
             musicArtistRepository.deleteAll(
                 ids = songsOfAlbum.map {
@@ -145,21 +140,16 @@ class AlbumService(
             userId = userId,
         )
 
-        if (
-            songsOfAlbum.firstOrNull()?.album != modifiedAlbum.name
-            || songsOfAlbum.firstOrNull()?.artist != modifiedAlbum.artistName
-        ) {
-            val updatedSongs = songsOfAlbum.map {
-                it.copy(
-                    albumId = albumInfoToUse?.id ?: modifiedAlbum.id,
-                    album = modifiedAlbum.name,
-                    artist = getArtistNameForMusicUseCase(it.id)
-                )
-            }
-            musicRepository.upsertAll(updatedSongs)
+        val updatedSongs = songsOfAlbum.map {
+            it.copy(
+                albumId = albumInfoToUse?.id ?: modifiedAlbum.id,
+                album = modifiedAlbum.name,
+                artist = getArtistNameForMusicUseCase(it.id),
+            )
         }
+        musicRepository.upsertAll(updatedSongs)
 
-        val savedAlbum: Album = if (albumInfoToUse != null) {
+        val savedAlbum: Album = if (albumInfoToUse != null && albumInfoToUse.id != modifiedAlbum.id) {
             albumRepository.deleteById(albumId = modifiedAlbum.id)
             albumRepository.upsert(
                 album = albumInfoToUse.copy(
