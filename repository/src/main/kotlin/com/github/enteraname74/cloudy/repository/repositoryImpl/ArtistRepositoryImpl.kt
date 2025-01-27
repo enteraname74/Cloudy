@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import com.github.enteraname74.cloudy.repository.util.paginated
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 class ArtistRepositoryImpl(
@@ -29,7 +30,7 @@ class ArtistRepositoryImpl(
     override suspend fun upsert(artist: Artist): Artist =
         artistDataSource.upsert(
             artist.copy(
-                lastUpdateAt = LocalDateTime.now()
+                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC)
             )
         )
 

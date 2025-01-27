@@ -4,6 +4,8 @@ import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 class PlaylistRepositoryImpl(
@@ -22,13 +24,28 @@ class PlaylistRepositoryImpl(
 
     override suspend fun upsert(playlist: Playlist): Playlist =
         playlistDataSource.upsert(
-            playlist = playlist,
+            playlist = playlist.copy(
+                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+            ),
+        )
+
+    override suspend fun upsertAll(playlists: List<Playlist>): List<Playlist> =
+        playlistDataSource.upsertAll(
+            playlists = playlists.map {
+                it.copy(
+                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                )
+            },
         )
 
     override suspend fun deleteById(playlistId: UUID) =
         playlistDataSource.deleteById(
             playlistId = playlistId,
         )
+
+    override suspend fun deleteAll(playlistIds: List<UUID>) {
+        playlistDataSource.deleteAll(playlistIds)
+    }
 
     override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
         playlistDataSource.allOfUser(

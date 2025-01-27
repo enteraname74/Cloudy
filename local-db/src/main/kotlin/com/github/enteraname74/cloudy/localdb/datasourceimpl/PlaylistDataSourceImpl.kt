@@ -3,16 +3,22 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.addedDate
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.coverPath
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.isFavorite
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.isInQuickAccess
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.lastUpdateAt
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.name
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.nbPlayed
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.userId
 import com.github.enteraname74.cloudy.localdb.table.toPlaylist
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.and
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.upsert
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
 
 class PlaylistDataSourceImpl: PlaylistDataSource {
@@ -57,12 +63,42 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
                 .toPlaylist()!!
         }
 
+    override suspend fun upsertAll(playlists: List<Playlist>): List<Playlist> =
+        suspendedTransaction {
+            PlaylistTable.batchUpsert(playlists) { playlist ->
+                this[PlaylistTable.id] = playlist.id
+                this[userId] = playlist.userId
+                this[name] = playlist.name
+                this[coverPath] = playlist.coverPath
+                this[isFavorite] = playlist.isFavorite
+                this[addedDate] = playlist.addedDate
+                this[nbPlayed] = playlist.nbPlayed
+                this[isInQuickAccess] = playlist.isInQuickAccess
+                this[lastUpdateAt] = playlist.lastUpdateAt
+            }
+
+            val playlistIds = playlists.map { it.id }
+
+            PlaylistTable
+                .selectAll()
+                .where { PlaylistTable.id inList playlistIds }
+                .mapNotNull { it.toPlaylist() }
+        }
+
     override suspend fun deleteById(playlistId: UUID): Boolean =
         suspendedTransaction {
             PlaylistTable.deleteWhere {
-                PlaylistTable.id eq playlistId
+                id eq playlistId
             } > 0
         }
+
+    override suspend fun deleteAll(playlistIds: List<UUID>) {
+        suspendedTransaction {
+            PlaylistTable.deleteWhere {
+                id inList playlistIds
+            }
+        }
+    }
 
     override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
         suspendedTransaction {
@@ -70,7 +106,7 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
                 .selectAll()
                 .where {
                     (PlaylistTable.userId eq userId) and
-                            (PlaylistTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
+                            (lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
                 }
                 .paginated(paginatedRequest)
                 .mapNotNull { it.toPlaylist() }

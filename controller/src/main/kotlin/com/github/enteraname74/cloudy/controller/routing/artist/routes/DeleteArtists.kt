@@ -7,7 +7,6 @@ import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.ArtistService
-import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -34,7 +33,7 @@ fun Route.deleteArtists() {
             if (!isArtistPossessedByUser) {
                 return@delete response(
                     status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Artist.ARTIST_NOT_POSSESSED_BY_USER,
+                    message = RoutingMessages.Artist.artistNotPossessedByUser(artistId),
                 )
             }
         }

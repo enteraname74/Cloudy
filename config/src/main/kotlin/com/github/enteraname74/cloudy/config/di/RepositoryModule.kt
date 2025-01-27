@@ -14,4 +14,5 @@ internal val repositoryModule = module {
     singleOf(::PlaylistRepositoryImpl) bind PlaylistRepository::class
     singleOf(::CoverRepositoryImpl) bind CoverRepository::class
     singleOf(::MusicArtistRepositoryImpl) bind MusicArtistRepository::class
+    singleOf(::MusicPlaylistRepositoryImpl) bind MusicPlaylistRepository::class
 }

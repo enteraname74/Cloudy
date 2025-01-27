@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.*
 
 class MusicRepositoryImpl(
@@ -13,7 +14,7 @@ class MusicRepositoryImpl(
     override suspend fun upsert(music: Music): Music =
         musicDataSource.upsert(
             music.copy(
-                lastUpdateAt = LocalDateTime.now()
+                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC)
             )
         )
 
@@ -21,7 +22,7 @@ class MusicRepositoryImpl(
         musicDataSource.upsertAll(
             musics.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(),
+                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
                 )
             }
         )

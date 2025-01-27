@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicArtistDataSource
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 class MusicArtistRepositoryImpl(
@@ -13,7 +14,7 @@ class MusicArtistRepositoryImpl(
     override suspend fun upsert(musicArtist: MusicArtist) {
         musicArtistDataSource.upsert(
             musicArtist.copy(
-                lastUpdateAt = LocalDateTime.now(),
+                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
             )
         )
     }
@@ -23,7 +24,13 @@ class MusicArtistRepositoryImpl(
     }
 
     override suspend fun upsertAll(musicArtists: List<MusicArtist>) {
-        musicArtistDataSource.upsertAll(musicArtists)
+        musicArtistDataSource.upsertAll(
+            musicArtists = musicArtists.map {
+                it.copy(
+                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                )
+            }
+        )
     }
 
     override suspend fun deleteAll(ids: List<String>) {

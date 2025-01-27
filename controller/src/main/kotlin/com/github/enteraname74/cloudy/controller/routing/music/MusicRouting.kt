@@ -7,7 +7,7 @@ import io.ktor.server.routing.*
 fun Routing.musicRouting() {
     authenticatedRoutes {
         route("/music") {
-            upload()
+            uploadMusic()
             songsOfUser()
             getMusicFile()
             deleteSongs()

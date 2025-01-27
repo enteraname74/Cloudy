@@ -48,8 +48,6 @@ fun Route.updateSong() {
             newArtistsNames = modifiedMusicInfo.artists,
         )
 
-        logger.trace("Got response: $music")
-
         call.respond(music)
     }
 }

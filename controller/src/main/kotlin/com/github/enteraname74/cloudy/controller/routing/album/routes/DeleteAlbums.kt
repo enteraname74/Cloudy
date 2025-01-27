@@ -33,7 +33,7 @@ fun Route.deleteAlbums() {
             if (!isAlbumPossessedByUser) {
                 return@delete response(
                     status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Album.ALBUM_NOT_POSSESSED_BY_USER,
+                    message = RoutingMessages.Album.albumNotPossessedByUser(albumId),
                 )
             }
         }

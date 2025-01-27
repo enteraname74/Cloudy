@@ -27,11 +27,25 @@ object RoutingMessages {
     object Artist {
         const val ARTISTS_DELETED = "Artists have been deleted."
         const val ARTIST_NOT_POSSESSED_BY_USER = "This artist is not possessed by the user."
+
+        fun artistNotPossessedByUser(artistId: UUID): String =
+            "The artist with id: $artistId is not possessed by the user."
     }
 
     object Album {
         const val ALBUMS_DELETED = "Albums have been deleted."
         const val ALBUM_NOT_POSSESSED_BY_USER = "This album is not possessed by the user."
+
+        fun albumNotPossessedByUser(albumId: UUID): String =
+            "The album with id: $albumId is not possessed by the user."
+    }
+
+    object Playlist {
+        const val PLAYLISTS_DELETED = "Playlists have been deleted"
+        const val PLAYLIST_NOT_POSSESSED_BY_USER = "This playlist is not possessed by the user."
+
+        fun playlistNotPossessedByUser(playlistId: UUID): String =
+            "The album with id: $playlistId is not possessed by the user."
     }
 
     object Auth {

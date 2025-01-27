@@ -13,7 +13,9 @@ interface PlaylistDataSource {
         userId: UUID,
     ): Playlist?
     suspend fun upsert(playlist: Playlist): Playlist
+    suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>
     suspend fun deleteById(playlistId: UUID): Boolean
+    suspend fun deleteAll(playlistIds: List<UUID>)
     suspend fun allOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,

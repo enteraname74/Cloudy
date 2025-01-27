@@ -6,9 +6,7 @@ import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
-import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
-import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
@@ -23,7 +21,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
-fun Route.upload() {
+fun Route.uploadMusic() {
 
     val musicFileService by inject<MusicFileService>()
     val musicService by inject<MusicService>()
