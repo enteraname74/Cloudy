@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
@@ -31,10 +32,7 @@ fun Route.deleteSongs() {
             )
 
             if (!isPossessedByUser) {
-                return@delete response(
-                    status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Music.songNotPossessedByUser(musicId),
-                )
+                return@delete forbidden(RoutingMessages.Music.songNotPossessedByUser(musicId))
             }
         }
 

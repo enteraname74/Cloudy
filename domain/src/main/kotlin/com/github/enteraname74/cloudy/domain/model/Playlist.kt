@@ -16,9 +16,9 @@ data class Playlist(
     val coverPath: String?,
     val isFavorite: Boolean = false,
     @Serializable(with = LocalDateTimeSerializer::class)
-    var addedDate: LocalDateTime = LocalDateTime.now(),
-    var nbPlayed: Int = 0,
-    var isInQuickAccess: Boolean = false,
+    val addedDate: LocalDateTime = LocalDateTime.now(),
+    val nbPlayed: Int = 0,
+    val isInQuickAccess: Boolean = false,
     @Serializable(with = LocalDateTimeSerializer::class)
     override val lastUpdateAt: LocalDateTime = LocalDateTime.now()
 ): UpdatableElement

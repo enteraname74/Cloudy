@@ -18,7 +18,7 @@ interface PlaylistRepository {
     suspend fun deleteAll(playlistIds: List<UUID>)
     suspend fun allOfUser(
         userId: UUID,
-        paginatedRequest: PaginatedRequest,
+        paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Playlist>
     suspend fun isPlaylistPossessedByUser(userId: UUID, playlistId: UUID): Boolean
 }

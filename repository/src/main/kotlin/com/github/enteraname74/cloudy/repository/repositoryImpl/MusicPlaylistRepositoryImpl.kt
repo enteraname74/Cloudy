@@ -29,6 +29,9 @@ class MusicPlaylistRepositoryImpl(
         )
     }
 
+    override suspend fun getAllOfPlaylist(playlistId: UUID): List<MusicPlaylist> =
+        musicPlaylistDataSource.getAllOfPlaylist(playlistId)
+
     override suspend fun delete(musicPlaylist: MusicPlaylist) {
         musicPlaylistDataSource.delete(musicPlaylist)
     }

@@ -15,8 +15,8 @@ data class MusicPlaylist(
     @Serializable(with = UUIDSerializer::class)
     val userId: UUID,
     @Serializable(with = LocalDateTimeSerializer::class)
-    override val lastUpdateAt: LocalDateTime
-): UpdatableElement {
+    override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
+) : UpdatableElement {
     val id: String
-        get() = "$musicId:$playlistId"
+        get() = "$musicId$playlistId"
 }

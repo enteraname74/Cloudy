@@ -1,11 +1,9 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.routing.playlist.model.ModifiedPlaylist
-import com.github.enteraname74.cloudy.controller.routing.playlist.model.fromModifiedPlaylist
+import com.github.enteraname74.cloudy.controller.routing.playlist.model.PlaylistCreation
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
@@ -16,30 +14,26 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import java.util.*
 
-fun Route.updatePlaylist() {
+fun Route.createPlaylist() {
     val playlistService by inject<PlaylistService>()
 
-    put {
-        val modifiedPlaylistInfo: ModifiedPlaylist = call.receive()
-        val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
-
-        val matchingPlaylist: Playlist = playlistService.getFromId(
-            playlistId = modifiedPlaylistInfo.id
-        ) ?: return@put badRequest(RoutingMessages.Generic.WRONG_ID)
+    post {
+        val playlistCreation: PlaylistCreation = call.receive()
+        val userId: UUID = getUserIdFromToken() ?: return@post missingTokenInformation()
 
         val isPlaylistPossessedByUser: Boolean = playlistService.isPlaylistPossessedByUser(
             userId = userId,
-            playlistId = modifiedPlaylistInfo.id,
+            playlistName = playlistCreation.name,
         )
 
-        if (!isPlaylistPossessedByUser) {
-            return@put forbidden(RoutingMessages.Playlist.PLAYLIST_NOT_POSSESSED_BY_USER)
+        if (isPlaylistPossessedByUser) {
+            return@post forbidden(RoutingMessages.Playlist.PLAYLIST_ALREADY_EXISTING)
         }
 
-        val updatedPlaylist: Playlist = matchingPlaylist.fromModifiedPlaylist(modifiedPlaylistInfo)
-
         val playlist: Playlist = playlistService.upsert(
-            playlist = updatedPlaylist,
+            playlist = playlistCreation.toNewPlaylist(
+                userId = userId,
+            ),
         )
 
         call.respond(playlist)

@@ -1,9 +1,12 @@
 package com.github.enteraname74.cloudy.localdb
 
+import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
+import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
+import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import org.jetbrains.exposed.sql.Database
@@ -21,7 +24,9 @@ object AppDatabase {
                 ArtistTable,
                 AlbumTable,
                 UserTable,
+                PlaylistTable,
                 MusicArtistTable,
+                MusicPlaylistTable,
             )
         }
     }

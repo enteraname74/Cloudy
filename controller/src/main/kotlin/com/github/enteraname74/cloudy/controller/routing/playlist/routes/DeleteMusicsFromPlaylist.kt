@@ -1,0 +1,59 @@
+package com.github.enteraname74.cloudy.controller.routing.playlist.routes
+
+import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
+import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.util.UUIDUtils
+import com.github.enteraname74.cloudy.domain.service.PlaylistService
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.call
+import io.ktor.server.request.receive
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.post
+import org.koin.ktor.ext.inject
+import java.util.UUID
+import kotlin.getValue
+
+fun Route.deleteMusicsFromPlaylist() {
+    val playlistService by inject<PlaylistService>()
+
+    post("/removeMusics/{playlistId}") {
+        val playlistId: UUID = UUIDUtils.fromString(
+            call.parameters["playlistId"]
+        ) ?: return@post badRequest(
+            message = RoutingMessages.Generic.WRONG_ID
+        )
+        val userId: UUID = getUserIdFromToken() ?: return@post missingTokenInformation()
+
+        if (playlistService.getFromId(playlistId) == null) {
+            return@post response(
+                status = HttpStatusCode.NotFound,
+                message = RoutingMessages.Playlist.PLAYLIST_NOT_FOUND,
+            )
+        }
+
+        val isPossessedByUser = playlistService.isPlaylistPossessedByUser(
+            userId = userId,
+            playlistId = playlistId,
+        )
+
+        if (!isPossessedByUser) {
+            return@post forbidden(RoutingMessages.Playlist.PLAYLIST_NOT_POSSESSED_BY_USER)
+        }
+
+        val musicIds: List<String> = call.receive()
+        val uuids: List<UUID> = musicIds.mapNotNull { UUIDUtils.fromString(it) }
+
+        call.respond(
+            playlistService.deleteFromPlaylist(
+                playlistId = playlistId,
+                userId = userId,
+                musicIds = uuids,
+            )
+        )
+    }
+}

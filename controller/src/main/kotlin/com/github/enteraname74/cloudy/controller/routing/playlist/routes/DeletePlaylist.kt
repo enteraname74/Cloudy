@@ -1,12 +1,13 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
@@ -29,10 +30,7 @@ fun Route.deletePlaylist() {
             )
 
             if (!isPossessedByUser) {
-                return@delete response(
-                    status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Playlist.playlistNotPossessedByUser(playlistId),
-                )
+                return@delete forbidden(RoutingMessages.Playlist.playlistNotPossessedByUser(playlistId))
             }
         }
 

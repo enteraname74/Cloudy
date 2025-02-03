@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
@@ -34,10 +35,9 @@ fun Route.uploadMusic() {
 
         val username: String = getUsernameFromToken() ?: return@post missingTokenInformation()
 
-        if (musicFileService.isUserDirectoryFull(username)) return@post response(
-            status = HttpStatusCode.Forbidden,
-            message = RoutingMessages.Music.USER_MAX_STORAGE_REACHED,
-        )
+        if (musicFileService.isUserDirectoryFull(username)) {
+            return@post forbidden(RoutingMessages.Music.USER_MAX_STORAGE_REACHED)
+        }
 
         if (musicFileService.isUserDirectoryFull(
                 username = username,

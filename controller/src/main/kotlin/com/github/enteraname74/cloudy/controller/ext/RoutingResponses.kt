@@ -25,5 +25,11 @@ suspend fun ApplicationContext.badRequest(message: String) =
         message = message,
     )
 
+suspend fun ApplicationContext.forbidden(message: String) =
+    response(
+        status = HttpStatusCode.Forbidden,
+        message = message,
+    )
+
 suspend fun ApplicationContext.response(status: HttpStatusCode, message: String) =
     call.respond(status, message)

@@ -6,6 +6,7 @@ import java.util.UUID
 
 interface MusicPlaylistRepository {
     suspend fun upsert(musicPlaylist: MusicPlaylist)
+    suspend fun getAllOfPlaylist(playlistId: UUID): List<MusicPlaylist>
     suspend fun upsertAll(musicPlaylists: List<MusicPlaylist>)
     suspend fun delete(musicPlaylist: MusicPlaylist)
     suspend fun deleteAll(ids: List<String>)

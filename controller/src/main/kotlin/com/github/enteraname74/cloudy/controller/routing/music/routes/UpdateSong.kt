@@ -2,15 +2,13 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.model.ModifiedMusic
 import com.github.enteraname74.cloudy.controller.routing.music.model.fromModifiedMusic
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import com.github.enteraname74.cloudy.logging.logger
-import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -34,10 +32,7 @@ fun Route.updateSong() {
         )
 
         if (!isMusicPossessedByUser) {
-            return@put response(
-                status = HttpStatusCode.Forbidden,
-                message = RoutingMessages.Music.SONG_NOT_POSSESSED_BY_USER,
-            )
+            return@put forbidden(RoutingMessages.Music.SONG_NOT_POSSESSED_BY_USER)
         }
 
         val updatedMusic: Music = matchingMusic.fromModifiedMusic(modifiedMusicInfo)

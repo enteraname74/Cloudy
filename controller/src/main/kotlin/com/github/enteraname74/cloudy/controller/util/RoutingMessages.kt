@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.controller.util
 
-import java.util.UUID
+import java.util.*
 
 object RoutingMessages {
     object User {
@@ -15,7 +15,6 @@ object RoutingMessages {
         const val NO_FILE_DATA = "No file data found."
         const val USER_MAX_STORAGE_REACHED = "The user has no storage space left."
         const val FILE_TOO_HEAVY = "The file is too heavy."
-        const val FILE_SAVED = "File saved."
         const val FILE_NOT_FOUND = "Couldn't find the music file."
         const val SONGS_DELETED = "Songs have been deleted."
         const val SONG_NOT_POSSESSED_BY_USER = "This song is not possessed by the user."
@@ -41,8 +40,10 @@ object RoutingMessages {
     }
 
     object Playlist {
+        const val PLAYLIST_NOT_FOUND = "This playlist does not exist."
         const val PLAYLISTS_DELETED = "Playlists have been deleted"
         const val PLAYLIST_NOT_POSSESSED_BY_USER = "This playlist is not possessed by the user."
+        const val PLAYLIST_ALREADY_EXISTING = "This playlist already exists."
 
         fun playlistNotPossessedByUser(playlistId: UUID): String =
             "The album with id: $playlistId is not possessed by the user."

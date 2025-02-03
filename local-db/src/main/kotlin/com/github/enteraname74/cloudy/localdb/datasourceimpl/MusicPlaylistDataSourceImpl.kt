@@ -9,8 +9,8 @@ import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSource
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
 
 class MusicPlaylistDataSourceImpl : MusicPlaylistDataSource {
@@ -27,12 +27,14 @@ class MusicPlaylistDataSourceImpl : MusicPlaylistDataSource {
     }
 
     override suspend fun upsertAll(musicPlaylists: List<MusicPlaylist>) {
-        MusicPlaylistTable.batchUpsert(musicPlaylists) { musicPlaylist ->
-            this[MusicPlaylistTable.id] = musicPlaylist.id
-            this[MusicPlaylistTable.musicId] = musicPlaylist.musicId
-            this[MusicPlaylistTable.playlistId] = musicPlaylist.playlistId
-            this[MusicPlaylistTable.userId] = musicPlaylist.userId
-            this[MusicPlaylistTable.lastUpdateAt] = musicPlaylist.lastUpdateAt
+        suspendedTransaction {
+            MusicPlaylistTable.batchUpsert(musicPlaylists) { musicPlaylist ->
+                this[MusicPlaylistTable.id] = musicPlaylist.id
+                this[MusicPlaylistTable.musicId] = musicPlaylist.musicId
+                this[MusicPlaylistTable.playlistId] = musicPlaylist.playlistId
+                this[MusicPlaylistTable.userId] = musicPlaylist.userId
+                this[MusicPlaylistTable.lastUpdateAt] = musicPlaylist.lastUpdateAt
+            }
         }
     }
 
@@ -51,6 +53,14 @@ class MusicPlaylistDataSourceImpl : MusicPlaylistDataSource {
             }
         }
     }
+
+    override suspend fun getAllOfPlaylist(playlistId: UUID): List<MusicPlaylist> =
+        suspendedTransaction {
+            MusicPlaylistTable
+                .selectAll()
+                .where { MusicPlaylistTable.playlistId eq playlistId }
+                .mapNotNull { it.toMusicPlaylist() }
+        }
 
     override suspend fun getAllOfUser(
         userId: UUID,

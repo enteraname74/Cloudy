@@ -1,13 +1,18 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.model.UploadedPlaylistData
+import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
+import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.util.*
 
 class PlaylistService(
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val musicRepository: MusicRepository,
+    private val musicPlaylistRepository: MusicPlaylistRepository,
 ) {
     suspend fun getFromId(playlistId: UUID): Playlist? =
         playlistRepository.getFromId(playlistId)
@@ -30,16 +35,16 @@ class PlaylistService(
             playlistId = playlistId,
         )
 
-    suspend fun getFromName(
+    suspend fun isPlaylistPossessedByUser(
         playlistName: String,
         userId: UUID,
-    ): Playlist? =
+    ): Boolean =
         playlistRepository.getFromInformation(
             name = playlistName,
             userId = userId,
-        )
+        ) != null
 
-    suspend fun update(
+    suspend fun upsert(
         playlist: Playlist,
     ): Playlist =
         playlistRepository.upsert(playlist)
@@ -88,9 +93,75 @@ class PlaylistService(
         }
     }
 
-    suspend fun deleteAll(
-        playlistIds: List<UUID>,
-    ) =
+    suspend fun deleteFromPlaylist(
+        playlistId: UUID,
+        musicIds: List<UUID>,
+        userId: UUID,
+    ): List<MusicPlaylist> {
+        val userSongsIds: List<UUID> = musicIds.filter { musicId ->
+            musicRepository.isMusicPossessedByUser(
+                userId = userId,
+                musicId = musicId,
+            )
+        }
+
+        val linksToDelete = userSongsIds.map { musicId ->
+            MusicPlaylist(
+                musicId = musicId,
+                playlistId = playlistId,
+                userId = userId,
+            )
+        }
+
+        musicPlaylistRepository.deleteAll(
+            ids = linksToDelete.map { it.id }
+        )
+
+        return linksToDelete
+    }
+
+    suspend fun addToPlaylist(
+        playlistId: UUID,
+        musicIds: List<UUID>,
+        userId: UUID,
+    ): List<MusicPlaylist> {
+        val userSongsIds: List<UUID> = musicIds.filter { musicId ->
+            musicRepository.isMusicPossessedByUser(
+                userId = userId,
+                musicId = musicId,
+            )
+        }
+
+        musicPlaylistRepository.upsertAll(
+            musicPlaylists = userSongsIds.map { musicId ->
+                MusicPlaylist(
+                    musicId = musicId,
+                    playlistId = playlistId,
+                    userId = userId,
+                )
+            }
+        )
+
+        return musicPlaylistRepository.getAllOfPlaylist(playlistId)
+    }
+
+    suspend fun deleteAll(playlistIds: List<UUID>, ) =
         playlistRepository.deleteAll(playlistIds)
+
+    /**
+     * Given a list of playlist ids to check,
+     * returns a list of all the ids of the initial list that are not present
+     * in the db.
+     */
+    suspend fun getDeletedPlaylistsIds(
+        idsToCheck: List<UUID>,
+        userId: UUID
+    ): List<UUID> {
+        val allPlaylistOfUser: List<UUID> = playlistRepository.allOfUser(
+            userId = userId,
+        ).map { it.id }
+
+        return idsToCheck.filterNot { it in allPlaylistOfUser }
+    }
 }
 

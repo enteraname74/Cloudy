@@ -4,9 +4,7 @@ import java.util.*
 
 object UUIDUtils {
     fun fromString(string: String?): UUID? =
-        try {
+        runCatching {
             string?.let { UUID.fromString(string) }
-        } catch (_: Exception) {
-            null
-        }
+        }.getOrNull()
 }

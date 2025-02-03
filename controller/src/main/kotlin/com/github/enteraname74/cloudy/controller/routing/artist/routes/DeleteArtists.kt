@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.routing.artist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
@@ -31,10 +32,7 @@ fun Route.deleteArtists() {
             )
 
             if (!isArtistPossessedByUser) {
-                return@delete response(
-                    status = HttpStatusCode.Forbidden,
-                    message = RoutingMessages.Artist.artistNotPossessedByUser(artistId),
-                )
+                return@delete forbidden(RoutingMessages.Artist.artistNotPossessedByUser(artistId))
             }
         }
 

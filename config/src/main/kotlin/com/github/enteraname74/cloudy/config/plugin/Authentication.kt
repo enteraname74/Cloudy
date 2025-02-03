@@ -45,11 +45,14 @@ internal fun Application.configureAuthentication() {
     }
 }
 
-fun Routing.authenticatedRoutes(
+fun Route.authenticatedRoutes(
+    name: String,
     block: Route.() -> Unit
 ) {
     authenticate(AUTH_NAME) {
-        block()
+        route(name) {
+            block()
+        }
     }
 }
 

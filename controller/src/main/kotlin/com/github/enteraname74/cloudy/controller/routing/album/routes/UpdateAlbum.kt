@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.routing.album.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.album.model.ModifiedAlbum
@@ -32,10 +33,7 @@ fun Route.updateAlbum() {
             userId = userId,
         )
         if (!isAlbumPossessedByUser) {
-            return@put response(
-                status = HttpStatusCode.Forbidden,
-                message = RoutingMessages.Album.ALBUM_NOT_POSSESSED_BY_USER,
-            )
+            return@put forbidden(RoutingMessages.Album.ALBUM_NOT_POSSESSED_BY_USER)
         }
 
         val updatedAlbum: Album = matchingAlbum.fromModifiedAlbum(

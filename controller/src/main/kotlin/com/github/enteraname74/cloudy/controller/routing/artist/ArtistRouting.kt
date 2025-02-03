@@ -8,12 +8,10 @@ import com.github.enteraname74.cloudy.controller.routing.artist.routes.updateArt
 import io.ktor.server.routing.*
 
 fun Routing.artistRouting() {
-    authenticatedRoutes {
-        route("/artist") {
-            artistsOfUser()
-            updateArtist()
-            deleteArtists()
-            checkArtistIdsValidity()
-        }
+    authenticatedRoutes("/artist") {
+        artistsOfUser()
+        updateArtist()
+        deleteArtists()
+        checkArtistIdsValidity()
     }
 }

@@ -8,12 +8,10 @@ import com.github.enteraname74.cloudy.controller.routing.album.routes.updateAlbu
 import io.ktor.server.routing.*
 
 fun Routing.albumRouting() {
-    authenticatedRoutes {
-        route("/album") {
-            albumsOfUser()
-            deleteAlbums()
-            updateAlbum()
-            checkAlbumIdsValidity()
-        }
+    authenticatedRoutes("/album") {
+        albumsOfUser()
+        deleteAlbums()
+        updateAlbum()
+        checkAlbumIdsValidity()
     }
 }

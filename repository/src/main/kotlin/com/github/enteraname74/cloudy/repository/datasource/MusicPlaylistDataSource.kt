@@ -7,6 +7,7 @@ import java.util.UUID
 interface MusicPlaylistDataSource {
     suspend fun upsert(musicPlaylist: MusicPlaylist)
     suspend fun upsertAll(musicPlaylists: List<MusicPlaylist>)
+    suspend fun getAllOfPlaylist(playlistId: UUID): List<MusicPlaylist>
     suspend fun delete(musicPlaylist: MusicPlaylist)
     suspend fun deleteAll(ids: List<String>)
     suspend fun getAllOfUser(

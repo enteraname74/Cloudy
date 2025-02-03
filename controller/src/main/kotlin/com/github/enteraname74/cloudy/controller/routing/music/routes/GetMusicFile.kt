@@ -7,6 +7,7 @@ import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
+import com.github.enteraname74.cloudy.logging.logger
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -24,6 +25,7 @@ fun Route.getMusicFile() {
         ) ?: return@get badRequest(
             message = RoutingMessages.Generic.WRONG_ID
         )
+        logger.trace("Got music id: $musicId")
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
@@ -35,6 +37,9 @@ fun Route.getMusicFile() {
             message = RoutingMessages.Music.FILE_NOT_FOUND,
         )
         val contentType: ContentType = ContentType.defaultForFile(musicFile)
+
+        logger.trace("Got music file: $musicFile")
+
         call.response.header(
             HttpHeaders.ContentDisposition,
             ContentDisposition.Inline.withParameter(
