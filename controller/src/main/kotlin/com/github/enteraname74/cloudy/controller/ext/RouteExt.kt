@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.controller.util.ServerUtil
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import io.ktor.server.application.*
+import io.ktor.server.request.receive
 import io.ktor.util.pipeline.*
 import java.time.LocalDateTime
 
@@ -31,3 +32,6 @@ fun ApplicationContext.getPaginatedRequestFromQueryParam(): PaginatedRequest =
         page = getIntegerFromQueryParam(key = ServerUtil.Keys.PAGE_KEY),
         limitPerPage = getIntegerFromQueryParam(key = ServerUtil.Keys.MAX_PER_PAGE),
     )
+
+suspend inline fun <reified T: Any> ApplicationCall.safeReceive(): T? =
+    runCatching { receive<T>() }.getOrNull()

@@ -1,14 +1,18 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
+import com.github.enteraname74.cloudy.config.auth.isTokenValid
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.safeReceive
+import com.github.enteraname74.cloudy.controller.ext.wrongBody
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
+import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
+import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -17,7 +21,7 @@ fun Route.signIn() {
     val userService by inject<UserService>()
 
     post("/sign") {
-        val user: UserAuth = call.receive()
+        val user: UserSignIn = call.safeReceive() ?: return@post wrongBody()
 
         if (!user.isValid()) {
             return@post badRequest(message = RoutingMessages.User.MISSING_INFORMATION)
@@ -25,6 +29,10 @@ fun Route.signIn() {
 
         if (userService.isUsernameUsed(user.username)) {
             return@post badRequest(message = RoutingMessages.User.USERNAME_TAKEN)
+        }
+
+        if (!isTokenValid(token = user.inscriptionCode)) {
+            return@post badRequest(message = RoutingMessages.User.INVALID_INSCRIPTION_CODE)
         }
 
         val serviceResult: ServiceResult = userService.createUser(
@@ -39,11 +47,14 @@ fun Route.signIn() {
 
             is ServiceResult.Ok -> {
                 val savedUser: User = (serviceResult.data as User)
+                val tokens = buildUserTokens(user = savedUser)
                 call.respond(
-                    buildUserTokens(user = savedUser)
+                    UserAuth(
+                        user = savedUser.toConnectedUser(),
+                        tokens = tokens,
+                    )
                 )
             }
         }
-
     }
 }

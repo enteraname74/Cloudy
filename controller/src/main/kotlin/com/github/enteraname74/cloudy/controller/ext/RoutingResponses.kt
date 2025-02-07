@@ -13,6 +13,12 @@ suspend fun ApplicationContext.missingTokenInformation() =
         message = RoutingMessages.Auth.MISSING_TOKEN_INFORMATION,
     )
 
+suspend fun ApplicationContext.wrongBody() =
+    response(
+        status = HttpStatusCode.BadRequest,
+        message = RoutingMessages.Generic.WRONG_BODY_DATA,
+    )
+
 suspend fun ApplicationContext.cannotFindUser() =
     response(
         status = HttpStatusCode.BadRequest,

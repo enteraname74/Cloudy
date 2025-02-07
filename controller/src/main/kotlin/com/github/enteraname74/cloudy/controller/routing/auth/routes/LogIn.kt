@@ -1,10 +1,11 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
 
-import com.github.enteraname74.cloudy.config.auth.generateToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
+import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
+import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
 import com.github.enteraname74.cloudy.controller.util.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
@@ -19,7 +20,7 @@ fun Route.logIn() {
     val userService: UserService by inject()
 
     post("/login") {
-        val user: UserAuth = call.receive()
+        val user: UserLogin = call.receive()
 
         if (!user.isValid()) {
             return@post badRequest(message = RoutingMessages.User.MISSING_INFORMATION)
@@ -37,8 +38,12 @@ fun Route.logIn() {
 
             is ServiceResult.Ok -> {
                 val authenticatedUser = (serviceResult.data as User)
+                val tokens = buildUserTokens(user = authenticatedUser)
                 call.respond(
-                    buildUserTokens(user = authenticatedUser)
+                    UserAuth(
+                        user = authenticatedUser.toConnectedUser(),
+                        tokens = tokens,
+                    )
                 )
             }
         }

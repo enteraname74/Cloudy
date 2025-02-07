@@ -9,6 +9,10 @@ object RoutingMessages {
         const val MISSING_INFORMATION = "Missing username or password."
         const val CANNOT_CREATE_USER = "Cannot create user."
         const val CANNOT_FIND_USER = "Cannot find the user."
+        const val NOT_AN_ADMIN = "The user is not an admin."
+        const val INVALID_INSCRIPTION_CODE = "The given inscription code is invalid."
+        const val MISSING_PERMISSION_FOR_DELETION = "The user cannot delete the requested profile."
+        const val USER_DELETED = "The user was deleted."
     }
 
     object Music {
@@ -55,7 +59,7 @@ object RoutingMessages {
     }
 
     object Generic {
-
         const val WRONG_ID = "The given id is incorrect."
+        const val WRONG_BODY_DATA = "The given data is incorrect."
     }
 }

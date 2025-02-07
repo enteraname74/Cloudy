@@ -5,8 +5,11 @@ import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.localdb.table.toUser
 import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.upsert
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import java.util.UUID
 
 class UserDataSourceImpl: UserDataSource {
     override suspend fun getFromUsername(username: String): User? =
@@ -14,6 +17,14 @@ class UserDataSourceImpl: UserDataSource {
             UserTable
                 .selectAll()
                 .where { UserTable.username eq username }
+                .firstOrNull()?.toUser()
+        }
+
+    override suspend fun getFromId(userId: UUID): User? =
+        suspendedTransaction {
+            UserTable
+                .selectAll()
+                .where { UserTable.id eq userId }
                 .firstOrNull()?.toUser()
         }
 
@@ -33,6 +44,13 @@ class UserDataSourceImpl: UserDataSource {
                 .first()
                 .toUser()!!
         }
+
+    override suspend fun delete(id: UUID) {
+        suspendedTransaction {
+            UserTable
+                .deleteWhere { UserTable.id eq id }
+        }
+    }
 
     override suspend fun getAll(): List<User> =
         suspendedTransaction {

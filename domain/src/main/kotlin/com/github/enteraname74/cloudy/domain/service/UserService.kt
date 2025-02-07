@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
+import java.util.UUID
 
 class UserService(
     private val userRepository: UserRepository,
@@ -15,6 +16,9 @@ class UserService(
 
     suspend fun getUserFromUsername(username: String): User? =
         userRepository.getFromUsername(username = username)
+
+    suspend fun getUserFromId(userId: UUID): User? =
+        userRepository.getFromId(userId = userId)
 
     suspend fun createUser(
         username: String,
@@ -54,4 +58,17 @@ class UserService(
         return userRepository.getAll()
     }
 
+    suspend fun deleteUser(userId: UUID) {
+        userRepository.delete(id = userId)
+    }
+
+    suspend fun canDeleteUser(
+        requester: UUID,
+        userIdToDelete: UUID,
+    ): Boolean {
+        val userRequester: User = userRepository.getFromId(userId = requester) ?: return false
+        val userToDelete: User = userRepository.getFromId(userId = userIdToDelete) ?: return false
+
+        return (requester == userIdToDelete) || (userRequester.isAdmin && !userToDelete.isAdmin)
+    }
 }
