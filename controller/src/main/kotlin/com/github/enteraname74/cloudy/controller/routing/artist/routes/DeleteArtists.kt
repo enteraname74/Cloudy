@@ -3,9 +3,10 @@ package com.github.enteraname74.cloudy.controller.routing.artist.routes
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import io.ktor.http.*
@@ -25,6 +26,8 @@ fun Route.deleteArtists() {
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         uuids.forEach { artistId ->
             val isArtistPossessedByUser = artistService.isArtistPossessedByUser(
                 artistId = artistId,
@@ -32,7 +35,7 @@ fun Route.deleteArtists() {
             )
 
             if (!isArtistPossessedByUser) {
-                return@delete forbidden(RoutingMessages.Artist.artistNotPossessedByUser(artistId))
+                return@delete forbidden(routingMessages.artistNotPossessedByUser(artistId))
             }
         }
 
@@ -43,7 +46,7 @@ fun Route.deleteArtists() {
 
         response(
             status = HttpStatusCode.OK,
-            message = RoutingMessages.Artist.ARTISTS_DELETED,
+            message = routingMessages.ARTISTS_DELETED,
         )
     }
 }

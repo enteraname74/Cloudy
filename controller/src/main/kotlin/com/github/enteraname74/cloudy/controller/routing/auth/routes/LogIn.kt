@@ -2,11 +2,12 @@ package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
 
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
@@ -22,8 +23,10 @@ fun Route.logIn() {
     post("/login") {
         val user: UserLogin = call.receive()
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         if (!user.isValid()) {
-            return@post badRequest(message = RoutingMessages.User.MISSING_INFORMATION)
+            return@post badRequest(message = routingMessages.MISSING_USER_INFORMATION)
         }
 
         val serviceResult: ServiceResult = userService.logUser(
@@ -33,7 +36,7 @@ fun Route.logIn() {
 
         when (serviceResult) {
             is ServiceResult.Error -> {
-                badRequest(message = RoutingMessages.User.WRONG_INFORMATION)
+                badRequest(message = routingMessages.WRONG_INFORMATION)
             }
 
             is ServiceResult.Ok -> {

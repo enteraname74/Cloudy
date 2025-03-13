@@ -2,13 +2,14 @@ package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
 import com.github.enteraname74.cloudy.config.auth.isTokenValid
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.safeReceive
 import com.github.enteraname74.cloudy.controller.ext.wrongBody
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.ServiceResult
@@ -23,16 +24,18 @@ fun Route.signIn() {
     post("/sign") {
         val user: UserSignIn = call.safeReceive() ?: return@post wrongBody()
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         if (!user.isValid()) {
-            return@post badRequest(message = RoutingMessages.User.MISSING_INFORMATION)
+            return@post badRequest(message = routingMessages.MISSING_USER_INFORMATION)
         }
 
         if (userService.isUsernameUsed(user.username)) {
-            return@post badRequest(message = RoutingMessages.User.USERNAME_TAKEN)
+            return@post badRequest(message = routingMessages.USERNAME_TAKEN)
         }
 
         if (!isTokenValid(token = user.inscriptionCode)) {
-            return@post badRequest(message = RoutingMessages.User.INVALID_INSCRIPTION_CODE)
+            return@post badRequest(message = routingMessages.INVALID_INSCRIPTION_CODE)
         }
 
         val serviceResult: ServiceResult = userService.createUser(
@@ -42,7 +45,7 @@ fun Route.signIn() {
 
         when (serviceResult) {
             is ServiceResult.Error -> {
-                badRequest(message = RoutingMessages.User.CANNOT_CREATE_USER)
+                badRequest(message = routingMessages.CANNOT_CREATE_USER)
             }
 
             is ServiceResult.Ok -> {

@@ -3,11 +3,12 @@ package com.github.enteraname74.cloudy.controller.routing.album.routes
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.album.model.ModifiedAlbum
 import com.github.enteraname74.cloudy.controller.routing.album.model.fromModifiedAlbum
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.service.AlbumService
 import io.ktor.http.*
@@ -25,15 +26,17 @@ fun Route.updateAlbum() {
         val modifiedAlbum: ModifiedAlbum = call.receive()
         val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         val matchingAlbum: Album = albumService.getFromId(albumId = modifiedAlbum.id)
-            ?: return@put badRequest(RoutingMessages.Generic.WRONG_ID)
+            ?: return@put badRequest(routingMessages.WRONG_ID)
 
         val isAlbumPossessedByUser: Boolean = albumService.isAlbumPossessedByUser(
             albumId = modifiedAlbum.id,
             userId = userId,
         )
         if (!isAlbumPossessedByUser) {
-            return@put forbidden(RoutingMessages.Album.ALBUM_NOT_POSSESSED_BY_USER)
+            return@put forbidden(routingMessages.ALBUM_NOT_POSSESSED_BY_USER)
         }
 
         val updatedAlbum: Album = matchingAlbum.fromModifiedAlbum(

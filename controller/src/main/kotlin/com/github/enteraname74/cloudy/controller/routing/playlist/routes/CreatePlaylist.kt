@@ -2,9 +2,10 @@ package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.PlaylistCreation
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import io.ktor.server.application.*
@@ -26,8 +27,10 @@ fun Route.createPlaylist() {
             playlistName = playlistCreation.name,
         )
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         if (isPlaylistPossessedByUser) {
-            return@post forbidden(RoutingMessages.Playlist.PLAYLIST_ALREADY_EXISTING)
+            return@post forbidden(routingMessages.PLAYLIST_ALREADY_EXISTING)
         }
 
         val playlist: Playlist = playlistService.upsert(

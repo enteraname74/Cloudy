@@ -2,9 +2,10 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.MusicFileService
@@ -23,10 +24,12 @@ fun Route.getMusicCover() {
     val coverService by inject<CoverService>()
 
     get("/cover/{musicId}") {
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         val musicId: UUID = UUIDUtils.fromString(
             call.parameters["musicId"]
         ) ?: return@get badRequest(
-            message = RoutingMessages.Generic.WRONG_ID
+            message = routingMessages.WRONG_ID
         )
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
@@ -36,7 +39,7 @@ fun Route.getMusicCover() {
             username = username,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
-            message = RoutingMessages.Music.FILE_NOT_FOUND,
+            message = routingMessages.FILE_NOT_FOUND,
         )
 
         val musicFileCover: ByteArray = coverService.getMusicFileCover(

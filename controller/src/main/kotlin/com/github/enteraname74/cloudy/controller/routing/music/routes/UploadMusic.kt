@@ -4,9 +4,10 @@ import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
 import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
@@ -30,13 +31,16 @@ fun Route.uploadMusic() {
 
     post("/upload") {
         val multipartData: MultiPartData = call.receiveMultipart()
+
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         val contentLength = call.request.header(HttpHeaders.ContentLength)?.toLong()
-            ?: return@post badRequest(message = RoutingMessages.Music.NO_FILE_DATA)
+            ?: return@post badRequest(message = routingMessages.NO_FILE_DATA)
 
         val username: String = getUsernameFromToken() ?: return@post missingTokenInformation()
 
         if (musicFileService.isUserDirectoryFull(username)) {
-            return@post forbidden(RoutingMessages.Music.USER_MAX_STORAGE_REACHED)
+            return@post forbidden(routingMessages.USER_MAX_STORAGE_REACHED)
         }
 
         if (musicFileService.isUserDirectoryFull(
@@ -45,7 +49,7 @@ fun Route.uploadMusic() {
             )
         ) return@post response(
             status = HttpStatusCode.PayloadTooLarge,
-            message = RoutingMessages.Music.FILE_TOO_HEAVY,
+            message = routingMessages.FILE_TOO_HEAVY,
         )
 
         val user: User = userService.getUserFromUsername(

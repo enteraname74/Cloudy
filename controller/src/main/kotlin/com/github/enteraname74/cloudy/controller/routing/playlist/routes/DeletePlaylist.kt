@@ -2,9 +2,10 @@ package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
+import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import io.ktor.http.*
@@ -23,6 +24,8 @@ fun Route.deletePlaylist() {
 
         val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
+        val routingMessages: RoutingMessages = getRoutingMessages()
+
         uuids.forEach { playlistId ->
             val isPossessedByUser = playlistService.isPlaylistPossessedByUser(
                 userId = userId,
@@ -30,7 +33,7 @@ fun Route.deletePlaylist() {
             )
 
             if (!isPossessedByUser) {
-                return@delete forbidden(RoutingMessages.Playlist.playlistNotPossessedByUser(playlistId))
+                return@delete forbidden(routingMessages.playlistNotPossessedByUser(playlistId))
             }
         }
 
@@ -38,7 +41,7 @@ fun Route.deletePlaylist() {
 
         response(
             status = HttpStatusCode.OK,
-            message = RoutingMessages.Playlist.PLAYLISTS_DELETED,
+            message = routingMessages.PLAYLISTS_DELETED,
         )
     }
 }
