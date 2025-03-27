@@ -21,8 +21,9 @@ class ArtistService(
     private val albumRepository: AlbumRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
+    private val musicFilePersistenceManager: MusicFilePersistenceManager,
 ) {
-    private val musicFilePersistenceManager = MusicFilePersistenceManager()
+
 
     suspend fun getAllOfUser(
         userId: UUID,

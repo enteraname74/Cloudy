@@ -8,19 +8,13 @@ import io.ktor.http.content.*
 import java.io.File
 import java.util.*
 
-class MusicFilePersistenceManager {
+class MusicFilePersistenceManager(
+    private val coverFilePersistenceManager: CoverFilePersistenceManager,
+) {
     private val logger = CloudyLogger(this::class)
 
-    private fun getMusicIdFromFileName(fileName: String): UUID =
-        UUID.fromString(
-            fileName.replaceFirst(
-                regex = """[.][^.]+$""".toRegex(),
-                replacement = ""
-            )
-        )
-
     private fun getUserDirectory(username: String): String =
-        "$MUSIC_FOLDER/$username"
+        "${FilePersistenceUtils.APP_FOLDER}/$username/${FilePersistenceUtils.MUSIC_FOLDER}"
 
     fun getUserDirectorySize(username: String): Long {
         val userDirectory = getUserDirectory(username = username)
@@ -41,10 +35,11 @@ class MusicFilePersistenceManager {
         var fileId: UUID? = null
         var customMetadata: CustomMusicMetadata? = null
         file.forEachPart { part ->
-            when(part) {
+            when (part) {
                 is PartData.FormItem -> {
                     customMetadata = CloudyJson.decodeFromString(part.value)
                 }
+
                 is PartData.FileItem -> {
                     val fileExtension = FileUtils.getFileExtension(
                         fileName = part.originalFileName.orEmpty()
@@ -53,7 +48,7 @@ class MusicFilePersistenceManager {
                     if (
                         !FileUtils.isMusicFile(part = part) ||
                         fileExtension == null
-                        ) {
+                    ) {
                         return@forEachPart
                     }
 
@@ -72,6 +67,7 @@ class MusicFilePersistenceManager {
                     fileToSave.parentFile?.mkdirs()
                     fileToSave.writeBytes(fileBytes)
                 }
+
                 else -> {}
             }
             part.dispose()
@@ -92,7 +88,7 @@ class MusicFilePersistenceManager {
         return userDirectory
             .listFiles()
             ?.filter { it.isFile }
-            ?.firstOrNull { getMusicIdFromFileName(it.name) == musicId }
+            ?.firstOrNull { FilePersistenceUtils.getUUIDFromFileName(it.name) == musicId }
     }
 
     fun deleteFile(musicId: UUID, username: String) {
@@ -101,14 +97,15 @@ class MusicFilePersistenceManager {
             username = username,
         ) ?: return
 
+        // We delete its cover if any
+        coverFilePersistenceManager.deleteCover(
+            id = musicId,
+            username = username,
+        )
+
         val hasBeenDeleted = fileToDelete.delete()
         if (!hasBeenDeleted) {
             logger.warn("Failed to delete music file with id $musicId.")
         }
-    }
-
-
-    companion object {
-        private const val MUSIC_FOLDER = "app/songs"
     }
 }

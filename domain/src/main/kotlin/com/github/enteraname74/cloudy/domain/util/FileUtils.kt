@@ -34,4 +34,26 @@ object FileUtils {
             )
         return authorizedMimeTypes.contains(type)
     }
+
+    fun isImageFile(part: PartData.FileItem): Boolean {
+        val type: String = part.contentType?.toString() ?: return false
+        val authorizedMimeTypes =
+            listOf(
+                "image/jpeg",
+                "image/png",
+                "image/gif",
+                "image/bmp",
+                "image/webp",
+                "image/heif",
+                "image/heic",
+                "image/tiff",
+                "image/svg+xml",
+                "image/x-icon",
+                "image/vnd.microsoft.icon",
+                "image/avif",
+                "image/jxr" // JPEG XR
+            )
+
+        return authorizedMimeTypes.contains(type)
+    }
 }

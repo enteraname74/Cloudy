@@ -42,10 +42,18 @@ fun Route.getMusicCover() {
             message = routingMessages.FILE_NOT_FOUND,
         )
 
-        val musicFileCover: ByteArray = coverService.getMusicFileCover(
-            file = musicFile
-        ) ?: byteArrayOf()
+        /*
+        We first try to retrieve a custom cover for the file, else, we fetch it from its file.
+         */
+        val foundCover: ByteArray? = coverService.getById(
+            id = musicId,
+            username = username,
+        )
 
-        call.respondBytes(musicFileCover)
+        val musicFileCover: ByteArray? = foundCover ?: coverService.getMusicFileCover(
+            file = musicFile
+        )
+
+        call.respondBytes(musicFileCover ?: byteArrayOf())
     }
 }
