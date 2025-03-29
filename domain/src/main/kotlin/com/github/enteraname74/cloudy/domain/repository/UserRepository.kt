@@ -9,4 +9,9 @@ interface UserRepository {
     suspend fun upsert(user: User): User
     suspend fun delete(id: UUID)
     suspend fun getAll(): List<User>
+
+    /**
+     * Retrieves the size of the user directory, in GB
+     */
+    suspend fun getUserDirectorySize(username: String): Long
 }

@@ -9,7 +9,9 @@ import com.github.enteraname74.cloudy.controller.routing.artist.model.ModifiedAr
 import com.github.enteraname74.cloudy.controller.routing.artist.model.fromModifiedArtist
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.ArtistService
+import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -20,12 +22,16 @@ import java.util.*
 fun Route.updateArtist() {
 
     val artistService by inject<ArtistService>()
+    val userService by inject<UserService>()
 
     put {
         val modifiedArtist: ModifiedArtist = call.receive()
         val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
+        val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
+            message = routingMessages.CANNOT_FIND_USER,
+        )
 
         val matchingArtist: Artist = artistService.getFromId(artistId = modifiedArtist.id)
             ?: return@put badRequest(routingMessages.WRONG_ID)
@@ -44,7 +50,7 @@ fun Route.updateArtist() {
 
         val artist: Artist = artistService.update(
             modifiedArtist = updatedArtist,
-            userId = userId,
+            user = user,
         )
 
         call.respond(artist)

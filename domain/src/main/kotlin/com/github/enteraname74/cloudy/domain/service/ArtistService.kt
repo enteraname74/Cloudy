@@ -1,10 +1,10 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
@@ -21,10 +21,7 @@ class ArtistService(
     private val albumRepository: AlbumRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
-    private val musicFilePersistenceManager: MusicFilePersistenceManager,
 ) {
-
-
     suspend fun getAllOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,
@@ -36,7 +33,7 @@ class ArtistService(
 
     suspend fun update(
         modifiedArtist: Artist,
-        userId: UUID,
+        user: User,
     ): Artist {
         // We fetch the songs and albums of the artist
         val songsOfArtist: List<Music> = musicRepository.allFromArtist(artistId = modifiedArtist.id)
@@ -49,7 +46,7 @@ class ArtistService(
          */
         val alreadyExistingArtist: Artist? = artistRepository.getFromInformation(
             name = modifiedArtist.name,
-            userId = userId,
+            userId = user.id,
         )
 
         val savedArtist: Artist = if (alreadyExistingArtist != null && alreadyExistingArtist.id != modifiedArtist.id) {
@@ -61,7 +58,7 @@ class ArtistService(
                     MusicArtist(
                         musicId = it.id,
                         artistId = alreadyExistingArtist.id,
-                        userId = userId,
+                        userId = user.id,
                     )
                 }
             )
@@ -78,7 +75,10 @@ class ArtistService(
         val updatedSongs = songsOfArtist.map {
             it.copy(artist = getArtistNameForMusicUseCase(it.id))
         }
-        musicRepository.upsertAll(updatedSongs)
+        musicRepository.upsertAll(
+            musicIds = updatedSongs,
+            username = user.username,
+        )
 
         // We update/redirect albums of the artist with the new information
         val updatedAlbums = albumsOfArtist.map {
@@ -108,8 +108,7 @@ class ArtistService(
         artistIds: List<UUID>,
         username: String,
     ) {
-        // We first delete all the music files of the artist
-        val songsOfArtist: List<Music> = buildList {
+        val musicsToDelete: List<Music> = buildList {
             artistIds.forEach { artistId ->
                 addAll(
                     musicRepository.allFromArtist(
@@ -120,19 +119,15 @@ class ArtistService(
         }.distinct()
 
         val relatedArtists: List<Artist> = buildList {
-            songsOfArtist.forEach {
+            musicsToDelete.forEach {
                 addAll(artistRepository.getArtistsOfMusic(it.id))
             }
         }.distinct()
 
-        // We delete the songs
-        songsOfArtist.forEach {
-            musicFilePersistenceManager.deleteFile(
-                musicId = it.id,
-                username = username,
-            )
-        }
-        musicRepository.deleteAll(ids = songsOfArtist.map { it.id })
+        musicRepository.deleteAll(
+            ids = musicsToDelete.map { it.id },
+            username = username,
+        )
         artistRepository.deleteAll(artistIds = artistIds)
 
         // We check if we can delete the related artists (other artists of songs).

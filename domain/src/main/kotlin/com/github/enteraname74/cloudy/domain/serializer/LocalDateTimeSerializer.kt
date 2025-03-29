@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.serializer
 
+import io.ktor.http.content.MultiPartData
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor

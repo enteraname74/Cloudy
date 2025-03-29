@@ -7,7 +7,6 @@ import org.koin.dsl.module
 
 internal val serviceModule = module {
     singleOf(::MusicService)
-    singleOf(::MusicFileService)
     singleOf(::ArtistService)
     singleOf(::AlbumService)
     singleOf(::PlaylistService)

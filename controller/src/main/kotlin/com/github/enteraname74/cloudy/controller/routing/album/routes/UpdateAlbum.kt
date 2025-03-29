@@ -10,7 +10,9 @@ import com.github.enteraname74.cloudy.controller.routing.album.model.ModifiedAlb
 import com.github.enteraname74.cloudy.controller.routing.album.model.fromModifiedAlbum
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.AlbumService
+import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -21,12 +23,16 @@ import java.util.*
 
 fun Route.updateAlbum() {
     val albumService by inject<AlbumService>()
+    val userService by inject<UserService>()
 
     put {
         val modifiedAlbum: ModifiedAlbum = call.receive()
         val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
+        val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
+            message = routingMessages.CANNOT_FIND_USER,
+        )
 
         val matchingAlbum: Album = albumService.getFromId(albumId = modifiedAlbum.id)
             ?: return@put badRequest(routingMessages.WRONG_ID)
@@ -45,7 +51,7 @@ fun Route.updateAlbum() {
 
         val savedAlbum: Album = albumService.update(
             modifiedAlbum = updatedAlbum,
-            userId = userId,
+            user = user,
         )
 
         call.respond(savedAlbum)

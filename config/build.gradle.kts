@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":repository"))
     implementation(project(":local-db"))
     implementation(project(":metadata"))
+    implementation(project(":file-access"))
 
     // DI
     implementation(libs.bundles.koin)

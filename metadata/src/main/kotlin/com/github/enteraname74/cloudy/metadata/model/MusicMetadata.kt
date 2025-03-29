@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.metadata.model
 
-internal data class MusicMetadata(
+data class MusicMetadata(
     val name: String,
     val artist: String,
     val album: String,

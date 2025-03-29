@@ -7,7 +7,7 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
-import com.github.enteraname74.cloudy.domain.service.MusicFileService
+import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -17,7 +17,7 @@ import java.io.File
 import java.util.*
 
 fun Route.getMusicFile() {
-    val musicFileService by inject<MusicFileService>()
+    val musicService by inject<MusicService>()
 
     get("/{musicId}") {
         val routingMessages: RoutingMessages = getRoutingMessages()
@@ -30,7 +30,7 @@ fun Route.getMusicFile() {
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
-        val musicFile: File = musicFileService.getMusicFile(
+        val musicFile: File = musicService.getMusicFile(
             musicId = musicId,
             username = username,
         ) ?: return@get response(

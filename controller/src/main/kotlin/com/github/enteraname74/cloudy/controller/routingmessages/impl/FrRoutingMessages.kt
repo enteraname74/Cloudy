@@ -20,7 +20,10 @@ object FrRoutingMessages: RoutingMessages {
     override val FILE_NOT_FOUND: String = "Impossible de trouver le fichier de musique."
 
     override val SONGS_DELETED: String = "Les musiques ont été supprimées."
+    override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Le fichier fourni n'est pas une musique."
     override val SONG_NOT_POSSESSED_BY_USER: String = "Cette musique n'est pas possédée par l'utilisateur."
+    override val CANNOT_SAVE_SONG: String = "Impossible de sauvegarder la musique."
+    override val CANNOT_UPDATE_SONG: String = "Impossible de mettre à jour la musique."
 
     override fun songNotPossessedByUser(musicId: UUID): String =
         "La musique ayant l'identifiant : $musicId, n'est pas possédée par l'utilisateur."

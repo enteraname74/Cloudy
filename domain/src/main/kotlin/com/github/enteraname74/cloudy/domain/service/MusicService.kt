@@ -1,29 +1,28 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.Music
-import com.github.enteraname74.cloudy.domain.model.MusicArtist
-import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.ext.joinArtists
+import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
+import com.github.enteraname74.cloudy.domain.model.*
+import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
+import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import java.io.File
 import java.util.*
 
 class MusicService(
     private val musicRepository: MusicRepository,
+    private val albumRepository: AlbumRepository,
     private val artistRepository: ArtistRepository,
     private val musicArtistRepository: MusicArtistRepository,
-    private val musicFilePersistenceManager: MusicFilePersistenceManager,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
@@ -34,45 +33,50 @@ class MusicService(
     suspend fun getFromId(musicId: UUID): Music? =
         musicRepository.getFromId(musicId = musicId)
 
-    suspend fun saveAndCreateMissingAlbumAndArtist(
-        user: User,
-        musicPath: String,
-        musicInformationResult: MusicInformationResult.FileMetadata,
-    ): UploadedMusicData {
+    suspend fun getMusicFile(musicId: UUID, username: String): File? =
+        musicRepository.getMusicFile(
+            musicId = musicId,
+            username = username,
+        )
 
-        val artists: List<Artist> = musicInformationResult.artists.map { artistName ->
+    private suspend fun saveMusicAndCreateMissingAlbumAndArtist(
+        userId: UUID,
+        metadata: MusicInformationRetriever.Metadata,
+    ): UploadedMusicData {
+        val artists: List<Artist> = metadata.artists.map { artistName ->
             getOrCreateArtistUseCase(
                 artistName = artistName.trim(),
-                userId = user.id,
-                coverPath = musicInformationResult.coverPath,
+                userId = userId,
+                coverPath = metadata.coverPath,
             )
         }
 
         val firstArtist = artists.first()
 
         val album: Album = getOrCreateAlbumUseCase(
-            albumName = musicInformationResult.album,
-            userId = user.id,
+            albumName = metadata.album,
+            userId = userId,
             artistId = firstArtist.id,
             artistName = firstArtist.name,
-            coverPath = musicInformationResult.coverPath,
+            coverPath = metadata.coverPath,
         )
 
-        val music: Music = musicInformationToMusic(
-            userId = user.id,
+        // TODO: Improve music path definition
+        val music: Music = musicMetadataToMusic(
+            userId = userId,
             albumId = album.id,
-            musicPath = musicPath,
-            musicInformationResult = musicInformationResult,
+            musicPath = "music/${metadata.musicId}",
+            metadata = metadata,
         )
 
-        musicRepository.upsert(music)
+        musicRepository.saveMusicFileToDbAfterUploadProcess(music)
 
         artists.forEach { artist ->
             musicArtistRepository.upsert(
                 musicArtist = MusicArtist(
                     musicId = music.id,
                     artistId = artist.id,
-                    userId = user.id,
+                    userId = userId,
                 )
             )
         }
@@ -85,16 +89,61 @@ class MusicService(
         )
     }
 
+    suspend fun save(
+        user: User,
+        fileData: FileData,
+        customMusicMetadata: CustomMusicMetadata?,
+        shouldSearchForMetadata: Boolean,
+    ): CloudyResult<UploadedMusicData> {
+
+        val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
+            user = user,
+            fileData = fileData,
+            customMusicMetadata = customMusicMetadata,
+            shouldSearchForMetadata = shouldSearchForMetadata,
+        )
+
+        when (uploadProcess) {
+            UploadProcessState.Error -> {
+                return CloudyResult.Error()
+            }
+
+            is UploadProcessState.AlreadyExisting -> {
+                val album: Album = albumRepository.getFromId(
+                    albumId = uploadProcess.updatedMusic.albumId ?: return CloudyResult.Error()
+                ) ?: return CloudyResult.Error()
+
+                return CloudyResult.Success(
+                    UploadedMusicData(
+                        music = uploadProcess.updatedMusic,
+                        album = album,
+                        artists = artistRepository.getArtistsOfMusic(uploadProcess.updatedMusic.id),
+                    )
+                )
+            }
+
+            is UploadProcessState.ContinueProcess -> {
+                return CloudyResult.Success(
+                    saveMusicAndCreateMissingAlbumAndArtist(
+                        userId = user.id,
+                        metadata = uploadProcess.metadata
+                    )
+                )
+            }
+        }
+    }
+
     suspend fun update(
         modifiedMusic: Music,
+        newCover: FileData?,
         newArtistsNames: List<String>,
-        userId: UUID,
-    ): Music {
+        user: User,
+    ): CloudyResult<Music> {
         // We get or create the artist of the modified music
         val newArtists: List<Artist> = newArtistsNames.map { name ->
             getOrCreateArtistUseCase(
                 artistName = name,
-                userId = userId,
+                userId = user.id,
                 coverPath = modifiedMusic.coverPath,
             )
         }
@@ -108,7 +157,7 @@ class MusicService(
         // We get or create the album of the modified music
         val album: Album = getOrCreateAlbumUseCase(
             albumName = modifiedMusic.album,
-            userId = userId,
+            userId = user.id,
             artistId = firstArtist.id,
             artistName = firstArtist.name,
             coverPath = modifiedMusic.coverPath,
@@ -118,7 +167,7 @@ class MusicService(
             updateArtistLinkOfMusic(
                 previousArtists = previousArtists,
                 newArtists = newArtists,
-                userId = userId,
+                userId = user.id,
                 newArtistsNames = newArtistsNames,
                 modifiedMusic = modifiedMusic,
             )
@@ -129,7 +178,11 @@ class MusicService(
             albumId = album.id,
             artist = getArtistNameForMusicUseCase(modifiedMusic.id),
         )
-        val savedMusic = musicRepository.upsert(musicWithCorrectIds)
+        val savedMusic = musicRepository.upsert(
+            music = musicWithCorrectIds,
+            username = user.username,
+            cover = newCover,
+        )
 
         // We check if the legacy album and artist can be deleted
         modifiedMusic.albumId?.let {
@@ -186,7 +239,10 @@ class MusicService(
             }
         }.distinct()
 
-        musicRepository.deleteAll(musicIds)
+        musicRepository.deleteAll(
+            ids = musicIds,
+            username = username,
+        )
 
         relatedArtists.forEach {
             deleteArtistIfEmptyUseCase(artistId = it.id)
@@ -198,13 +254,6 @@ class MusicService(
             .forEach { albumId ->
                 deleteAlbumIfEmptyUseCase(albumId = albumId)
             }
-
-        musicIds.forEach { musicId ->
-            musicFilePersistenceManager.deleteFile(
-                musicId = musicId,
-                username = username,
-            )
-        }
     }
 
     suspend fun getAllOfUser(
@@ -243,20 +292,20 @@ class MusicService(
     }
 
 
-    private fun musicInformationToMusic(
+    private fun musicMetadataToMusic(
         userId: UUID,
         albumId: UUID,
         musicPath: String,
-        musicInformationResult: MusicInformationResult.FileMetadata,
+        metadata: MusicInformationRetriever.Metadata,
     ): Music = Music(
-        id = musicInformationResult.musicId,
+        id = metadata.musicId,
         userId = userId,
-        name = musicInformationResult.name,
-        album = musicInformationResult.album,
-        artist = musicInformationResult.artists.joinToString(", "),
-        duration = musicInformationResult.duration,
-        coverPath = musicInformationResult.coverPath,
-        fingerprint = musicInformationResult.fingerprint,
+        name = metadata.name,
+        album = metadata.album,
+        artist = metadata.artists.joinArtists(),
+        duration = metadata.duration,
+        coverPath = metadata.coverPath,
+        fingerprint = metadata.fingerprint,
         albumId = albumId,
         path = musicPath,
     )

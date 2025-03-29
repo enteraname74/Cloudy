@@ -12,7 +12,7 @@ import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedU
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
-import com.github.enteraname74.cloudy.domain.util.ServiceResult
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -38,18 +38,18 @@ fun Route.signIn() {
             return@post badRequest(message = routingMessages.INVALID_INSCRIPTION_CODE)
         }
 
-        val serviceResult: ServiceResult = userService.createUser(
+        val cloudyResult: CloudyResult<User> = userService.createUser(
             username = user.username,
             password = user.password,
         )
 
-        when (serviceResult) {
-            is ServiceResult.Error -> {
+        when (cloudyResult) {
+            is CloudyResult.Error -> {
                 badRequest(message = routingMessages.CANNOT_CREATE_USER)
             }
 
-            is ServiceResult.Ok -> {
-                val savedUser: User = (serviceResult.data as User)
+            is CloudyResult.Success -> {
+                val savedUser: User = cloudyResult.data
                 val tokens = buildUserTokens(user = savedUser)
                 call.respond(
                     UserAuth(

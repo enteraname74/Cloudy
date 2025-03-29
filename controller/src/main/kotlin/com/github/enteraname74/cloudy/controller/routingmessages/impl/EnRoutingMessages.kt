@@ -20,7 +20,10 @@ object EnRoutingMessages: RoutingMessages {
     override val FILE_NOT_FOUND: String = "Couldn't find the music file."
 
     override val SONGS_DELETED: String = "Songs have been deleted."
+    override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Given file is not a music file."
     override val SONG_NOT_POSSESSED_BY_USER: String = "This song is not possessed by the user."
+    override val CANNOT_SAVE_SONG: String = "Cannot save the given song."
+    override val CANNOT_UPDATE_SONG: String = "Cannot update the song."
 
     override fun songNotPossessedByUser(musicId: UUID): String =
         "The song with id: $musicId is not possessed by the user."

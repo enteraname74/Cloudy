@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.metadata.musicinformation
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.metadata.acoustid.AcoustidApiClient
@@ -23,15 +22,15 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
         musicId: UUID,
         customMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean,
-    ): MusicInformationResult {
+    ): MusicInformationRetriever.Metadata {
         val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
 
         val fingerprintData: FingerprintData? = fingerprintRetriever
             .getFingerprintFromMusic(musicPath = musicFile.path)
 
         // TODO: Handle duration missing for OPUS format (JaudioTagger crashing)
-        if (!shouldSearchForMetadata || fingerprintData == null) {
-            return MusicInformationResult.FileMetadata(
+        return if (!shouldSearchForMetadata || fingerprintData == null) {
+            MusicInformationRetriever.Metadata(
                 name = customMetadata?.name ?: fileMetadata.name,
                 artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: listOf(fileMetadata.artist),
                 album = customMetadata?.album ?: fileMetadata.album,
@@ -52,7 +51,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 musicArtist = finalMetadata.artist,
             )
 
-            return MusicInformationResult.FileMetadata(
+            MusicInformationRetriever.Metadata(
                 name = finalMetadata.name,
                 artists = listOf(finalMetadata.artist),
                 album = finalMetadata.album,

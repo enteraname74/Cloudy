@@ -13,6 +13,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
+import kotlin.collections.mapNotNull
 
 class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
@@ -79,13 +80,6 @@ class MusicDataSourceImpl : MusicDataSource {
                 .mapNotNull { it.toMusic() }
         }
 
-    override suspend fun deleteById(musicId: UUID): Boolean =
-        suspendedTransaction {
-            MusicTable.deleteWhere {
-                id eq musicId
-            } > 0
-        }
-
     override suspend fun deleteAll(ids: List<UUID>) {
         suspendedTransaction {
             MusicTable.deleteWhere {
@@ -117,12 +111,13 @@ class MusicDataSourceImpl : MusicDataSource {
                 .count() > 0
         }
 
-    override suspend fun doesMusicExists(fingerprint: String, userId: UUID): Boolean =
+    override suspend fun getFromFingerprint(fingerprint: String, userId: UUID): Music? =
         suspendedTransaction {
             MusicTable
                 .selectAll()
                 .where { (MusicTable.fingerprint eq fingerprint) and (MusicTable.userId eq userId) }
-                .count() > 0
+                .firstOrNull()
+                ?.toMusic()
         }
 
     override suspend fun allFromAlbum(albumId: UUID): List<Music> =

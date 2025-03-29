@@ -8,19 +8,17 @@ import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.CoverService
-import com.github.enteraname74.cloudy.domain.service.MusicFileService
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
-import io.ktor.server.response.respondBytes
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
+import com.github.enteraname74.cloudy.domain.service.MusicService
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import java.io.File
-import java.util.UUID
-import kotlin.getValue
+import java.util.*
 
 fun Route.getMusicCover() {
-    val musicFileService by inject<MusicFileService>()
+    val musicService by inject<MusicService>()
     val coverService by inject<CoverService>()
 
     get("/cover/{musicId}") {
@@ -34,7 +32,7 @@ fun Route.getMusicCover() {
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
-        val musicFile: File = musicFileService.getMusicFile(
+        val musicFile: File = musicService.getMusicFile(
             musicId = musicId,
             username = username,
         ) ?: return@get response(

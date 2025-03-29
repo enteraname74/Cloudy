@@ -2,10 +2,11 @@ package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
+import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
-import com.github.enteraname74.cloudy.domain.util.ServiceResult
-import java.util.UUID
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import java.util.*
 
 class UserService(
     private val userRepository: UserRepository,
@@ -24,10 +25,10 @@ class UserService(
         username: String,
         password: String,
         isAdmin: Boolean = false,
-    ): ServiceResult {
+    ): CloudyResult<User> {
         val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
             password = password,
-        ) ?: return ServiceResult.Error()
+        ) ?: return CloudyResult.Error()
 
         val user = User(
             username = username,
@@ -37,20 +38,20 @@ class UserService(
 
         val savedUser: User = userRepository.upsert(user = user)
 
-        return ServiceResult.Ok(data = savedUser)
+        return CloudyResult.Success(data = savedUser)
     }
 
-    suspend fun logUser(username: String, password: String): ServiceResult {
-        val user: User = userRepository.getFromUsername(username = username) ?: return ServiceResult.Error()
+    suspend fun logUser(username: String, password: String): CloudyResult<User> {
+        val user: User = userRepository.getFromUsername(username = username) ?: return CloudyResult.Error()
         val isPasswordMatching = hashedPasswordManager.isMatching(
             password = password,
             hashedPassword = user.hashedPassword,
         )
 
         return if (isPasswordMatching) {
-            ServiceResult.Ok(data = user)
+            CloudyResult.Success(data = user)
         } else {
-            ServiceResult.Error()
+            CloudyResult.Error()
         }
     }
 
@@ -62,6 +63,16 @@ class UserService(
         userRepository.delete(id = userId)
     }
 
+    suspend fun isUserDirectoryFull(
+        username: String,
+        addedSize: Long = 0L,
+    ): Boolean {
+        val userDirectorySize = userRepository.getUserDirectorySize(username)
+        val gbSize = (userDirectorySize + addedSize).toGb()
+
+        return gbSize >= MAX_USER_DIRECTORY_SIZE_IN_GB
+    }
+
     suspend fun canDeleteUser(
         requester: UUID,
         userIdToDelete: UUID,
@@ -70,5 +81,9 @@ class UserService(
         val userToDelete: User = userRepository.getFromId(userId = userIdToDelete) ?: return false
 
         return (requester == userIdToDelete) || (userRequester.isAdmin && !userToDelete.isAdmin)
+    }
+
+    companion object {
+        private val MAX_USER_DIRECTORY_SIZE_IN_GB = System.getenv("TOTAL_SPACE_PER_FOLDER")?.toIntOrNull() ?: 10
     }
 }

@@ -1,10 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicFilePersistenceManager
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.Music
-import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.*
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
@@ -13,14 +9,13 @@ import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyU
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.UUID
+import java.util.*
 
 class AlbumService(
     private val albumRepository: AlbumRepository,
     private val musicRepository: MusicRepository,
     private val artistRepository: ArtistRepository,
     private val musicArtistRepository: MusicArtistRepository,
-    private val musicFilePersistenceManager: MusicFilePersistenceManager,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
@@ -53,7 +48,7 @@ class AlbumService(
         username: String,
     ) {
         val albumsToDelete: List<Album> = albumRepository.getAll(albumIds)
-        val relatedMusics: List<Music> = buildList {
+        val musicsToDelete: List<Music> = buildList {
             albumsToDelete.forEach {
                 addAll(
                     musicRepository.allFromAlbum(
@@ -64,7 +59,7 @@ class AlbumService(
         }
 
         val relatedArtists: List<Artist> = buildList {
-            relatedMusics.forEach {
+            musicsToDelete.forEach {
                 addAll(
                     artistRepository.getArtistsOfMusic(
                         musicId = it.id
@@ -73,23 +68,25 @@ class AlbumService(
             }
         }.distinct()
 
+        /*
+        Even if the deletion of albums delete the musics,
+         we need to ensure that the files will be also deleted.
+         */
+        musicRepository.deleteAll(
+            ids = musicsToDelete.map { it.id },
+            username = username,
+        )
+
         albumRepository.deleteAll(albumIds)
 
         relatedArtists.forEach {
             deleteArtistIfEmptyUseCase(artistId = it.id)
         }
-
-        relatedMusics.forEach { music ->
-            musicFilePersistenceManager.deleteFile(
-                musicId = music.id,
-                username = username,
-            )
-        }
     }
 
     suspend fun update(
         modifiedAlbum: Album,
-        userId: UUID,
+        user: User,
     ): Album {
         // We fetch the songs of the album to update and its artist
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
@@ -100,7 +97,7 @@ class AlbumService(
          */
         val existingArtist: Artist = getOrCreateArtistUseCase(
             artistName = modifiedAlbum.artistName,
-            userId = userId,
+            userId = user.id,
             coverPath = modifiedAlbum.coverPath,
         )
 
@@ -114,7 +111,7 @@ class AlbumService(
                     MusicArtist(
                         musicId = it.id,
                         artistId = artist.id,
-                        userId = userId,
+                        userId = user.id,
                     ).id
                 }
             )
@@ -124,7 +121,7 @@ class AlbumService(
                 MusicArtist(
                     musicId = it.id,
                     artistId = existingArtist.id,
-                    userId = userId,
+                    userId = user.id,
                 )
             }
         )
@@ -137,7 +134,7 @@ class AlbumService(
         val albumInfoToUse: Album? = albumRepository.getFromInformation(
             albumName = modifiedAlbum.name,
             albumArtist = modifiedAlbum.artistName,
-            userId = userId,
+            userId = user.id,
         )
 
         val updatedSongs = songsOfAlbum.map {
@@ -147,7 +144,10 @@ class AlbumService(
                 artist = getArtistNameForMusicUseCase(it.id),
             )
         }
-        musicRepository.upsertAll(updatedSongs)
+        musicRepository.upsertAll(
+            musicIds = updatedSongs,
+            username = user.username,
+        )
 
         val savedAlbum: Album = if (albumInfoToUse != null && albumInfoToUse.id != modifiedAlbum.id) {
             albumRepository.deleteById(albumId = modifiedAlbum.id)

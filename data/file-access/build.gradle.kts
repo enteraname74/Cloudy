@@ -3,9 +3,12 @@ plugins {
 }
 
 group = "com.github.enteraname74.cloudy"
+description = "Handles file access and operation"
 version = "0.0.1"
 
 dependencies {
+    implementation(project(":logging"))
+    implementation(project(":domain"))
     testImplementation(kotlin("test"))
 }
 

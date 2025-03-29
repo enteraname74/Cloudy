@@ -21,7 +21,10 @@ interface RoutingMessages {
     val FILE_NOT_FOUND: String
 
     val SONGS_DELETED: String
+    val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String
     val SONG_NOT_POSSESSED_BY_USER: String
+    val CANNOT_SAVE_SONG: String
+    val CANNOT_UPDATE_SONG: String
 
     fun songNotPossessedByUser(musicId: UUID): String
 

@@ -1,20 +1,16 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
-import com.github.enteraname74.cloudy.controller.ext.badRequest
-import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
-import com.github.enteraname74.cloudy.controller.ext.forbidden
-import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
-import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.ext.*
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
+import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
+import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
 import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.service.MusicFileService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
-import com.github.enteraname74.cloudy.domain.util.ServiceResult
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.application.*
@@ -24,8 +20,6 @@ import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 
 fun Route.uploadMusic() {
-
-    val musicFileService by inject<MusicFileService>()
     val musicService by inject<MusicService>()
     val userService by inject<UserService>()
 
@@ -39,11 +33,11 @@ fun Route.uploadMusic() {
 
         val username: String = getUsernameFromToken() ?: return@post missingTokenInformation()
 
-        if (musicFileService.isUserDirectoryFull(username)) {
+        if (userService.isUserDirectoryFull(username)) {
             return@post forbidden(routingMessages.USER_MAX_STORAGE_REACHED)
         }
 
-        if (musicFileService.isUserDirectoryFull(
+        if (userService.isUserDirectoryFull(
                 username = username,
                 addedSize = contentLength,
             )
@@ -57,35 +51,28 @@ fun Route.uploadMusic() {
         ) ?: return@post cannotFindUser()
 
         val shouldSearchForMetadata: Boolean = call.request.queryParameters["searchMetadata"]?.toBoolean() == true
-
-        val serviceResult: ServiceResult = musicFileService.save(
-            user = user,
-            file = multipartData,
-            shouldSearchForMetadata = shouldSearchForMetadata,
+        val musicFile: CloudyResult<Pair<FileData, CustomMusicMetadata?>> = MultiPartDataUtils.processMusicUploadRequest(
+            musicFile = multipartData,
         )
 
-        when (serviceResult) {
-            is ServiceResult.Error -> {
-                badRequest(message = serviceResult.message.orEmpty())
+        when (musicFile) {
+            is CloudyResult.Error -> {
+                return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
+            is CloudyResult.Success -> {
+                val uploadedResult: CloudyResult<UploadedMusicData> = musicService.save(
+                    user = user,
+                    fileData = musicFile.data.first,
+                    customMusicMetadata = musicFile.data.second,
+                    shouldSearchForMetadata = shouldSearchForMetadata,
+                )
 
-            is ServiceResult.Ok -> {
-                when (serviceResult.data) {
-                    is MusicInformationResult.FileMetadata -> {
-                        val musicInformationResult = serviceResult.data as MusicInformationResult.FileMetadata
-
-                        val uploadedData: UploadedMusicData = musicService.saveAndCreateMissingAlbumAndArtist(
-                            user = user,
-                            musicInformationResult = musicInformationResult,
-                                musicPath = "music/${musicInformationResult.musicId}",
-                        )
-                        call.respond(uploadedData)
+                when(uploadedResult) {
+                    is CloudyResult.Error -> {
+                        return@post badRequest(routingMessages.CANNOT_SAVE_SONG)
                     }
-
-                    else -> {
-                        serviceResult.data?.let {
-                            call.respond(it.toString())
-                        }
+                    is CloudyResult.Success -> {
+                        call.respond(uploadedResult.data)
                     }
                 }
             }
