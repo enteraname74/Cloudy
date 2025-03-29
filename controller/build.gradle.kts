@@ -7,10 +7,6 @@ plugins {
 group = "com.github.enteraname74.cloudy"
 version = "0.0.1"
 
-repositories {
-    mavenCentral()
-}
-
 ktor {
     docker {
         localImageName.set("cloudy-docker-image")

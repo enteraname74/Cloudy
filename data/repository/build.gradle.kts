@@ -3,11 +3,8 @@ plugins {
 }
 
 group = "com.github.enteraname74.cloudy"
+description = "Handles data access for Cloudy"
 version = "0.0.1"
-
-repositories {
-    mavenCentral()
-}
 
 dependencies {
     implementation(project(":domain"))

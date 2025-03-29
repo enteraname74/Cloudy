@@ -1,17 +1,17 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "com.github.enteraname74.cloudy"
 version = "0.0.1"
 
 dependencies {
-    implementation(libs.ktor.serialization.kotlinx.json)
     testImplementation(kotlin("test"))
-    implementation(project(":logging"))
 }
 
 tasks.test {
     useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(17)
 }
