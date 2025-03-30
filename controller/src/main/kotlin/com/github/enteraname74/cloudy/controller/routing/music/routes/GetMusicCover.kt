@@ -48,10 +48,10 @@ fun Route.getMusicCover() {
             username = username,
         )
 
-        val musicFileCover: ByteArray? = foundCover ?: coverService.getMusicFileCover(
+        val finalCover: ByteArray = foundCover ?: coverService.getMusicFileCover(
             file = musicFile
-        )
+        ) ?: return@get badRequest(routingMessages.IMAGE_NOT_FOUND)
 
-        call.respondBytes(musicFileCover ?: byteArrayOf())
+        call.respondBytes(finalCover)
     }
 }

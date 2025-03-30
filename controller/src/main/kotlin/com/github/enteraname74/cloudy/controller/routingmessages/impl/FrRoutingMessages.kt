@@ -18,6 +18,7 @@ object FrRoutingMessages: RoutingMessages {
     override val USER_MAX_STORAGE_REACHED: String = "L'utilisateur a atteint se limite de stockage disponible."
     override val FILE_TOO_HEAVY: String = "Le fichier est trop gros."
     override val FILE_NOT_FOUND: String = "Impossible de trouver le fichier de musique."
+    override val IMAGE_NOT_FOUND: String = "Impossible de trouver l'image demandée."
 
     override val SONGS_DELETED: String = "Les musiques ont été supprimées."
     override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Le fichier fourni n'est pas une musique."

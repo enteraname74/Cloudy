@@ -19,6 +19,7 @@ interface RoutingMessages {
     val USER_MAX_STORAGE_REACHED: String
     val FILE_TOO_HEAVY: String
     val FILE_NOT_FOUND: String
+    val IMAGE_NOT_FOUND: String
 
     val SONGS_DELETED: String
     val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String

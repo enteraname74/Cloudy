@@ -17,7 +17,8 @@ object EnRoutingMessages: RoutingMessages {
     override val NO_FILE_DATA: String = "No file data found."
     override val USER_MAX_STORAGE_REACHED: String = "The user has no storage space left."
     override val FILE_TOO_HEAVY: String = "The file is too heavy."
-    override val FILE_NOT_FOUND: String = "Couldn't find the music file."
+    override val FILE_NOT_FOUND: String = "Couldn't find the requested music file."
+    override val IMAGE_NOT_FOUND: String = "Couldn't find the requested image file."
 
     override val SONGS_DELETED: String = "Songs have been deleted."
     override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Given file is not a music file."
