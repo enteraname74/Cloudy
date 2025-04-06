@@ -5,15 +5,13 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.toMusic
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
 import java.util.*
-import kotlin.collections.mapNotNull
 
 class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
@@ -68,6 +66,15 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicTable
                 .selectAll()
                 .where { MusicTable.id eq musicId }
+                .firstOrNull()
+                ?.toMusic()
+        }
+
+    override suspend fun getFromCoverPath(coverPath: String): Music? =
+        suspendedTransaction {
+            MusicTable
+                .selectAll()
+                .where { MusicTable.coverPath eq coverPath }
                 .firstOrNull()
                 ?.toMusic()
         }

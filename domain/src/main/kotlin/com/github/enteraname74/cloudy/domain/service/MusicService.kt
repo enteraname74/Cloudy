@@ -39,6 +39,9 @@ class MusicService(
             username = username,
         )
 
+    suspend fun getFromCoverPath(coverPath: String): Music? =
+        musicRepository.getFromCoverPath(coverPath = coverPath)
+
     private suspend fun saveMusicAndCreateMissingAlbumAndArtist(
         userId: UUID,
         metadata: MusicInformationRetriever.Metadata,

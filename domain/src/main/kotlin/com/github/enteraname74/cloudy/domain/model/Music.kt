@@ -27,4 +27,11 @@ data class Music(
     @Serializable(with = UUIDSerializer::class)
     val albumId: UUID?,
     val fingerprint: String,
-): UpdatableElement
+): UpdatableElement {
+    companion object {
+        fun buildLocalCoverPath(): String =
+            "$LOCAL_PATH${UUID.randomUUID()}"
+
+        const val LOCAL_PATH = "music/cover/"
+    }
+}

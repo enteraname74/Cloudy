@@ -7,6 +7,7 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.UUIDUtils
+import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.*
@@ -24,7 +25,7 @@ fun Route.getMusicCover() {
     get("/cover/{musicId}") {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
-        val musicId: UUID = UUIDUtils.fromString(
+        val coverId: UUID = UUIDUtils.fromString(
             call.parameters["musicId"]
         ) ?: return@get badRequest(
             message = routingMessages.WRONG_ID
@@ -32,8 +33,15 @@ fun Route.getMusicCover() {
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
+        val correspondingMusic: Music = musicService.getFromCoverPath(
+            coverPath = "${Music.LOCAL_PATH}$coverId",
+        ) ?: return@get response(
+            status = HttpStatusCode.NotFound,
+            message = routingMessages.WRONG_ID,
+        )
+
         val musicFile: File = musicService.getMusicFile(
-            musicId = musicId,
+            musicId = correspondingMusic.id,
             username = username,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
@@ -44,7 +52,7 @@ fun Route.getMusicCover() {
         We first try to retrieve a custom cover for the file, else, we fetch it from its file.
          */
         val foundCover: ByteArray? = coverService.getById(
-            id = musicId,
+            id = correspondingMusic.id,
             username = username,
         )
 

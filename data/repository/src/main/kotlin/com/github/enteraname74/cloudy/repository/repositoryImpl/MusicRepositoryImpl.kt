@@ -62,7 +62,8 @@ class MusicRepositoryImpl(
                 id = temporarySavedFileId,
                 username = user.username,
             )
-            val updatedMusic = saveMusicFileToDbAfterUploadProcess(music = existingMusic.updateFromMetadata(metadata = musicMetadata))
+            val updatedMusic =
+                saveMusicFileToDbAfterUploadProcess(music = existingMusic.updateFromMetadata(metadata = musicMetadata))
             return UploadProcessState.AlreadyExisting(updatedMusic)
         }
 
@@ -99,7 +100,8 @@ class MusicRepositoryImpl(
         return CloudyResult.Success(
             musicDataSource.upsert(
                 music.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC)
+                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    coverPath = cover?.let { Music.buildLocalCoverPath() } ?: music.coverPath,
                 )
             )
         )
@@ -133,6 +135,9 @@ class MusicRepositoryImpl(
 
     override suspend fun getFromId(musicId: UUID): Music? =
         musicDataSource.getFromId(musicId = musicId)
+
+    override suspend fun getFromCoverPath(coverPath: String): Music? =
+        musicDataSource.getFromCoverPath(coverPath = coverPath)
 
     override suspend fun getMusicFile(musicId: UUID, username: String): File? =
         musicFileManager.getById(

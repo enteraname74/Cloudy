@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.metadata.musicinformation
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
+import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.metadata.acoustid.AcoustidApiClient
 import com.github.enteraname74.cloudy.metadata.cover.RemoteMusicCoverRetriever
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
@@ -35,7 +36,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: listOf(fileMetadata.artist),
                 album = customMetadata?.album ?: fileMetadata.album,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
-                coverPath = coverUrlFromFile(musicId),
+                coverPath = Music.buildLocalCoverPath(),
                 duration = customMetadata?.duration ?: fileMetadata.duration,
                 musicId = musicId,
             )
@@ -56,15 +57,12 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 artists = listOf(finalMetadata.artist),
                 album = finalMetadata.album,
                 fingerprint = fingerprintData.fingerprint.hashed(),
-                coverPath = coverPath ?: coverUrlFromFile(musicId),
+                coverPath = coverPath ?: Music.buildLocalCoverPath(),
                 duration = finalMetadata.duration,
                 musicId = musicId,
             )
         }
     }
-
-    private fun coverUrlFromFile(musicId: UUID): String =
-        "music/cover/$musicId"
 
     private fun ByteArray.toHex() =
         joinToString("") { "%02x".format(it) }

@@ -40,6 +40,7 @@ interface MusicRepository {
     ): CloudyResult<Music>
     suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit>
     suspend fun getFromId(musicId: UUID): Music?
+    suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(musicId: UUID, username: String): File?
     suspend fun getAll(ids: List<UUID>): List<Music>
 
