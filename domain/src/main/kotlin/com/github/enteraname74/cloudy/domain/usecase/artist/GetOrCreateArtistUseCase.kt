@@ -1,6 +1,8 @@
 package com.github.enteraname74.cloudy.domain.usecase.artist
 
 import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import java.util.*
 
@@ -9,17 +11,19 @@ class GetOrCreateArtistUseCase(
 ) {
     suspend operator fun invoke(
         artistName: String,
-        userId: UUID,
-        coverPath: String?
+        user: User,
+        coverData: FileData?,
     ): Artist =
         artistRepository.getFromInformation(
             name = artistName,
-            userId = userId,
+            userId = user.id,
         ) ?: artistRepository.upsert(
             artist = Artist(
-                userId = userId,
+                userId = user.id,
                 name = artistName,
-                coverPath = coverPath,
-            )
+                coverPath = null,
+            ),
+            coverData = coverData,
+            username = user.username,
         )
 }

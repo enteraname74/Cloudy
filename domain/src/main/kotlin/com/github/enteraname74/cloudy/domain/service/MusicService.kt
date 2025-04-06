@@ -43,14 +43,15 @@ class MusicService(
         musicRepository.getFromCoverPath(coverPath = coverPath)
 
     private suspend fun saveMusicAndCreateMissingAlbumAndArtist(
-        userId: UUID,
+        user: User,
         metadata: MusicInformationRetriever.Metadata,
+        artistCover: FileData?,
     ): UploadedMusicData {
         val artists: List<Artist> = metadata.artists.map { artistName ->
             getOrCreateArtistUseCase(
                 artistName = artistName.trim(),
-                userId = userId,
-                coverPath = metadata.coverPath,
+                user = user,
+                coverData = artistCover,
             )
         }
 
@@ -58,7 +59,7 @@ class MusicService(
 
         val album: Album = getOrCreateAlbumUseCase(
             albumName = metadata.album,
-            userId = userId,
+            userId = user.id,
             artistId = firstArtist.id,
             artistName = firstArtist.name,
             coverPath = metadata.coverPath,
@@ -66,7 +67,7 @@ class MusicService(
 
         // TODO: Improve music path definition
         val music: Music = musicMetadataToMusic(
-            userId = userId,
+            userId = user.id,
             albumId = album.id,
             musicPath = "music/${metadata.musicId}",
             metadata = metadata,
@@ -79,7 +80,7 @@ class MusicService(
                 musicArtist = MusicArtist(
                     musicId = music.id,
                     artistId = artist.id,
-                    userId = userId,
+                    userId = user.id,
                 )
             )
         }
@@ -128,8 +129,10 @@ class MusicService(
             is UploadProcessState.ContinueProcess -> {
                 return CloudyResult.Success(
                     saveMusicAndCreateMissingAlbumAndArtist(
-                        userId = user.id,
-                        metadata = uploadProcess.metadata
+                        user = user,
+                        metadata = uploadProcess.metadata,
+                        // TODO: Add possibility to set an artist cover from the sent music.
+                        artistCover = null,
                     )
                 )
             }
@@ -146,8 +149,9 @@ class MusicService(
         val newArtists: List<Artist> = newArtistsNames.map { name ->
             getOrCreateArtistUseCase(
                 artistName = name,
-                userId = user.id,
-                coverPath = modifiedMusic.coverPath,
+                user = user,
+                // If a new artist should be made from scratch on the music update, it should not have a predefined cover.
+                coverData = null,
             )
         }
 

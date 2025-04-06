@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.model.User
@@ -33,6 +34,7 @@ class ArtistService(
 
     suspend fun update(
         modifiedArtist: Artist,
+        coverData: FileData?,
         user: User,
     ): Artist {
         // We fetch the songs and albums of the artist
@@ -64,12 +66,18 @@ class ArtistService(
             )
 
             artistRepository.upsert(
-                alreadyExistingArtist.copy(
+                artist = alreadyExistingArtist.copy(
                     isInQuickAccess = modifiedArtist.isInQuickAccess,
-                )
+                ),
+                coverData = coverData,
+                username = user.username,
             )
         } else {
-            artistRepository.upsert(modifiedArtist)
+            artistRepository.upsert(
+                artist = modifiedArtist,
+                coverData = coverData,
+                username = user.username,
+            )
         }
 
         val updatedSongs = songsOfArtist.map {
@@ -94,6 +102,9 @@ class ArtistService(
 
     suspend fun getFromId(artistId: UUID): Artist? =
         artistRepository.getFromId(artistId = artistId)
+
+    suspend fun getFromCoverPath(coverPath: String): Artist? =
+        artistRepository.getFromCoverPath(coverPath)
 
     suspend fun isArtistPossessedByUser(
         artistId: UUID,

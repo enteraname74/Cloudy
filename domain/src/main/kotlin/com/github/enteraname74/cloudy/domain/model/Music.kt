@@ -30,8 +30,8 @@ data class Music(
 ): UpdatableElement {
     companion object {
         fun buildLocalCoverPath(): String =
-            "$LOCAL_PATH${UUID.randomUUID()}"
+            "$COVER_PATH${UUID.randomUUID()}"
 
-        const val LOCAL_PATH = "music/cover/"
+        const val COVER_PATH = "music/cover/"
     }
 }

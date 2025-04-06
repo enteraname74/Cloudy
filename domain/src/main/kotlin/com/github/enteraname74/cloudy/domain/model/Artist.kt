@@ -20,4 +20,8 @@ data class Artist(
     var isInQuickAccess: Boolean = false,
     @Serializable(with = LocalDateTimeSerializer::class)
     override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
-): UpdatableElement
+): UpdatableElement {
+    companion object {
+        const val COVER_PATH = "artist/cover/"
+    }
+}

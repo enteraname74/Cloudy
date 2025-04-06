@@ -37,6 +37,15 @@ class ArtistDataSourceImpl : ArtistDataSource {
                 ?.toArtist()
         }
 
+    override suspend fun getFromCoverPath(coverPath: String): Artist? =
+        suspendedTransaction {
+            ArtistTable
+                .selectAll()
+                .where { ArtistTable.coverPath eq coverPath }
+                .firstOrNull()
+                ?.toArtist()
+        }
+
     override suspend fun isArtistPossessedByUser(userId: UUID, artistId: UUID): Boolean =
         suspendedTransaction {
             ArtistTable

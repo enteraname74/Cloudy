@@ -97,8 +97,8 @@ class AlbumService(
          */
         val existingArtist: Artist = getOrCreateArtistUseCase(
             artistName = modifiedAlbum.artistName,
-            userId = user.id,
-            coverPath = modifiedAlbum.coverPath,
+            user = user,
+            coverData = null,
         )
 
         /*

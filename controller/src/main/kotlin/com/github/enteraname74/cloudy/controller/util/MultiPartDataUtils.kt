@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.controller.util
 
+import com.github.enteraname74.cloudy.controller.routing.artist.model.ModifiedArtist
 import com.github.enteraname74.cloudy.controller.routing.music.model.ModifiedMusic
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
@@ -32,9 +33,9 @@ object MultiPartDataUtils {
         )
     }
 
-    suspend fun processMusicUpdateRequest(request: MultiPartData): CloudyResult<Pair<FileData?, ModifiedMusic>> {
+    suspend inline fun <reified T> processUpdateRequest(request: MultiPartData): CloudyResult<Pair<FileData?, T>> {
         var fileData: FileData? = null
-        var modifiedMusic: ModifiedMusic? = null
+        var modifiedMusic: T? = null
         request.forEachPart { part ->
             when (part) {
                 is PartData.FormItem -> {

@@ -3,14 +3,12 @@ package com.github.enteraname74.cloudy.config.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.ApplicationContext
+import com.github.enteraname74.cloudy.domain.ext.toUUID
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.model.UserType
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
-import io.ktor.util.pipeline.*
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import java.util.*
 
 fun ApplicationContext.generateToken(
@@ -55,7 +53,7 @@ fun ApplicationContext.getUsernameFromToken(): String? {
 
 fun ApplicationContext.getUserIdFromToken(): UUID? {
     val principal = call.principal<JWTPrincipal>()
-    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.let { UUID.fromString(it) }
+    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUUID()
 }
 
 fun ApplicationContext.isTokenARefreshOne(): Boolean {

@@ -10,6 +10,7 @@ interface ArtistDataSource {
         userId: UUID,
     ): Artist?
     suspend fun getFromId(artistId: UUID): Artist?
+    suspend fun getFromCoverPath(coverPath: String): Artist?
     suspend fun isArtistPossessedByUser(userId: UUID, artistId: UUID): Boolean
     suspend fun upsert(artist: Artist): Artist
     suspend fun getAllOfUser(

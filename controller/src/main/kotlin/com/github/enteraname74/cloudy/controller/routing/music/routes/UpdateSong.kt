@@ -36,7 +36,7 @@ fun Route.updateSong() {
         )
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        val updateInformation = MultiPartDataUtils.processMusicUpdateRequest(multipartData)
+        val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedMusic>(multipartData)
 
         when(updateInformation) {
             is CloudyResult.Error -> {

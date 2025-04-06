@@ -22,11 +22,11 @@ fun Route.getMusicCover() {
     val musicService by inject<MusicService>()
     val coverService by inject<CoverService>()
 
-    get("/cover/{musicId}") {
+    get("/cover/{coverId}") {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         val coverId: UUID = UUIDUtils.fromString(
-            call.parameters["musicId"]
+            call.parameters["coverId"]
         ) ?: return@get badRequest(
             message = routingMessages.WRONG_ID
         )
@@ -34,7 +34,7 @@ fun Route.getMusicCover() {
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
         val correspondingMusic: Music = musicService.getFromCoverPath(
-            coverPath = "${Music.LOCAL_PATH}$coverId",
+            coverPath = "${Music.COVER_PATH}$coverId",
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
             message = routingMessages.WRONG_ID,
