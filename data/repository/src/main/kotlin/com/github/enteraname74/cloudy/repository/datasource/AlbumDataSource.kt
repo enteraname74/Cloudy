@@ -8,6 +8,7 @@ interface AlbumDataSource {
     suspend fun getFromId(
         albumId: UUID,
     ): Album?
+    suspend fun getFromCoverPath(coverPath: String): Album?
     suspend fun getAll(albumIds: List<UUID>): List<Album>
     suspend fun getFromInformation(
         albumName: String,

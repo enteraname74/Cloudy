@@ -42,7 +42,10 @@ class ArtistRepositoryImpl(
         val savedId: UUID? = coverData?.let {
             // We will delete the previous cover if any
             val previousId: UUID? =
-                artist.coverPath?.takeIf { it.startsWith(Artist.COVER_PATH) }?.split('/')?.last()?.toUUID()
+                artist
+                    .coverPath
+                    ?.takeIf { it.startsWith(Artist.COVER_PATH) }
+                    ?.split('/')?.last()?.toUUID()
 
             previousId?.let { id ->
                 coverFileManager.delete(

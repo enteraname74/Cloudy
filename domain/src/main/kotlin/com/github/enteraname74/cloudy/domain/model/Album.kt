@@ -23,4 +23,8 @@ data class Album(
     val artistName: String,
     @Serializable(with = LocalDateTimeSerializer::class)
     override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
-): UpdatableElement
+): UpdatableElement {
+    companion object {
+        const val COVER_PATH = "album/cover/"
+    }
+}

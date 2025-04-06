@@ -24,6 +24,16 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 ?.toAlbum()
         }
 
+    override suspend fun getFromCoverPath(coverPath: String): Album? =
+        suspendedTransaction {
+            AlbumTable
+                .selectAll()
+                .where {
+                    AlbumTable.coverPath eq coverPath
+                }.firstOrNull()
+                ?.toAlbum()
+        }
+
     override suspend fun getAll(albumIds: List<UUID>): List<Album> =
         suspendedTransaction {
             AlbumTable

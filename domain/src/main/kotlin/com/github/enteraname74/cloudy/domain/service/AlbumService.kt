@@ -86,6 +86,7 @@ class AlbumService(
 
     suspend fun update(
         modifiedAlbum: Album,
+        coverData: FileData?,
         user: User,
     ): Album {
         // We fetch the songs of the album to update and its artist
@@ -154,13 +155,17 @@ class AlbumService(
             albumRepository.upsert(
                 album = albumInfoToUse.copy(
                     isInQuickAccess = modifiedAlbum.isInQuickAccess,
-                )
+                ),
+                coverData = coverData,
+                username = user.username,
             )
         } else {
             albumRepository.upsert(
                 album = modifiedAlbum.copy(
                     artistId = existingArtist.id,
-                )
+                ),
+                coverData = coverData,
+                username = user.username,
             )
         }
 

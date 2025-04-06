@@ -1,6 +1,8 @@
 package com.github.enteraname74.cloudy.domain.usecase.album
 
 import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import java.util.*
 
@@ -10,21 +12,23 @@ class GetOrCreateAlbumUseCase(
     suspend operator fun invoke(
         albumName: String,
         artistName: String,
-        userId: UUID,
+        user: User,
         artistId: UUID,
-        coverPath: String?
+        coverData: FileData?,
     ): Album =
         albumRepository.getFromInformation(
             albumName = albumName,
             albumArtist = artistName,
-            userId = userId,
+            userId = user.id,
         ) ?: albumRepository.upsert(
             album = Album(
-                userId = userId,
+                userId = user.id,
                 name = albumName,
-                coverPath = coverPath,
+                coverPath = null,
                 artistId = artistId,
                 artistName = artistName,
-            )
+            ),
+            coverData = coverData,
+            username = user.username,
         )
 }

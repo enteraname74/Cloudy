@@ -1,20 +1,28 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
+import com.github.enteraname74.cloudy.domain.ext.toUUID
 import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
 class AlbumRepositoryImpl(
-    private val albumDataSource: AlbumDataSource
-): AlbumRepository {
+    private val albumDataSource: AlbumDataSource,
+    private val coverFileManager: CoverFileManager,
+) : AlbumRepository {
     override suspend fun getFromId(albumId: UUID): Album? =
         albumDataSource.getFromId(
             albumId = albumId,
         )
+
+    override suspend fun getFromCoverPath(coverPath: String): Album? =
+        albumDataSource.getFromCoverPath(coverPath)
+
 
     override suspend fun getAll(albumIds: List<UUID>): List<Album> =
         albumDataSource.getAll(albumIds)
@@ -37,12 +45,43 @@ class AlbumRepositoryImpl(
             albumId = albumId,
         )
 
-    override suspend fun upsert(album: Album): Album =
-        albumDataSource.upsert(
+    override suspend fun upsert(
+        album: Album,
+        coverData: FileData?,
+        username: String,
+    ): Album {
+        val savedId: UUID? = coverData?.let {
+            // We will delete the previous cover if any
+            val previousId: UUID? =
+                album
+                    .coverPath
+                    ?.takeIf { it.startsWith(Album.COVER_PATH) }
+                    ?.split('/')?.last()?.toUUID()
+
+            previousId?.let { id ->
+                coverFileManager.delete(
+                    id = id,
+                    username = username,
+                )
+            }
+
+            coverFileManager.save(
+                username = username,
+                fileData = it,
+            )
+        }
+
+        val newCoverPath = savedId?.let {
+            "${Album.COVER_PATH}$it"
+        }
+
+        return albumDataSource.upsert(
             album.copy(
                 lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                coverPath = newCoverPath ?: album.coverPath,
             )
         )
+    }
 
     override suspend fun upsertAll(albums: List<Album>) {
         albumDataSource.upsertAll(

@@ -46,6 +46,7 @@ class MusicService(
         user: User,
         metadata: MusicInformationRetriever.Metadata,
         artistCover: FileData?,
+        albumCover: FileData?,
     ): UploadedMusicData {
         val artists: List<Artist> = metadata.artists.map { artistName ->
             getOrCreateArtistUseCase(
@@ -59,10 +60,10 @@ class MusicService(
 
         val album: Album = getOrCreateAlbumUseCase(
             albumName = metadata.album,
-            userId = user.id,
             artistId = firstArtist.id,
             artistName = firstArtist.name,
-            coverPath = metadata.coverPath,
+            coverData = albumCover,
+            user = user,
         )
 
         // TODO: Improve music path definition
@@ -131,8 +132,9 @@ class MusicService(
                     saveMusicAndCreateMissingAlbumAndArtist(
                         user = user,
                         metadata = uploadProcess.metadata,
-                        // TODO: Add possibility to set an artist cover from the sent music.
+                        // TODO: Add possibility to set an artist/album cover from the sent music.
                         artistCover = null,
+                        albumCover = null,
                     )
                 )
             }
@@ -164,10 +166,11 @@ class MusicService(
         // We get or create the album of the modified music
         val album: Album = getOrCreateAlbumUseCase(
             albumName = modifiedMusic.album,
-            userId = user.id,
             artistId = firstArtist.id,
             artistName = firstArtist.name,
-            coverPath = modifiedMusic.coverPath,
+            user = user,
+            // If a new album should be made from scratch on the music update, it should not have a predefined cover.
+            coverData = null,
         )
 
         if (newArtistsNames.isNotEmpty()) {

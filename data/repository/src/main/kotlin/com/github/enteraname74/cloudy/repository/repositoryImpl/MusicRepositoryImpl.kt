@@ -114,7 +114,6 @@ class MusicRepositoryImpl(
                 id = music.id,
             ) ?: return CloudyResult.Error()
 
-            // TODO: Handle cover update
             musicFileMetadataManager.setMetadataOfFile(
                 musicFile = musicFile,
                 music = music,
