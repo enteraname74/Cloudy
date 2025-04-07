@@ -25,6 +25,11 @@ class AlbumService(
             albumId = albumId,
         )
 
+    suspend fun getFromCoverPath(coverPath: String): Album? =
+        albumRepository.getFromCoverPath(
+            coverPath = coverPath,
+        )
+
     suspend fun getAllOfUser(
         userId: UUID,
         paginatedRequest: PaginatedRequest,
