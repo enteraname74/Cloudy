@@ -38,7 +38,6 @@ class ArtistRepositoryImpl(
         coverData: FileData?,
         username: String
     ): Artist {
-
         val savedId: UUID? = coverData?.let {
             // We will delete the previous cover if any
             val previousId: UUID? =

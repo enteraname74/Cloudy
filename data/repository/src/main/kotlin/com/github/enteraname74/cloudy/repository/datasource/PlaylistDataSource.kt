@@ -8,6 +8,9 @@ interface PlaylistDataSource {
     suspend fun getFromId(
         playlistId: UUID
     ): Playlist?
+    suspend fun getFromCoverPath(
+        coverPath: String
+    ): Playlist?
     suspend fun getFromInformation(
         name: String,
         userId: UUID,

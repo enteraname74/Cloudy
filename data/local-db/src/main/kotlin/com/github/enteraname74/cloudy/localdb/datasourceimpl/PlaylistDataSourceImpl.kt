@@ -32,6 +32,16 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
                 ?.toPlaylist()
         }
 
+    override suspend fun getFromCoverPath(coverPath: String): Playlist? =
+        suspendedTransaction {
+            PlaylistTable
+                .selectAll()
+                .where {
+                    PlaylistTable.coverPath eq coverPath
+                }.firstOrNull()
+                ?.toPlaylist()
+        }
+
     override suspend fun getFromInformation(name: String, userId: UUID): Playlist? =
         suspendedTransaction {
             PlaylistTable

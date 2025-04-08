@@ -1,8 +1,10 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.model.UploadedPlaylistData
+import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
@@ -16,6 +18,9 @@ class PlaylistService(
 ) {
     suspend fun getFromId(playlistId: UUID): Playlist? =
         playlistRepository.getFromId(playlistId)
+
+    suspend fun getFromCoverPath(coverPath: String): Playlist? =
+        playlistRepository.getFromCoverPath(coverPath)
 
     suspend fun getAllOfUser(
         userId: UUID,
@@ -46,8 +51,14 @@ class PlaylistService(
 
     suspend fun upsert(
         playlist: Playlist,
+        coverData: FileData?,
+        username: String,
     ): Playlist =
-        playlistRepository.upsert(playlist)
+        playlistRepository.upsert(
+            playlist = playlist,
+            coverData = coverData,
+            username = username,
+        )
 
     /**
      * Upload playlists from the user.

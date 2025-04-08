@@ -11,6 +11,7 @@ fun Routing.playlistRouting() {
         uploadPlaylists()
         updatePlaylist()
         createPlaylist()
+        getPlaylistCover()
         addMusicsToPlaylist()
         deleteMusicsFromPlaylist()
         checkPlaylistIdsValidity()
