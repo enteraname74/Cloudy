@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.ktor)
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
