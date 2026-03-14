@@ -54,4 +54,10 @@ object EnRoutingMessages: RoutingMessages {
 
     override val WRONG_ID: String = "The given id is incorrect."
     override val WRONG_BODY_DATA: String = "The given data is incorrect."
+
+    override fun internalServerError(error: String): String =
+        """
+            There was an internal server error.
+            Cause: $error
+        """.trimIndent()
 }

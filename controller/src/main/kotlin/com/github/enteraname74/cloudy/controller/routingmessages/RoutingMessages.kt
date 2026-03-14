@@ -52,6 +52,8 @@ interface RoutingMessages {
     val WRONG_ID: String
     val WRONG_BODY_DATA: String
 
+    fun internalServerError(error: String): String
+
     companion object {
         fun fromLocale(locale: AppLocale): RoutingMessages =
             when (locale) {

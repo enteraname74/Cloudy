@@ -13,6 +13,7 @@ import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -21,13 +22,9 @@ fun Route.signIn() {
     val userService by inject<UserService>()
 
     post("/sign") {
-        val user: UserSignIn = call.safeReceive() ?: return@post wrongBody()
+        val user: UserSignIn = call.receive()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
-
-        if (!user.isValid()) {
-            return@post badRequest(message = routingMessages.MISSING_USER_INFORMATION)
-        }
 
         if (userService.isUsernameUsed(user.username)) {
             return@post badRequest(message = routingMessages.USERNAME_TAKEN)

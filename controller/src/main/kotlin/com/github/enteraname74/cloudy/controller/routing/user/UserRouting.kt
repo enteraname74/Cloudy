@@ -7,11 +7,9 @@ import com.github.enteraname74.cloudy.controller.routing.user.routes.generateIns
 import io.ktor.server.routing.*
 
 fun Routing.userRoutes() {
-    route("/user") {
-        allUser()
-        authenticatedRoutes {
-            generateInscriptionCode()
-            deleteUser()
-        }
+    allUser()
+    authenticatedRoutes {
+        generateInscriptionCode()
+        deleteUser()
     }
 }
