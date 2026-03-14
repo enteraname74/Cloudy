@@ -3,13 +3,13 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import kotlin.uuid.Uuid
 
 class MusicPlaylistService(
     private val musicPlaylistRepository: MusicPlaylistRepository,
 ) {
     suspend fun allOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<MusicPlaylist> =
         musicPlaylistRepository.getAllOfUser(

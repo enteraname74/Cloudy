@@ -2,11 +2,10 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSource
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 class MusicPlaylistRepositoryImpl(
     private val musicPlaylistDataSource: MusicPlaylistDataSource,
@@ -14,7 +13,7 @@ class MusicPlaylistRepositoryImpl(
     override suspend fun upsert(musicPlaylist: MusicPlaylist) {
         musicPlaylistDataSource.upsert(
             musicPlaylist.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                lastUpdateAtMillis = DateUtils.now(),
             )
         )
     }
@@ -23,13 +22,13 @@ class MusicPlaylistRepositoryImpl(
         musicPlaylistDataSource.upsertAll(
             musicPlaylists = musicPlaylists.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                 )
             }
         )
     }
 
-    override suspend fun getAllOfPlaylist(playlistId: UUID): List<MusicPlaylist> =
+    override suspend fun getAllOfPlaylist(playlistId: Uuid): List<MusicPlaylist> =
         musicPlaylistDataSource.getAllOfPlaylist(playlistId)
 
     override suspend fun delete(musicPlaylist: MusicPlaylist) {
@@ -41,7 +40,7 @@ class MusicPlaylistRepositoryImpl(
     }
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest
     ): List<MusicPlaylist> =
         musicPlaylistDataSource.getAllOfUser(

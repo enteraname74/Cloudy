@@ -3,19 +3,25 @@ package com.github.enteraname74.cloudy.fileaccess
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import java.io.File
-import java.util.*
+import kotlin.uuid.Uuid
 
 abstract class FileManager {
     protected val logger = CloudyLogger(this::class)
     protected abstract fun getFileDirectory(username: String): String
 
-    fun getById(id: UUID, username: String): File? {
+    // Retrieve file by its name (without extension)
+    fun getByName(name: String, username: String): File? {
         val coversDirectory = File(getFileDirectory(username)).also { it.mkdirs() }
 
         return coversDirectory
             .listFiles()
             ?.filter { it.isFile }
-            ?.firstOrNull { getUUIDFromFileName(it.name) == id }
+            ?.firstOrNull {
+                it.name.replaceFirst(
+                    regex = """[.][^.]+$""".toRegex(),
+                    replacement = ""
+                ) == name
+            }
     }
 
     protected fun getUserDirectory(username: String): String =
@@ -30,29 +36,43 @@ abstract class FileManager {
         val directorySize = directory
             .walkTopDown()
             .filter { it.isFile }
-            .map { it.length() }
-            .sum()
+            .sumOf { it.length() }
 
         return directorySize
     }
 
-    open fun delete(id: UUID, username: String) {
-        val fileToDelete: File = getById(
-            id = id,
+    open fun delete(name: String, username: String) {
+        val fileToDelete: File = getByName(
+            name = name,
             username = username,
         ) ?: return
 
         val hasBeenDeleted = fileToDelete.delete()
         if (!hasBeenDeleted) {
-            logger.warn("Failed to delete cover file with id $id.")
+            logger.warn("Failed to delete cover file with id $name.")
         }
+    }
+
+    fun rename(
+        from: String,
+        to: String,
+        username: String,
+    ) {
+        val existingFile: File = getByName(
+            name = from,
+            username = username,
+        ) ?: return
+
+        val updated = File("${getFileDirectory(username)}/$to")
+
+        existingFile.renameTo(updated)
     }
 
     /**
      * Saves a file and returns its id (its name without an extension).
      */
-    fun save(username: String, fileData: FileData): UUID {
-        val fileId = UUID.randomUUID()
+    fun save(username: String, fileData: FileData): Uuid {
+        val fileId = Uuid.random()
         val filename = "$fileId.${fileData.extension}"
         val filepath = "${getFileDirectory(username)}/$filename"
 
@@ -63,16 +83,6 @@ abstract class FileManager {
 
         return fileId
     }
-
-    private fun getUUIDFromFileName(fileName: String): UUID? =
-        runCatching {
-            UUID.fromString(
-                fileName.replaceFirst(
-                    regex = """[.][^.]+$""".toRegex(),
-                    replacement = ""
-                )
-            )
-        }.getOrNull()
 
     companion object {
         const val APP_FOLDER = "app"

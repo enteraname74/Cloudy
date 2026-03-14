@@ -1,15 +1,16 @@
 package com.github.enteraname74.cloudy.controller.routing.music.model
 
+import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.Music
-import com.github.enteraname74.cloudy.domain.serializer.UUIDSerializer
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
-import java.util.*
+import kotlin.uuid.Uuid
 
+// TODO: Improve to take album and artists directly
 @Serializable
 data class ModifiedMusic(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
+    val id: String,
     val name: String,
     val album: String,
     val nbPlayed: Int = 0,
@@ -17,12 +18,26 @@ data class ModifiedMusic(
     val artists: List<String>,
 )
 
+// TODO: Improve album/artists
 fun Music.fromModifiedMusic(modifiedMusic: ModifiedMusic): Music =
     this.copy(
-        id = modifiedMusic.id,
+        fingerprint = modifiedMusic.id,
         name = modifiedMusic.name,
-        album = modifiedMusic.album,
+        album = Album(
+            name = modifiedMusic.album,
+            id = Uuid.random(),
+            userId = userId,
+            coverPath = null,
+            addedDateMillis = DateUtils.now(),
+            artist = Artist(
+                id = Uuid.random(),
+                userId = userId,
+                name = "",
+                coverPath = null,
+                addedDateMillis = DateUtils.now(),
+            ),
+        ),
         nbPlayed = modifiedMusic.nbPlayed,
         isInQuickAccess = modifiedMusic.isInQuickAccess,
-        lastUpdateAt = LocalDateTime.now(),
+        lastUpdateAtMillis = DateUtils.now(),
     )

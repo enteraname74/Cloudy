@@ -1,20 +1,18 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist.model
 
 import com.github.enteraname74.cloudy.domain.model.Playlist
-import com.github.enteraname74.cloudy.domain.serializer.UUIDSerializer
 import kotlinx.serialization.Serializable
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 @Serializable
 data class PlaylistUpload(
-    @Serializable(with = UUIDSerializer::class)
-    val id: UUID,
+    val id: Uuid,
     val name: String,
     val isFavorite: Boolean,
     val isInQuickAccess: Boolean,
 ) {
     fun toPlaylist(
-        userId: UUID,
+        userId: Uuid,
     ): Playlist = Playlist(
         id = id,
         name = name,

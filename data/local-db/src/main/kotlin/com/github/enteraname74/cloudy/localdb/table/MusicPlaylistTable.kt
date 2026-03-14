@@ -1,30 +1,35 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
-import org.jetbrains.exposed.sql.ReferenceOption
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.javatime.datetime
-import java.time.LocalDateTime
+import com.github.enteraname74.cloudy.domain.util.DateUtils
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.IdTable
+import org.jetbrains.exposed.v1.dao.Entity
+import org.jetbrains.exposed.v1.dao.EntityClass
 
-object MusicPlaylistTable: Table() {
-    val id = varchar("id", 256)
+internal object MusicPlaylistTable : IdTable<String>() {
+    override val id = varchar("256", 128).entityId()
+
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val musicId = reference("musicId", MusicTable.id, onDelete = ReferenceOption.CASCADE)
     val playlistId = reference("playlistId", PlaylistTable.id, onDelete = ReferenceOption.CASCADE)
-    val lastUpdateAt = datetime("lastUpdateAt").default(LocalDateTime.now())
-
-    override val primaryKey: PrimaryKey? = PrimaryKey(MusicArtistTable.id, name = "PK_MusicPlaylist_id")
+    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
 }
 
-internal fun ResultRow.toMusicPlaylist(): MusicPlaylist? =
-    try {
+internal class MusicPlaylistEntity(id: EntityID<String>) : Entity<String>(id) {
+    companion object : EntityClass<String, MusicPlaylistEntity>(MusicPlaylistTable)
+
+    var userId by MusicPlaylistTable.userId
+    var musicId by MusicPlaylistTable.musicId
+    var playlistId by MusicPlaylistTable.playlistId
+    var lastUpdateAt by MusicPlaylistTable.lastUpdateAt
+
+    fun toMusicPlaylist(): MusicPlaylist =
         MusicPlaylist(
-            musicId = this[MusicPlaylistTable.musicId].value,
-            playlistId = this[MusicPlaylistTable.playlistId].value,
-            userId = this[MusicPlaylistTable.userId].value,
-            lastUpdateAt = this[MusicPlaylistTable.lastUpdateAt],
+            musicId = musicId.value,
+            playlistId = playlistId.value,
+            userId = userId.value,
+            lastUpdateAtMillis = lastUpdateAt,
         )
-    } catch (_: Exception) {
-        null
-    }
+}

@@ -1,8 +1,6 @@
 package com.github.enteraname74.cloudy.domain.ext
 
-import java.util.UUID
+import kotlin.uuid.Uuid
 
-fun String.toUUID(): UUID? =
-    runCatching {
-        UUID.fromString(this)
-    }.getOrNull()
+fun String.toUuid(): Uuid? =
+    Uuid.parseOrNull(this)

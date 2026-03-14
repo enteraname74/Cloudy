@@ -1,12 +1,9 @@
 package com.github.enteraname74.cloudy.config
 
 import com.github.enteraname74.cloudy.config.plugin.*
-import com.github.enteraname74.cloudy.config.plugin.configureHTTP
-import com.github.enteraname74.cloudy.config.plugin.configureSerialization
-import com.github.enteraname74.cloudy.config.plugin.configureSockets
 import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.server.application.*
-import io.ktor.util.pipeline.*
+import io.ktor.server.routing.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -46,4 +43,4 @@ fun Application.upsertAdmin() {
     }
 }
 
-typealias ApplicationContext = PipelineContext<Unit, ApplicationCall>
+typealias ApplicationContext = RoutingContext

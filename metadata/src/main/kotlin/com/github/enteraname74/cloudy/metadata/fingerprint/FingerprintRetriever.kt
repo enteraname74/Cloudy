@@ -1,7 +1,6 @@
 package com.github.enteraname74.cloudy.metadata.fingerprint
 
 import com.github.enteraname74.cloudy.logging.CloudyLogger
-import io.ktor.util.logging.*
 import java.io.BufferedReader
 import java.io.InputStreamReader
 

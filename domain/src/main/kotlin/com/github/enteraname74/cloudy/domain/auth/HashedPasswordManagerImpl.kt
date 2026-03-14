@@ -8,7 +8,7 @@ class HashedPasswordManagerImpl : HashedPasswordManager {
 
     private fun generateSalt(): ByteArray {
         val random = SecureRandom()
-        val salt: ByteArray = ByteArray(16)
+        val salt = ByteArray(16)
         random.nextBytes(salt)
 
         return salt

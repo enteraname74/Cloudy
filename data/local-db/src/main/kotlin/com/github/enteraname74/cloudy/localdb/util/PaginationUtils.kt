@@ -1,16 +1,14 @@
 package com.github.enteraname74.cloudy.localdb.util
 
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import org.jetbrains.exposed.sql.Column
-import org.jetbrains.exposed.sql.Op
-import org.jetbrains.exposed.sql.Query
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.greaterEq
-import java.time.LocalDateTime
+import org.jetbrains.exposed.v1.core.Column
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.jdbc.SizedIterable
 
-internal fun Query.paginated(
+internal fun <T> SizedIterable<T>.paginated(
     paginatedRequest: PaginatedRequest,
-
-): Query =
+): SizedIterable<T> =
     if (paginatedRequest.page != null && paginatedRequest.limitPerPage != null) {
         this
             .offset((paginatedRequest.page!! * paginatedRequest.limitPerPage!!).toLong())
@@ -19,7 +17,7 @@ internal fun Query.paginated(
         this
     }
 
-internal infix fun Column<LocalDateTime>.updatedAfter(other: LocalDateTime?): Op<Boolean> =
+internal infix fun Column<Long>.updatedAfter(other: Long?): Op<Boolean> =
     (other?.let { lastUpdateAt ->
         this greaterEq lastUpdateAt
     } ?: Op.TRUE)

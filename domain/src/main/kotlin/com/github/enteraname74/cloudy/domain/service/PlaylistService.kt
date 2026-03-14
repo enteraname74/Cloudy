@@ -4,26 +4,25 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.model.UploadedPlaylistData
-import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import kotlin.uuid.Uuid
 
 class PlaylistService(
     private val playlistRepository: PlaylistRepository,
     private val musicRepository: MusicRepository,
     private val musicPlaylistRepository: MusicPlaylistRepository,
 ) {
-    suspend fun getFromId(playlistId: UUID): Playlist? =
+    suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistRepository.getFromId(playlistId)
 
     suspend fun getFromCoverPath(coverPath: String): Playlist? =
         playlistRepository.getFromCoverPath(coverPath)
 
     suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest
     ): List<Playlist> =
         playlistRepository.allOfUser(
@@ -32,8 +31,8 @@ class PlaylistService(
         )
 
     suspend fun isPlaylistPossessedByUser(
-        userId: UUID,
-        playlistId: UUID,
+        userId: Uuid,
+        playlistId: Uuid,
     ): Boolean =
         playlistRepository.isPlaylistPossessedByUser(
             userId = userId,
@@ -42,7 +41,7 @@ class PlaylistService(
 
     suspend fun isPlaylistPossessedByUser(
         playlistName: String,
-        userId: UUID,
+        userId: Uuid,
     ): Boolean =
         playlistRepository.getFromInformation(
             name = playlistName,
@@ -66,7 +65,7 @@ class PlaylistService(
      */
     suspend fun uploadPlaylists(
         playlists: List<Playlist>,
-        userId: UUID,
+        userId: Uuid,
     ): List<UploadedPlaylistData> {
 
         /*
@@ -84,9 +83,9 @@ class PlaylistService(
         /*
         We will attribute news ids for the playlists
          */
-        val mapOfIds: Map<UUID, UUID> = buildMap {
+        val mapOfIds: Map<Uuid, Uuid> = buildMap {
             playlistsToSave.forEach {
-                put(UUID.randomUUID(), it.id)
+                put(Uuid.random(), it.id)
             }
         }
 
@@ -105,11 +104,11 @@ class PlaylistService(
     }
 
     suspend fun deleteFromPlaylist(
-        playlistId: UUID,
-        musicIds: List<UUID>,
-        userId: UUID,
+        playlistId: Uuid,
+        musicIds: List<String>,
+        userId: Uuid,
     ): List<MusicPlaylist> {
-        val userSongsIds: List<UUID> = musicIds.filter { musicId ->
+        val userSongsIds: List<String> = musicIds.filter { musicId ->
             musicRepository.isMusicPossessedByUser(
                 userId = userId,
                 musicId = musicId,
@@ -132,11 +131,11 @@ class PlaylistService(
     }
 
     suspend fun addToPlaylist(
-        playlistId: UUID,
-        musicIds: List<UUID>,
-        userId: UUID,
+        playlistId: Uuid,
+        musicIds: List<String>,
+        userId: Uuid,
     ): List<MusicPlaylist> {
-        val userSongsIds: List<UUID> = musicIds.filter { musicId ->
+        val userSongsIds: List<String> = musicIds.filter { musicId ->
             musicRepository.isMusicPossessedByUser(
                 userId = userId,
                 musicId = musicId,
@@ -156,7 +155,7 @@ class PlaylistService(
         return musicPlaylistRepository.getAllOfPlaylist(playlistId)
     }
 
-    suspend fun deleteAll(playlistIds: List<UUID>, ) =
+    suspend fun deleteAll(playlistIds: List<Uuid>) =
         playlistRepository.deleteAll(playlistIds)
 
     /**
@@ -165,10 +164,10 @@ class PlaylistService(
      * in the db.
      */
     suspend fun getDeletedPlaylistsIds(
-        idsToCheck: List<UUID>,
-        userId: UUID
-    ): List<UUID> {
-        val allPlaylistOfUser: List<UUID> = playlistRepository.allOfUser(
+        idsToCheck: List<Uuid>,
+        userId: Uuid
+    ): List<Uuid> {
+        val allPlaylistOfUser: List<Uuid> = playlistRepository.allOfUser(
             userId = userId,
         ).map { it.id }
 

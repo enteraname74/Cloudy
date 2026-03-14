@@ -2,7 +2,6 @@ package com.github.enteraname74.cloudy.config.plugin
 
 import com.github.enteraname74.cloudy.localdb.AppDatabase
 import io.ktor.server.application.*
-import org.slf4j.LoggerFactory
 
 fun Application.configureDatabase() {
     AppDatabase.connectToDatabase(

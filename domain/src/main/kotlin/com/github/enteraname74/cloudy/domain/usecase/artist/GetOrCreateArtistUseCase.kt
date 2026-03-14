@@ -4,7 +4,9 @@ import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import java.util.*
+import kotlin.uuid.Uuid
 
 class GetOrCreateArtistUseCase(
     private val artistRepository: ArtistRepository,
@@ -22,6 +24,8 @@ class GetOrCreateArtistUseCase(
                 userId = user.id,
                 name = artistName,
                 coverPath = null,
+                id = Uuid.random(),
+                addedDateMillis = DateUtils.now(),
             ),
             coverData = coverData,
             username = user.username,

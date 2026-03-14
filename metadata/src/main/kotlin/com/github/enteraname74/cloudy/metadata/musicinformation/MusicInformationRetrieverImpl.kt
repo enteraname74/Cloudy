@@ -11,7 +11,6 @@ import com.github.enteraname74.cloudy.metadata.fingerprint.FingerprintRetriever
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
 import java.io.File
 import java.security.MessageDigest
-import java.util.*
 
 class MusicInformationRetrieverImpl : MusicInformationRetriever {
     private val metadataManager = MusicFileMetadataManager()
@@ -20,7 +19,6 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
 
     override suspend fun getInformationAboutMusicFile(
         musicFile: File,
-        musicId: UUID,
         customMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean,
     ): MusicInformationRetriever.Metadata {
@@ -38,7 +36,6 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
                 coverPath = Music.buildLocalCoverPath(),
                 duration = customMetadata?.duration ?: fileMetadata.duration,
-                musicId = musicId,
             )
         } else {
             val acoustidClient = AcoustidApiClient()
@@ -59,7 +56,6 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
                 fingerprint = fingerprintData.fingerprint.hashed(),
                 coverPath = coverPath ?: Music.buildLocalCoverPath(),
                 duration = finalMetadata.duration,
-                musicId = musicId,
             )
         }
     }

@@ -7,24 +7,22 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.AlbumService
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.deleteAlbums() {
     val albumService by inject<AlbumService>()
 
     delete {
         val albumIds: List<String> = call.receive()
-        val uuids: List<UUID> = albumIds.mapNotNull { UUIDUtils.fromString(it) }
+        val uuids: List<Uuid> = albumIds.mapNotNull { Uuid.parseOrNull(it) }
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
-        val userId: UUID = getUserIdFromToken() ?: return@delete missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
 

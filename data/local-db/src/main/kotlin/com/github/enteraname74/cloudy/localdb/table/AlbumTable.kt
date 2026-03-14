@@ -1,38 +1,62 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.Album
-import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.ReferenceOption
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.javatime.datetime
-import java.time.LocalDateTime
+import com.github.enteraname74.cloudy.domain.util.DateUtils
+import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.dao.id.EntityID
+import org.jetbrains.exposed.v1.core.dao.id.UuidTable
+import org.jetbrains.exposed.v1.dao.UuidEntity
+import org.jetbrains.exposed.v1.dao.UuidEntityClass
+import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import kotlin.uuid.Uuid
 
-internal object AlbumTable: UUIDTable() {
+internal object AlbumTable: UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val name = varchar("name", 128)
     val coverPath = text("coverPath").nullable()
-    val addedDate = datetime("addedDate")
+    val addedDate = long("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
     val artistId = reference("artistId", ArtistTable.id, ReferenceOption.CASCADE)
-    val artistName = varchar("artistName", 128).default("")
-    val lastUpdateAt = datetime("lastUpdateAt").default(LocalDateTime.now())
+    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+
+    fun upsertAll(albums: List<Album>) {
+        batchUpsert(albums) { album ->
+            this[id] = album.id
+            this[name] = album.name
+            this[userId] = album.userId
+            this[coverPath] = album.coverPath
+            this[addedDate] = album.addedDateMillis
+            this[nbPlayed] = album.nbPlayed
+            this[isInQuickAccess] = album.isInQuickAccess
+            this[artistId] = album.artist.id
+            this[lastUpdateAt] = album.lastUpdateAtMillis
+        }
+    }
 }
 
-internal fun ResultRow.toAlbum(): Album? =
-    try {
+internal class AlbumEntity(id: EntityID<Uuid>): UuidEntity(id) {
+    companion object : UuidEntityClass<AlbumEntity>(AlbumTable)
+
+    var userId by AlbumTable.userId
+    var name by AlbumTable.name
+    var coverPath by AlbumTable.coverPath
+    var addedDate by AlbumTable.addedDate
+    var nbPlayed by AlbumTable.nbPlayed
+    var isInQuickAccess by AlbumTable.isInQuickAccess
+    val artist by ArtistEntity referencedOn AlbumTable.artistId
+    var lastUpdateAt by AlbumTable.lastUpdateAt
+
+    fun toAlbum(): Album =
         Album(
-            id = this[AlbumTable.id].value,
-            name = this[AlbumTable.name],
-            coverPath = this[AlbumTable.coverPath],
-            addedDate = this[AlbumTable.addedDate],
-            nbPlayed = this[AlbumTable.nbPlayed],
-            isInQuickAccess = this[AlbumTable.isInQuickAccess],
-            userId = this[AlbumTable.userId].value,
-            artistId = this[AlbumTable.artistId].value,
-            artistName = this[AlbumTable.artistName],
-            lastUpdateAt = this[AlbumTable.lastUpdateAt],
+            id = id.value,
+            userId = userId.value,
+            name = name,
+            coverPath = coverPath,
+            addedDateMillis = addedDate,
+            nbPlayed = nbPlayed,
+            isInQuickAccess = isInQuickAccess,
+            artist = artist.toArtist(),
+            lastUpdateAtMillis = lastUpdateAt,
         )
-    } catch (_: Exception) {
-        null
-    }
+}

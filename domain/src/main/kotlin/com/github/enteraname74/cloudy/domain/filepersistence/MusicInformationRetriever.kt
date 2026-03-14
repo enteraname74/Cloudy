@@ -1,10 +1,12 @@
 package com.github.enteraname74.cloudy.domain.filepersistence
 
-import com.github.enteraname74.cloudy.domain.ext.joinArtists
+import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import java.io.File
-import java.util.*
+import kotlin.uuid.Uuid
 
 interface MusicInformationRetriever {
 
@@ -14,7 +16,6 @@ interface MusicInformationRetriever {
      */
     suspend fun getInformationAboutMusicFile(
         musicFile: File,
-        musicId: UUID,
         customMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean,
     ): Metadata
@@ -23,7 +24,6 @@ interface MusicInformationRetriever {
      * Music metadata from a file our a remote source.
      */
     data class Metadata(
-        val musicId: UUID,
         val name: String,
         val artists: List<String>,
         val album: String,
@@ -33,13 +33,32 @@ interface MusicInformationRetriever {
     )
 }
 
-fun Music.updateFromMetadata(metadata: MusicInformationRetriever.Metadata): Music =
-    this.copy(
+// TODO: Improve MusicInformationRetriever.Metadata to include album artist
+// TODO: Improve artist check with existing ones.
+fun Music.updateFromMetadata(metadata: MusicInformationRetriever.Metadata): Music {
+    val artists = metadata.artists.map {
+        Artist(
+            id = Uuid.random(),
+            userId = userId,
+            name = it,
+            coverPath = null,
+            addedDateMillis = DateUtils.now(),
+        )
+    }
+
+    return copy(
         name = name,
-        id = metadata.musicId,
-        artist = metadata.artists.joinArtists(),
-        album = metadata.album,
-        coverPath = metadata.coverPath,
         fingerprint = metadata.fingerprint,
+        artists = artists,
+        album = Album(
+            id = Uuid.random(),
+            userId = userId,
+            name = metadata.album,
+            coverPath = null,
+            addedDateMillis = addedDateMillis,
+            artist = artists.first(),
+        ),
+        coverPath = metadata.coverPath,
         duration = metadata.duration,
     )
+}

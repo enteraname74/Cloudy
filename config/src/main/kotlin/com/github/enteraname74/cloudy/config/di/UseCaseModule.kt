@@ -13,5 +13,4 @@ internal val useCaseModule = module {
     // Artist
     singleOf(::GetOrCreateArtistUseCase)
     singleOf(::DeleteArtistIfEmptyUseCase)
-    singleOf(::GetArtistNameForMusicUseCase)
 }

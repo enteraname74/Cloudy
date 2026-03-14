@@ -9,19 +9,18 @@ import com.github.enteraname74.cloudy.controller.routing.playlist.model.Playlist
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.createPlaylist() {
     val playlistService by inject<PlaylistService>()
 
     post {
         val playlistCreation: PlaylistCreation = call.receive()
-        val userId: UUID = getUserIdFromToken() ?: return@post missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@post missingTokenInformation()
         val username: String = getUsernameFromToken() ?: return@post missingTokenInformation()
 
         val isPlaylistPossessedByUser: Boolean = playlistService.isPlaylistPossessedByUser(

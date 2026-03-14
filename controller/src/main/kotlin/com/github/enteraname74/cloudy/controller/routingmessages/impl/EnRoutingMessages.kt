@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.routingmessages.impl
 
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 object EnRoutingMessages: RoutingMessages {
     override val USERNAME_TAKEN: String = "The username is already taken."
@@ -26,19 +26,19 @@ object EnRoutingMessages: RoutingMessages {
     override val CANNOT_SAVE_SONG: String = "Cannot save the given song."
     override val CANNOT_UPDATE_SONG: String = "Cannot update the song."
 
-    override fun songNotPossessedByUser(musicId: UUID): String =
+    override fun songNotPossessedByUser(musicId: String): String =
         "The song with id: $musicId is not possessed by the user."
 
     override val ARTISTS_DELETED: String = "Artists have been deleted."
     override val ARTIST_NOT_POSSESSED_BY_USER: String = "This artist is not possessed by the user."
 
-    override fun artistNotPossessedByUser(artistId: UUID): String =
+    override fun artistNotPossessedByUser(artistId: Uuid): String =
         "The artist with id: $artistId is not possessed by the user."
 
     override val ALBUMS_DELETED: String = "Albums have been deleted."
     override val ALBUM_NOT_POSSESSED_BY_USER: String = "This album is not possessed by the user."
 
-    override fun albumNotPossessedByUser(albumId: UUID): String =
+    override fun albumNotPossessedByUser(albumId: Uuid): String =
         "The album with id: $albumId is not possessed by the user."
 
     override val PLAYLIST_NOT_FOUND: String = "This playlist does not exist."
@@ -46,7 +46,7 @@ object EnRoutingMessages: RoutingMessages {
     override val PLAYLIST_NOT_POSSESSED_BY_USER: String = "This playlist is not possessed by the user."
     override val PLAYLIST_ALREADY_EXISTING: String = "This playlist already exists."
 
-    override fun playlistNotPossessedByUser(playlistId: UUID): String =
+    override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "The album with id: $playlistId is not possessed by the user."
 
     override val MISSING_TOKEN_INFORMATION: String = "Missing information from token."

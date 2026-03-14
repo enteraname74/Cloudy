@@ -5,17 +5,16 @@ import com.github.enteraname74.cloudy.controller.ext.getPaginatedRequestFromQuer
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.playlistsOfUser() {
     val playlistService by inject<PlaylistService>()
 
     get("/ofUser") {
-        val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val data: List<Playlist> = playlistService.getAllOfUser(
             userId = userId,

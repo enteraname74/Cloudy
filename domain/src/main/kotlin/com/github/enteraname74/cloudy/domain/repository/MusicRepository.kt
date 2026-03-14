@@ -8,7 +8,7 @@ import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
-import java.util.*
+import kotlin.uuid.Uuid
 
 interface MusicRepository {
 
@@ -39,24 +39,24 @@ interface MusicRepository {
         cover: FileData?,
     ): CloudyResult<Music>
     suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit>
-    suspend fun getFromId(musicId: UUID): Music?
+    suspend fun getFromId(musicId: String): Music?
     suspend fun getFromCoverPath(coverPath: String): Music?
-    suspend fun getMusicFile(musicId: UUID, username: String): File?
-    suspend fun getAll(ids: List<UUID>): List<Music>
+    suspend fun getMusicFile(musicId: String, username: String): File?
+    suspend fun getAll(ids: List<String>): List<Music>
 
     /**
      * Deletes the given musics from the db and the file system.
      */
-    suspend fun deleteAll(ids: List<UUID>, username: String)
+    suspend fun deleteAll(ids: List<String>, username: String)
     suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Music>
 
-    suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean
-    suspend fun getFromFingerprint(fingerprint: String, userId: UUID): Music?
-    suspend fun allFromAlbum(albumId: UUID): List<Music>
-    suspend fun allFromArtist(artistId: UUID): List<Music>
+    suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean
+    suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music?
+    suspend fun allFromAlbum(albumId: Uuid): List<Music>
+    suspend fun allFromArtist(artistId: Uuid): List<Music>
 
     sealed interface UploadProcessState {
         /**

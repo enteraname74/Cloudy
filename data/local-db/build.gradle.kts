@@ -16,6 +16,12 @@ dependencies {
     implementation(libs.postgresql)
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }

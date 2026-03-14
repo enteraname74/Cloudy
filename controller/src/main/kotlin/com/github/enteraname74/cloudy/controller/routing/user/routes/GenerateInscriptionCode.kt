@@ -10,17 +10,16 @@ import com.github.enteraname74.cloudy.controller.routing.user.model.GeneratedCod
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.generateInscriptionCode() {
     val userService: UserService by inject()
 
     get("/generateCode") {
-        val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
 

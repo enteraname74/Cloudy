@@ -16,12 +16,11 @@ import com.github.enteraname74.cloudy.domain.service.ArtistService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.http.content.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.updateArtist() {
 
@@ -29,7 +28,7 @@ fun Route.updateArtist() {
     val userService by inject<UserService>()
 
     put {
-        val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@put missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
         val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
@@ -37,9 +36,7 @@ fun Route.updateArtist() {
         )
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedArtist>(multipartData)
-
-        when(updateInformation) {
+        when(val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedArtist>(multipartData)) {
             is CloudyResult.Error -> {
                 return@put badRequest(routingMessages.WRONG_INFORMATION)
             }

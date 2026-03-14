@@ -2,14 +2,12 @@ package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.util.UUIDUtils
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
-import io.ktor.server.application.call
-import io.ktor.server.request.receive
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
+import kotlin.uuid.Uuid
 
 fun Route.checkPlaylistIdsValidity() {
     val playlistService: PlaylistService by inject()
@@ -19,7 +17,7 @@ fun Route.checkPlaylistIdsValidity() {
 
         val idsToCheck: List<String> = call.receive()
         val uuidList = idsToCheck
-            .mapNotNull { UUIDUtils.fromString(it) }
+            .mapNotNull { Uuid.parseOrNull(it) }
             .distinct()
 
         val list = playlistService.getDeletedPlaylistsIds(

@@ -1,33 +1,31 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.ext.toUUID
 import com.github.enteraname74.cloudy.domain.model.Artist
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import kotlin.uuid.Uuid
 
 class ArtistRepositoryImpl(
     private val artistDataSource: ArtistDataSource,
     private val coverFileManager: CoverFileManager,
 ) : ArtistRepository {
-    override suspend fun getFromInformation(name: String, userId: UUID): Artist? =
+    override suspend fun getFromInformation(name: String, userId: Uuid): Artist? =
         artistDataSource.getFromInformation(
             name = name,
             userId = userId,
         )
 
-    override suspend fun isArtistPossessedByUser(userId: UUID, artistId: UUID): Boolean =
+    override suspend fun isArtistPossessedByUser(userId: Uuid, artistId: Uuid): Boolean =
         artistDataSource.isArtistPossessedByUser(
             userId = userId,
             artistId = artistId,
         )
 
-    override suspend fun getFromId(artistId: UUID): Artist? =
+    override suspend fun getFromId(artistId: Uuid): Artist? =
         artistDataSource.getFromId(artistId = artistId)
 
     override suspend fun getFromCoverPath(coverPath: String): Artist? =
@@ -38,24 +36,24 @@ class ArtistRepositoryImpl(
         coverData: FileData?,
         username: String
     ): Artist {
-        val savedId: UUID? = coverData?.let {
+        val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
-            val previousId: UUID? =
+            val previousName: String? =
                 artist
                     .coverPath
                     ?.takeIf { it.startsWith(Artist.COVER_PATH) }
-                    ?.split('/')?.last()?.toUUID()
+                    ?.split('/')?.last()
 
-            previousId?.let { id ->
+            previousName?.let { name ->
                 coverFileManager.delete(
-                    id = id,
+                    name = name,
                     username = username,
                 )
             }
 
             coverFileManager.save(
                 username = username,
-                fileData = it,
+                fileData = cover,
             )
         }
 
@@ -65,14 +63,14 @@ class ArtistRepositoryImpl(
 
         return artistDataSource.upsert(
             artist.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                lastUpdateAtMillis = DateUtils.now(),
                 coverPath = newCoverPath ?: artist.coverPath,
             )
         )
     }
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Artist> =
         artistDataSource
@@ -81,12 +79,9 @@ class ArtistRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun deleteById(artistId: UUID) =
+    override suspend fun deleteById(artistId: Uuid) =
         artistDataSource.deleteById(artistId)
 
-    override suspend fun deleteAll(artistIds: List<UUID>) =
+    override suspend fun deleteAll(artistIds: List<Uuid>) =
         artistDataSource.deleteAll(artistIds)
-
-    override suspend fun getArtistsOfMusic(musicId: UUID): List<Artist> =
-        artistDataSource.getArtistsOfMusic(musicId)
 }
