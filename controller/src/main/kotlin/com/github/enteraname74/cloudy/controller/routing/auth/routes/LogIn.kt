@@ -7,18 +7,22 @@ import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
+import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.server.resources.post
 import org.koin.ktor.ext.inject
 
 fun Route.logIn() {
     val userService: UserService by inject()
 
-    post("/login") {
+    post<AuthResource.LogIn> {
+        cloudyLogger.debug("THERE IS LOGIN")
         val user: UserLogin = call.receive()
 
         val cloudyResult: CloudyResult<User> = userService.logUser(
