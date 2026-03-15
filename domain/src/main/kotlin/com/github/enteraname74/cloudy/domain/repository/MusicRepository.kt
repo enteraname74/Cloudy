@@ -1,7 +1,5 @@
 package com.github.enteraname74.cloudy.domain.repository
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
-import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.User
@@ -18,13 +16,11 @@ interface MusicRepository {
      *
      * @param user the user that possess the music
      * @param fileData the file data of the music
-     * @param customMusicMetadata custom metadata that the user has sent with the file
      * @param shouldSearchForMetadata if the system should search music metadata from remote sources
      */
     suspend fun startUploadProcess(
         user: User,
         fileData: FileData,
-        customMusicMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean,
     ): UploadProcessState
 
@@ -65,16 +61,10 @@ interface MusicRepository {
         data object Error : UploadProcessState
 
         /**
-         * If the file was already on the server.
-         * In this case, we just need to save the updated file.
-         */
-        data class AlreadyExisting(val updatedMusic: Music) : UploadProcessState
-
-        /**
          * If we should continue the process and create the links of the music to save (artists, album...).
          */
         data class ContinueProcess(
-            val metadata: MusicInformationRetriever.Metadata,
+            val fingerprint: String,
         ): UploadProcessState
     }
 }

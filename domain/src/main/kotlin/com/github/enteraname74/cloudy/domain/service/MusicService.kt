@@ -1,8 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.*
-import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
@@ -10,20 +8,20 @@ import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUse
 import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
+import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
 import kotlin.uuid.Uuid
 
 class MusicService(
     private val musicRepository: MusicRepository,
-    private val albumRepository: AlbumRepository,
     private val musicArtistRepository: MusicArtistRepository,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
     private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
     private val deleteAlbumIfEmptyUseCase: DeleteAlbumIfEmptyUseCase,
+    private val uploadMusicUseCase: UploadMusicUseCase,
 ) {
 
     suspend fun getFromId(musicId: String): Music? =
@@ -38,99 +36,30 @@ class MusicService(
     suspend fun getFromCoverPath(coverPath: String): Music? =
         musicRepository.getFromCoverPath(coverPath = coverPath)
 
-    private suspend fun saveMusicAndCreateMissingAlbumAndArtist(
-        user: User,
-        metadata: MusicInformationRetriever.Metadata,
-        artistCover: FileData?,
-        albumCover: FileData?,
-    ): UploadedMusicData {
-        val artists: List<Artist> = metadata.artists.map { artistName ->
-            getOrCreateArtistUseCase(
-                artistName = artistName.trim(),
-                user = user,
-                coverData = artistCover,
-            )
-        }
-
-        val firstArtist = artists.first()
-
-        val album: Album = getOrCreateAlbumUseCase(
-            albumName = metadata.album,
-            artistId = firstArtist.id,
-            artistName = firstArtist.name,
-            coverData = albumCover,
-            user = user,
-        )
-
-        // TODO: Improve music path definition
-        val music: Music = musicMetadataToMusic(
-            userId = user.id,
-            musicPath = "music/${metadata.fingerprint}",
-            metadata = metadata,
-        )
-
-        musicRepository.saveMusicFileToDbAfterUploadProcess(music)
-
-        artists.forEach { artist ->
-            musicArtistRepository.upsert(
-                musicArtist = MusicArtist(
-                    musicId = music.fingerprint,
-                    artistId = artist.id,
-                    userId = user.id,
-                )
-            )
-        }
-
-
-        return UploadedMusicData(
-            music = music,
-            artists = artists,
-            album = album,
-        )
-    }
-
     suspend fun save(
         user: User,
         fileData: FileData,
-        customMusicMetadata: CustomMusicMetadata?,
+        musicUpload: MusicUpload,
         shouldSearchForMetadata: Boolean,
-    ): CloudyResult<UploadedMusicData> {
+    ): CloudyResult<Unit> {
 
         val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
             user = user,
             fileData = fileData,
-            customMusicMetadata = customMusicMetadata,
             shouldSearchForMetadata = shouldSearchForMetadata,
         )
 
-        when (uploadProcess) {
+        return when (uploadProcess) {
             UploadProcessState.Error -> {
-                return CloudyResult.Error()
-            }
-
-            is UploadProcessState.AlreadyExisting -> {
-                val album: Album = albumRepository.getFromId(
-                    albumId = uploadProcess.updatedMusic.album.id
-                ) ?: return CloudyResult.Error()
-
-                return CloudyResult.Success(
-                    UploadedMusicData(
-                        music = uploadProcess.updatedMusic,
-                        album = album,
-                        artists = uploadProcess.updatedMusic.artists,
-                    )
-                )
+                CloudyResult.Error()
             }
 
             is UploadProcessState.ContinueProcess -> {
-                return CloudyResult.Success(
-                    saveMusicAndCreateMissingAlbumAndArtist(
-                        user = user,
-                        metadata = uploadProcess.metadata,
-                        // TODO: Add possibility to set an artist/album cover from the sent music.
-                        artistCover = null,
-                        albumCover = null,
-                    )
+                uploadMusicUseCase(
+                    musicUpload = musicUpload,
+                    fingerprint = uploadProcess.fingerprint,
+                    user = user,
+                    musicPath = "music/${uploadProcess.fingerprint}",
                 )
             }
         }
@@ -290,44 +219,5 @@ class MusicService(
         ).map { it.fingerprint }
 
         return idsToCheck.filterNot { it in allMusicOfUser }
-    }
-
-
-    // TODO: Better impl
-    private fun musicMetadataToMusic(
-        userId: Uuid,
-        musicPath: String,
-        metadata: MusicInformationRetriever.Metadata,
-    ): Music {
-        val artists = metadata.artists.map {
-            Artist(
-                id = Uuid.random(),
-                userId = userId,
-                name = it,
-                coverPath = null,
-                addedDateMillis = DateUtils.now()
-            )
-        }
-
-        return Music(
-            userId = userId,
-            name = metadata.name,
-            album = Album(
-                id = Uuid.random(),
-                userId = userId,
-                name = metadata.album,
-                coverPath = null,
-                addedDateMillis = DateUtils.now(),
-                artist = artists.first()
-            ),
-            artists = artists,
-            duration = metadata.duration,
-            coverPath = metadata.coverPath,
-            fingerprint = metadata.fingerprint,
-            path = musicPath,
-            // TODO: Add album position from metadata
-            albumPosition = null,
-            addedDateMillis = DateUtils.now(),
-        )
     }
 }

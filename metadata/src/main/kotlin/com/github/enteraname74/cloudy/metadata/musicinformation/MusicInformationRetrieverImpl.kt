@@ -17,6 +17,12 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
     private val fingerprintRetriever = FingerprintRetriever()
     private val remoteMusicCoverRetriever = RemoteMusicCoverRetriever()
 
+    override suspend fun getFingerprint(musicFile: File): String? =
+        fingerprintRetriever
+            .getFingerprintFromMusic(musicPath = musicFile.path)
+            ?.fingerprint
+            ?.hashed()
+
     override suspend fun getInformationAboutMusicFile(
         musicFile: File,
         customMetadata: CustomMusicMetadata?,

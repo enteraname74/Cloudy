@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.util
 
-import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.MusicUpload
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.FileUtils
@@ -57,13 +57,13 @@ object MultiPartDataUtils {
         }
     }
 
-    suspend fun processMusicUploadRequest(musicFile: MultiPartData): CloudyResult<Pair<FileData, CustomMusicMetadata?>> {
+    suspend fun processMusicUploadRequest(musicFile: MultiPartData): CloudyResult<Pair<FileData, MusicUpload>> {
         var fileData: FileData? = null
-        var customMetadata: CustomMusicMetadata? = null
+        var music: MusicUpload? = null
         musicFile.forEachPart { part ->
             when (part) {
                 is PartData.FormItem -> {
-                    customMetadata = CloudyJson.decodeFromString(part.value)
+                    music = CloudyJson.decodeFromString(part.value)
                 }
 
                 is PartData.FileItem -> {
@@ -92,9 +92,9 @@ object MultiPartDataUtils {
             part.dispose()
         }
 
-        return if (fileData != null) {
+        return if (fileData != null && music != null) {
             CloudyResult.Success(
-                Pair(fileData, customMetadata)
+                Pair(fileData, music!!)
             )
         } else {
             CloudyResult.Error()

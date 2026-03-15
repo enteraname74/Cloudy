@@ -15,8 +15,43 @@ data class Album(
     val isInQuickAccess: Boolean = false,
     val artist: Artist,
     override val lastUpdateAtMillis: Long = DateUtils.now(),
-): UpdatableElement {
+) : UpdatableElement {
+
+    fun merge(
+        albumUpload: AlbumUpload,
+        artist: Artist,
+    ) : Album =
+        copy(
+            name = albumUpload.name,
+            isInQuickAccess = albumUpload.isInQuickAccess,
+            nbPlayed = albumUpload.nbPlayed,
+            artist = artist,
+        )
+
     companion object {
         const val COVER_PATH = "album/cover/"
     }
+}
+
+@Serializable
+data class AlbumUpload(
+    val name: String,
+    val nbPlayed: Int,
+    val isInQuickAccess: Boolean,
+    val artistUpload: ArtistUpload,
+) {
+    fun toNewAlbum(
+        artist: Artist,
+        userId: Uuid,
+    ): Album =
+        Album(
+            id = Uuid.random(),
+            userId = userId,
+            name = name,
+            coverPath = null,
+            addedDateMillis = DateUtils.now(),
+            nbPlayed = nbPlayed,
+            isInQuickAccess = isInQuickAccess,
+            artist = artist,
+        )
 }

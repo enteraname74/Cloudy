@@ -4,9 +4,8 @@ import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.*
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
-import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.UploadedMusicData
+import com.github.enteraname74.cloudy.domain.model.MusicUpload
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
@@ -50,7 +49,7 @@ fun Route.uploadMusic() {
         ) ?: return@post cannotFindUser()
 
         val shouldSearchForMetadata: Boolean = call.request.queryParameters["searchMetadata"]?.toBoolean() == true
-        val musicFile: CloudyResult<Pair<FileData, CustomMusicMetadata?>> = MultiPartDataUtils.processMusicUploadRequest(
+        val musicFile: CloudyResult<Pair<FileData, MusicUpload>> = MultiPartDataUtils.processMusicUploadRequest(
             musicFile = multipartData,
         )
 
@@ -59,10 +58,10 @@ fun Route.uploadMusic() {
                 return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
             is CloudyResult.Success -> {
-                val uploadedResult: CloudyResult<UploadedMusicData> = musicService.save(
+                val uploadedResult: CloudyResult<Unit> = musicService.save(
                     user = user,
                     fileData = musicFile.data.first,
-                    customMusicMetadata = musicFile.data.second,
+                    musicUpload = musicFile.data.second,
                     shouldSearchForMetadata = shouldSearchForMetadata,
                 )
 
@@ -71,7 +70,7 @@ fun Route.uploadMusic() {
                         return@post badRequest(routingMessages.CANNOT_SAVE_SONG)
                     }
                     is CloudyResult.Success -> {
-                        call.respond(uploadedResult.data)
+                        call.respond(HttpStatusCode.Accepted)
                     }
                 }
             }

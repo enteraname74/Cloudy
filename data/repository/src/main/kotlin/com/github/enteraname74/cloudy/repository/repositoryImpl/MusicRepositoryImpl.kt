@@ -1,8 +1,6 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
-import com.github.enteraname74.cloudy.domain.filepersistence.updateFromMetadata
-import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.Music
 import com.github.enteraname74.cloudy.domain.model.User
@@ -26,7 +24,6 @@ class MusicRepositoryImpl(
     override suspend fun startUploadProcess(
         user: User,
         fileData: FileData,
-        customMusicMetadata: CustomMusicMetadata?,
         shouldSearchForMetadata: Boolean
     ): UploadProcessState {
         // We save the file
@@ -40,18 +37,21 @@ class MusicRepositoryImpl(
             name = temporarySavedFileId.toString(),
         ) ?: return UploadProcessState.Error
 
-        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
-            musicFile = temporarySavedFile,
-            customMetadata = customMusicMetadata,
-            shouldSearchForMetadata = shouldSearchForMetadata,
-        )
+//        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
+//            musicFile = temporarySavedFile,
+//            customMetadata = customMusicMetadata,
+//            shouldSearchForMetadata = shouldSearchForMetadata,
+//        )
+
+        val fingerprint: String =
+            musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile) ?: return UploadProcessState.Error
 
         /*
         We check if a music with the same fingerprint has already been saved.
         If so, we will delete the temporary file and update the information of the found file.
          */
         val existingMusic: Music? = getFromFingerprint(
-            fingerprint = musicMetadata.fingerprint,
+            fingerprint = fingerprint,
             userId = user.id,
         )
 
@@ -60,20 +60,17 @@ class MusicRepositoryImpl(
                 name = temporarySavedFileId.toString(),
                 username = user.username,
             )
-            val updatedMusic =
-                saveMusicFileToDbAfterUploadProcess(music = existingMusic.updateFromMetadata(metadata = musicMetadata))
-            return UploadProcessState.AlreadyExisting(updatedMusic)
         } else {
             // We will rename the temporary file to suit the music fingerprint
             musicFileManager.rename(
                 from = temporarySavedFileId.toString(),
                 username = user.username,
-                to = "${musicMetadata.fingerprint}.${fileData.extension}"
+                to = "$fingerprint.${fileData.extension}"
             )
         }
 
         return UploadProcessState.ContinueProcess(
-            metadata = musicMetadata
+            fingerprint = fingerprint,
         )
     }
 

@@ -10,6 +10,8 @@ import kotlin.uuid.Uuid
 
 interface MusicInformationRetriever {
 
+    suspend fun getFingerprint(musicFile: File): String?
+
     /**
      * Retrieves information about a music file.
      * If [shouldSearchForMetadata] is true, the primary source of information will be a remote service (Acoustid).
@@ -35,6 +37,7 @@ interface MusicInformationRetriever {
 
 // TODO: Improve MusicInformationRetriever.Metadata to include album artist
 // TODO: Improve artist check with existing ones.
+@Deprecated("Not useful with new data structure")
 fun Music.updateFromMetadata(metadata: MusicInformationRetriever.Metadata): Music {
     val artists = metadata.artists.map {
         Artist(

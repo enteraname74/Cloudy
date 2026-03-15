@@ -21,10 +21,57 @@ data class Music(
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
 ): UpdatableElement {
+
+    fun merge(
+        musicUpload: MusicUpload,
+        artists: List<Artist>,
+        album: Album,
+    ): Music =
+        copy(
+            name = musicUpload.name,
+            album = album,
+            artists = artists,
+            albumPosition = musicUpload.albumPosition,
+            duration = musicUpload.duration,
+            nbPlayed = musicUpload.nbPlayed,
+            isInQuickAccess = musicUpload.isInQuickAccess,
+        )
+
     companion object {
         fun buildLocalCoverPath(): String =
             "$COVER_PATH${UUID.randomUUID()}"
 
         const val COVER_PATH = "music/cover/"
     }
+}
+
+@Serializable
+data class MusicUpload(
+    val name: String,
+    val albumUpload: AlbumUpload,
+    val artists: List<ArtistUpload>,
+    val albumPosition: Int?,
+    val duration: Long,
+    val nbPlayed: Int,
+    val isInQuickAccess: Boolean,
+) {
+    fun toNewMusic(
+        userId: Uuid,
+        artists: List<Artist>,
+        album: Album,
+        fingerprint: String,
+        path: String,
+    ): Music =
+        Music(
+            fingerprint = fingerprint,
+            userId = userId,
+            name = name,
+            album = album,
+            artists = artists,
+            path = path,
+            albumPosition = albumPosition,
+            coverPath = null,
+            duration = duration,
+            addedDateMillis = DateUtils.now(),
+        )
 }
