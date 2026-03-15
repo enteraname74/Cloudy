@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.*
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.FileData
@@ -13,6 +14,7 @@ import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -21,7 +23,7 @@ fun Route.uploadMusic() {
     val musicService by inject<MusicService>()
     val userService by inject<UserService>()
 
-    post("/upload") {
+    post<MusicResource.Upload> {
         val multipartData: MultiPartData = call.receiveMultipart()
 
         val routingMessages: RoutingMessages = getRoutingMessages()

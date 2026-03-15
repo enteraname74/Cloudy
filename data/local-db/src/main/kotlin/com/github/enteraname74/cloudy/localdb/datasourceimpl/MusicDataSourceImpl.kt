@@ -101,12 +101,12 @@ class MusicDataSourceImpl : MusicDataSource {
         workTransaction {
 
             val query = MusicTable.join(
-                    otherTable = MusicArtistTable,
-                    joinType = JoinType.INNER,
-                    onColumn = MusicTable.id,
-                    otherColumn = MusicArtistTable.musicId,
-                    additionalConstraint = { MusicArtistTable.artistId eq artistId }
-                ).selectAll().withDistinct()
+                otherTable = MusicArtistTable,
+                joinType = JoinType.INNER,
+                onColumn = MusicTable.id,
+                otherColumn = MusicArtistTable.musicId,
+                additionalConstraint = { MusicArtistTable.artistId eq artistId }
+            ).selectAll().withDistinct()
 
             MusicEntity
                 .wrapRows(query)

@@ -5,7 +5,7 @@ import com.github.enteraname74.cloudy.controller.routing.music.routes.*
 import io.ktor.server.routing.*
 
 fun Routing.musicRouting() {
-    authenticatedRoutes("/music") {
+    authenticatedRoutes {
         uploadMusic()
         songsOfUser()
         getMusicFile()
