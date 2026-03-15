@@ -25,4 +25,5 @@ interface AlbumDataSource {
     suspend fun deleteAll(albumIds: List<Uuid>)
     suspend fun allOfArtist(artistId: Uuid): List<Album>
     suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean
+    suspend fun deleteAllEmpty()
 }

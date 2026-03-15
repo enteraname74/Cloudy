@@ -22,6 +22,7 @@ internal object ArtistTable: UuidTable() {
     fun upsertAll(artists: List<Artist>) {
         batchUpsert(artists) { artist ->
             this[id] = artist.id
+            this[userId] = artist.userId
             this[name] = artist.name
             this[coverPath] = artist.coverPath
             this[addedDate] = artist.addedDateMillis

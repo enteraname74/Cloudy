@@ -11,6 +11,7 @@ import org.jetbrains.exposed.v1.jdbc.batchUpsert
 
 internal object MusicTable: IdTable<String>() {
     override val id = varchar("id", 128).entityId()
+    override val primaryKey = PrimaryKey(id)
 
     val name = varchar("name", 128)
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)

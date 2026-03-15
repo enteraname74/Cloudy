@@ -24,4 +24,6 @@ interface ArtistRepository {
     ): List<Artist>
     suspend fun deleteById(artistId: Uuid): Boolean
     suspend fun deleteAll(artistIds: List<Uuid>)
+
+    suspend fun deleteAllEmpty()
 }

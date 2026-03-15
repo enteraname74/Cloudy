@@ -108,4 +108,8 @@ class AlbumRepositoryImpl(
     override suspend fun deleteAll(albumIds: List<Uuid>) {
         albumDataSource.deleteAll(albumIds)
     }
+
+    override suspend fun deleteAllEmpty() {
+        albumDataSource.deleteAllEmpty()
+    }
 }

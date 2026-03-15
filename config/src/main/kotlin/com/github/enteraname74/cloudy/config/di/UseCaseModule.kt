@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.config.di
 
+import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.*
 import com.github.enteraname74.cloudy.domain.usecase.artist.*
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
@@ -19,4 +20,6 @@ internal val useCaseModule = module {
 
     // Music
     singleOf(::UploadMusicUseCase)
+
+    singleOf(::DeleteEmptyAlbumsAndArtistsUseCase)
 }

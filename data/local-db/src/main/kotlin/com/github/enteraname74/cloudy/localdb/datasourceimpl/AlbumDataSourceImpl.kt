@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumEntity
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
+import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
@@ -12,7 +13,9 @@ import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.notInSubQuery
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
@@ -110,4 +113,13 @@ class AlbumDataSourceImpl : AlbumDataSource {
                     (AlbumTable.id eq albumId) and (AlbumTable.userId eq userId)
                 }.count() > 0
         }
+
+    override suspend fun deleteAllEmpty() {
+        workTransaction {
+            AlbumTable.deleteWhere {
+                this.id notInSubQuery MusicTable
+                    .select(MusicTable.albumId)
+            }
+        }
+    }
 }
