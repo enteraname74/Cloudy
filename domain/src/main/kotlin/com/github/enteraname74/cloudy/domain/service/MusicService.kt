@@ -1,13 +1,17 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.model.*
+import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
-import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
+import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
+import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -17,11 +21,9 @@ import kotlin.uuid.Uuid
 class MusicService(
     private val musicRepository: MusicRepository,
     private val musicArtistRepository: MusicArtistRepository,
-    private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
-    private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
-    private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
-    private val deleteAlbumIfEmptyUseCase: DeleteAlbumIfEmptyUseCase,
+    private val updateMusicUseCase: UpdateMusicUseCase,
     private val uploadMusicUseCase: UploadMusicUseCase,
+    private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
 
     suspend fun getFromId(musicId: String): Music? =
@@ -66,66 +68,20 @@ class MusicService(
     }
 
     suspend fun update(
-        modifiedMusic: Music,
-        newCover: FileData?,
-        newArtistsNames: List<String>,
+        musicUpdates: List<MusicUpdate>,
         user: User,
-    ): CloudyResult<Music> {
-        // We get or create the artist of the modified music
-        val newArtists: List<Artist> = newArtistsNames.map { name ->
-            getOrCreateArtistUseCase(
-                artistName = name,
+    ): CloudyResult<Unit> {
+        for (update in musicUpdates) {
+            val result = updateMusicUseCase(
+                musicUpdate = update,
                 user = user,
-                // If a new artist should be made from scratch on the music update, it should not have a predefined cover.
-                coverData = null,
+            )
+
+            if (result is CloudyResult.Error) return CloudyResult.Error(
+                message = update.id,
             )
         }
-
-        val previousArtists = modifiedMusic.artists
-
-        val firstArtist: Artist =
-            newArtists.firstOrNull() ?: modifiedMusic.artists.first()
-
-        // We get or create the album of the modified music
-        val album: Album = getOrCreateAlbumUseCase(
-            albumName = modifiedMusic.album.name,
-            artistId = firstArtist.id,
-            artistName = firstArtist.name,
-            user = user,
-            // If a new album should be made from scratch on the music update, it should not have a predefined cover.
-            coverData = null,
-        )
-
-        if (newArtistsNames.isNotEmpty()) {
-            updateArtistLinkOfMusic(
-                previousArtists = previousArtists,
-                newArtists = newArtists,
-                userId = user.id,
-                newArtistsNames = newArtistsNames,
-                modifiedMusic = modifiedMusic,
-            )
-        }
-
-        // We update the album of the music and its artist name
-        val musicWithCorrectIds = modifiedMusic.copy(
-            album = album,
-        )
-        val savedMusic = musicRepository.upsert(
-            music = musicWithCorrectIds,
-            username = user.username,
-            cover = newCover,
-        )
-
-        // We check if the legacy album and artist can be deleted
-        modifiedMusic.album.id.let {
-            deleteAlbumIfEmptyUseCase(albumId = it)
-        }
-
-        previousArtists.forEach {
-            deleteArtistIfEmptyUseCase(artistId = it.id)
-        }
-
-        return savedMusic
+        return CloudyResult.Success(Unit)
     }
 
     private suspend fun updateArtistLinkOfMusic(
@@ -163,27 +119,11 @@ class MusicService(
         musicIds: List<String>,
         username: String,
     ) {
-
-        val musicsToDelete = musicRepository.getAll(musicIds)
-        val relatedArtists: List<Artist> = musicsToDelete
-            .flatMap { it.artists }
-            .distinct()
-
         musicRepository.deleteAll(
             ids = musicIds,
             username = username,
         )
-
-        relatedArtists.forEach {
-            deleteArtistIfEmptyUseCase(artistId = it.id)
-        }
-
-        musicsToDelete
-            .map { it.album.id }
-            .distinct()
-            .forEach { albumId ->
-                deleteAlbumIfEmptyUseCase(albumId = albumId)
-            }
+        deleteEmptyAlbumsAndArtistsUseCase()
     }
 
     suspend fun getAllOfUser(

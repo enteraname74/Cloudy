@@ -6,6 +6,7 @@ import kotlin.uuid.Uuid
 object EnRoutingMessages: RoutingMessages {
     override val USERNAME_TAKEN: String = "The username is already taken."
     override val WRONG_INFORMATION: String = "The given information are incorrect."
+    override val INVALID_INFORMATION: String = "The given information are invalid"
     override val MISSING_USER_INFORMATION: String = "Missing username or password."
     override val CANNOT_CREATE_USER: String = "Cannot create user."
     override val CANNOT_FIND_USER: String = "Cannot find the user."
@@ -24,7 +25,9 @@ object EnRoutingMessages: RoutingMessages {
     override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Given file is not a music file."
     override val SONG_NOT_POSSESSED_BY_USER: String = "This song is not possessed by the user."
     override val CANNOT_SAVE_SONG: String = "Cannot save the given song."
-    override val CANNOT_UPDATE_SONG: String = "Cannot update the song."
+
+    override fun cannotUpdateSong(songId: String): String =
+        "Couldn't update the song with id: $songId"
 
     override fun songNotPossessedByUser(musicId: String): String =
         "The song with id: $musicId is not possessed by the user."

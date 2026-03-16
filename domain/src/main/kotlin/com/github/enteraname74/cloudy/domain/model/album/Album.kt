@@ -1,19 +1,21 @@
-package com.github.enteraname74.cloudy.domain.model
+package com.github.enteraname74.cloudy.domain.model.album
 
+import com.github.enteraname74.cloudy.domain.model.UpdatableElement
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
 data class Album(
-    val id: Uuid,
+    val id: Uuid = Uuid.random(),
     val userId: Uuid,
     val name: String,
     val coverPath: String?,
-    val addedDateMillis: Long,
+    val artist: Artist,
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
-    val artist: Artist,
+    val addedDateMillis: Long = DateUtils.now(),
     override val lastUpdateAtMillis: Long = DateUtils.now(),
 ) : UpdatableElement {
 
@@ -28,30 +30,18 @@ data class Album(
             artist = artist,
         )
 
+    fun merge(
+        albumUpdate: AlbumUpdate,
+        artist: Artist,
+    ): Album =
+        copy(
+            name = albumUpdate.name,
+            isInQuickAccess = albumUpdate.isInQuickAccess,
+            nbPlayed = albumUpdate.nbPlayed,
+            artist = artist,
+        )
+
     companion object {
         const val COVER_PATH = "album/cover/"
     }
-}
-
-@Serializable
-data class AlbumUpload(
-    val name: String,
-    val nbPlayed: Int,
-    val isInQuickAccess: Boolean,
-    val artistUpload: ArtistUpload,
-) {
-    fun toNewAlbum(
-        artist: Artist,
-        userId: Uuid,
-    ): Album =
-        Album(
-            id = Uuid.random(),
-            userId = userId,
-            name = name,
-            coverPath = null,
-            addedDateMillis = DateUtils.now(),
-            nbPlayed = nbPlayed,
-            isInQuickAccess = isInQuickAccess,
-            artist = artist,
-        )
 }

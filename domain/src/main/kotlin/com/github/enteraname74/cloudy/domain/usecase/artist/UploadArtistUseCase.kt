@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.domain.usecase.artist
 
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.ArtistUpload
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.model.artist.ArtistUpload
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 

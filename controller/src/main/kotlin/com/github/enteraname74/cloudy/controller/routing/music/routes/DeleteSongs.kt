@@ -6,10 +6,12 @@ import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.delete
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
@@ -17,7 +19,7 @@ import kotlin.uuid.Uuid
 fun Route.deleteSongs() {
     val musicService by inject<MusicService>()
 
-    delete {
+    delete<MusicResource> {
         val musicIds: List<String> = call.receive()
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()

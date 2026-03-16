@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.repository.datasource
 
-import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
@@ -14,6 +14,10 @@ interface AlbumDataSource {
         albumName: String,
         albumArtist: String,
         userId: Uuid
+    ): Album?
+    suspend fun getFromUser(
+        albumId: Uuid,
+        userId: Uuid,
     ): Album?
     suspend fun upsert(album: Album): Album
     suspend fun upsertAll(albums: List<Album>)

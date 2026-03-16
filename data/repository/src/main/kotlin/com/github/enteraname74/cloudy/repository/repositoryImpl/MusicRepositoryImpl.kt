@@ -2,7 +2,7 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
@@ -136,6 +136,15 @@ class MusicRepositoryImpl(
 
     override suspend fun getFromId(musicId: String): Music? =
         musicDataSource.getFromId(musicId = musicId)
+
+    override suspend fun getFromUser(
+        musicId: String,
+        userId: Uuid
+    ): Music? =
+        musicDataSource.getFromUser(
+            userId = userId,
+            musicId = musicId,
+        )
 
     override suspend fun getFromCoverPath(coverPath: String): Music? =
         musicDataSource.getFromCoverPath(coverPath = coverPath)

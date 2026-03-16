@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -36,6 +36,10 @@ interface MusicRepository {
     ): CloudyResult<Music>
     suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit>
     suspend fun getFromId(musicId: String): Music?
+    suspend fun getFromUser(
+        musicId: String,
+        userId: Uuid,
+    ): Music?
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(musicId: String, username: String): File?
     suspend fun getAll(ids: List<String>): List<Music>

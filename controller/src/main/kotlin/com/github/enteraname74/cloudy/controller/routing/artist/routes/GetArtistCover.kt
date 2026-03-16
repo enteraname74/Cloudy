@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.*
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import io.ktor.http.*

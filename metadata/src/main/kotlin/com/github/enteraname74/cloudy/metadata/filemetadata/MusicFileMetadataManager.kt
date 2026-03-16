@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.metadata.filemetadata
 
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata

@@ -18,6 +18,7 @@ internal fun Application.configureStatusPage() {
             )
         }
         exception<RequestValidationException> { call, cause ->
+            println("THERE?")
             call.respond(
                 status = HttpStatusCode.BadRequest,
                 message = call
@@ -28,7 +29,6 @@ internal fun Application.configureStatusPage() {
             )
         }
         exception<Throwable> { call, cause ->
-            println("CLUELESS -- cause: $cause")
             call.respond(
                 status = HttpStatusCode.InternalServerError,
                 message = call.getRoutingMessages().internalServerError(
@@ -42,5 +42,6 @@ internal fun Application.configureStatusPage() {
 private fun RoutingMessages.fromInvalidRequestType(type: InvalidRequestType): String =
     when (type) {
         InvalidRequestType.UserInformation -> MISSING_USER_INFORMATION
+        InvalidRequestType.MusicUpdate -> INVALID_INFORMATION
         InvalidRequestType.Unknown -> WRONG_INFORMATION
     }

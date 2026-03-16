@@ -1,22 +1,21 @@
 package com.github.enteraname74.cloudy.domain.usecase.music
 
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.MusicArtist
-import com.github.enteraname74.cloudy.domain.model.MusicUpload
 import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
+import com.github.enteraname74.cloudy.domain.model.album.Album
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
+import com.github.enteraname74.cloudy.domain.usecase.musicartist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 
 class UploadMusicUseCase(
     private val uploadArtistUseCase: UploadArtistUseCase,
     private val uploadAlbumUseCase: UploadAlbumUseCase,
     private val musicRepository: MusicRepository,
-    private val musicArtistRepository: MusicArtistRepository,
+    private val setArtistsOfMusicUseCase: SetArtistsOfMusicUseCase,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
     suspend operator fun invoke(
@@ -36,13 +35,13 @@ class UploadMusicUseCase(
             user = user,
         )
 
-        val exisingMusic = musicRepository.getFromFingerprint(
+        val existingMusic = musicRepository.getFromFingerprint(
             fingerprint = fingerprint,
             userId = user.id,
         )
-        val result = if (exisingMusic != null) {
+        val result = if (existingMusic != null) {
             musicRepository.upsert(
-                music = exisingMusic.merge(
+                music = existingMusic.merge(
                     musicUpload = musicUpload,
                     artists = artistOfMusic,
                     album = albumOfMusic,
@@ -67,15 +66,10 @@ class UploadMusicUseCase(
         return when (result) {
             is CloudyResult.Error -> result
             is CloudyResult.Success -> {
-                musicArtistRepository.deleteOfMusic(musicId = fingerprint)
-                musicArtistRepository.upsertAll(
-                    musicArtists = artistOfMusic.map {
-                        MusicArtist(
-                            musicId = fingerprint,
-                            artistId = it.id,
-                            userId = user.id,
-                        )
-                    }
+                setArtistsOfMusicUseCase(
+                    musicId = fingerprint,
+                    artistIds = artistOfMusic.map { it.id },
+                    userId = user.id,
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase()

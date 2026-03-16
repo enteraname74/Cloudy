@@ -12,3 +12,6 @@ sealed interface CloudyResult<T> {
             is Success<*> -> Success(Unit)
         }
 }
+
+fun <T> T.toCloudyResult(): CloudyResult.Success<T> =
+    CloudyResult.Success(this)

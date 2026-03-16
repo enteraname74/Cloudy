@@ -1,9 +1,9 @@
 package com.github.enteraname74.cloudy.domain.filepersistence
 
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.album.Album
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import java.io.File
 import kotlin.uuid.Uuid

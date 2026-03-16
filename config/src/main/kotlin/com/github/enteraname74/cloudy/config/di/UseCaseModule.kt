@@ -3,23 +3,31 @@ package com.github.enteraname74.cloudy.config.di
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.*
 import com.github.enteraname74.cloudy.domain.usecase.artist.*
+import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
-import org.koin.core.module.dsl.singleOf
+import com.github.enteraname74.cloudy.domain.usecase.musicartist.SetArtistsOfMusicUseCase
+import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.module
 
 internal val useCaseModule = module {
     // Album
-    singleOf(::DeleteAlbumIfEmptyUseCase)
-    singleOf(::GetOrCreateAlbumUseCase)
-    singleOf(::UploadAlbumUseCase)
+    factoryOf(::DeleteAlbumIfEmptyUseCase)
+    factoryOf(::GetOrCreateAlbumUseCase)
+    factoryOf(::UploadAlbumUseCase)
+    factoryOf(::UpdateAlbumUseCase)
 
     // Artist
-    singleOf(::GetOrCreateArtistUseCase)
-    singleOf(::DeleteArtistIfEmptyUseCase)
-    singleOf(::UploadArtistUseCase)
+    factoryOf(::GetOrCreateArtistUseCase)
+    factoryOf(::DeleteArtistIfEmptyUseCase)
+    factoryOf(::UploadArtistUseCase)
+    factoryOf(::UpdateArtistUseCase)
 
     // Music
-    singleOf(::UploadMusicUseCase)
+    factoryOf(::UploadMusicUseCase)
+    factoryOf(::UpdateMusicUseCase)
+    
+    // MusicArtist
+    factoryOf(::SetArtistsOfMusicUseCase)
 
-    singleOf(::DeleteEmptyAlbumsAndArtistsUseCase)
+    factoryOf(::DeleteEmptyAlbumsAndArtistsUseCase)
 }

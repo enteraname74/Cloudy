@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
@@ -33,7 +33,17 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun getFromId(musicId: String): Music? =
         workTransaction {
             MusicEntity
-                .find { MusicTable.id eq musicId }
+                .findById(musicId)
+                ?.toMusic()
+        }
+
+    override suspend fun getFromUser(
+        musicId: String,
+        userId: Uuid
+    ): Music? =
+        workTransaction {
+            MusicEntity
+                .find { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
                 .firstOrNull()
                 ?.toMusic()
         }

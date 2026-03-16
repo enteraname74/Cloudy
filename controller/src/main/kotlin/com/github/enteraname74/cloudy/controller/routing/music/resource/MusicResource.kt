@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.routing.music.resource
 
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import io.ktor.resources.Resource
+import io.ktor.resources.*
 
 @Resource("/music")
 class MusicResource {
@@ -25,4 +25,9 @@ class MusicResource {
                 limitPerPage = maxPerPage,
             )
     }
+    @Resource("{id}")
+    data class File(
+        val parent: MusicResource = MusicResource(),
+        val id: String,
+    )
 }

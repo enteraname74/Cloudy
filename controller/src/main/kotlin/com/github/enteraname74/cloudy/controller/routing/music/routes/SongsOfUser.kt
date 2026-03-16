@@ -3,7 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing.music.routes
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.server.resources.*
 import io.ktor.server.response.*

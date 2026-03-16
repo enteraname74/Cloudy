@@ -5,7 +5,8 @@ import kotlin.uuid.Uuid
 
 object FrRoutingMessages: RoutingMessages {
     override val USERNAME_TAKEN: String = "Ce nom d'utilisateur est déjà pris."
-    override val WRONG_INFORMATION: String = "Les informations fournis sont incorrectes."
+    override val WRONG_INFORMATION: String = "Les informations fournies sont incorrectes."
+    override val INVALID_INFORMATION: String = "Les informations fournies ne sont pas valables."
     override val MISSING_USER_INFORMATION: String = "Il manque le nom d'utilisateur ou le mot de passe."
     override val CANNOT_CREATE_USER: String = "Impossible de créer le profil utilisateur."
     override val CANNOT_FIND_USER: String = "Impossible de trouver l'utilisateur."
@@ -24,7 +25,9 @@ object FrRoutingMessages: RoutingMessages {
     override val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String = "Le fichier fourni n'est pas une musique."
     override val SONG_NOT_POSSESSED_BY_USER: String = "Cette musique n'est pas possédée par l'utilisateur."
     override val CANNOT_SAVE_SONG: String = "Impossible de sauvegarder la musique."
-    override val CANNOT_UPDATE_SONG: String = "Impossible de mettre à jour la musique."
+
+    override fun cannotUpdateSong(songId: String): String =
+        "Impossible de mettre à jour la musique avec l'id : $songId"
 
     override fun songNotPossessedByUser(musicId: String): String =
         "La musique ayant l'identifiant : $musicId, n'est pas possédée par l'utilisateur."

@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.AlbumEntity
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
@@ -55,6 +55,17 @@ class AlbumDataSourceImpl : AlbumDataSource {
 
             AlbumEntity
                 .wrapRows(query)
+                .firstOrNull()
+                ?.toAlbum()
+        }
+
+    override suspend fun getFromUser(
+        albumId: Uuid,
+        userId: Uuid
+    ): Album? =
+        workTransaction {
+            AlbumEntity
+                .find { (AlbumTable.id eq albumId) and (AlbumTable.userId eq userId) }
                 .firstOrNull()
                 ?.toAlbum()
         }

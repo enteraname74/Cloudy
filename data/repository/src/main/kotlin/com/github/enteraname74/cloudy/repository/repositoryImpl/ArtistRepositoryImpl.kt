@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
@@ -27,6 +27,12 @@ class ArtistRepositoryImpl(
 
     override suspend fun getFromId(artistId: Uuid): Artist? =
         artistDataSource.getFromId(artistId = artistId)
+
+    override suspend fun getFromUser(artistId: Uuid, userId: Uuid): Artist? =
+        artistDataSource.getFromUser(
+            artistId = artistId,
+            userId = userId,
+        )
 
     override suspend fun getFromCoverPath(coverPath: String): Artist? =
         artistDataSource.getFromCoverPath(coverPath = coverPath)

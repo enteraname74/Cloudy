@@ -1,6 +1,9 @@
 package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.*
+import com.github.enteraname74.cloudy.domain.model.album.Album
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
