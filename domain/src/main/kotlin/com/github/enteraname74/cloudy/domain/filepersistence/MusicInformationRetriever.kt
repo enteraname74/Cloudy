@@ -1,12 +1,7 @@
 package com.github.enteraname74.cloudy.domain.filepersistence
 
-import com.github.enteraname74.cloudy.domain.model.album.Album
-import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
-import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.util.DateUtils
 import java.io.File
-import kotlin.uuid.Uuid
 
 interface MusicInformationRetriever {
 
@@ -32,36 +27,5 @@ interface MusicInformationRetriever {
         val coverPath: String?,
         val fingerprint: String,
         val duration: Long,
-    )
-}
-
-// TODO: Improve MusicInformationRetriever.Metadata to include album artist
-// TODO: Improve artist check with existing ones.
-@Deprecated("Not useful with new data structure")
-fun Music.updateFromMetadata(metadata: MusicInformationRetriever.Metadata): Music {
-    val artists = metadata.artists.map {
-        Artist(
-            id = Uuid.random(),
-            userId = userId,
-            name = it,
-            coverPath = null,
-            addedDateMillis = DateUtils.now(),
-        )
-    }
-
-    return copy(
-        name = name,
-        fingerprint = metadata.fingerprint,
-        artists = artists,
-        album = Album(
-            id = Uuid.random(),
-            userId = userId,
-            name = metadata.album,
-            coverPath = null,
-            addedDateMillis = addedDateMillis,
-            artist = artists.first(),
-        ),
-        coverPath = metadata.coverPath,
-        duration = metadata.duration,
     )
 }

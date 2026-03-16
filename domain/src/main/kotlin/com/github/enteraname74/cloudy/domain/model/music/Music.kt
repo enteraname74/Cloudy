@@ -17,7 +17,7 @@ data class Music(
     val artists: List<Artist>,
     val path: String,
     val albumPosition: Int?,
-    val coverPath: String?,
+    val coverPath: String = buildLocalCoverPath(),
     val duration: Long,
     val addedDateMillis: Long,
     override val lastUpdateAtMillis: Long = DateUtils.now(),

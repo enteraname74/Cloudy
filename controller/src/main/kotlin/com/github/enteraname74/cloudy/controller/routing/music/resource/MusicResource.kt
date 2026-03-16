@@ -30,4 +30,10 @@ class MusicResource {
         val parent: MusicResource = MusicResource(),
         val id: String,
     )
+
+    @Resource("cover/{coverId}")
+    data class Cover(
+        val parent: MusicResource = MusicResource(),
+        val coverId: String,
+    )
 }

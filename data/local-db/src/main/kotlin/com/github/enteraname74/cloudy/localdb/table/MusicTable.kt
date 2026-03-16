@@ -15,7 +15,7 @@ internal object MusicTable: IdTable<String>() {
 
     val name = varchar("name", 128)
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val coverPath = text("coverPath").nullable()
+    val coverPath = text("coverPath")
     val albumPosition = integer("albumPosition").nullable()
     val path = varchar("path", 255)
     val duration = long("duration")

@@ -33,7 +33,6 @@ data class MusicUpload(
             artists = artists,
             path = path,
             albumPosition = albumPosition,
-            coverPath = null,
             duration = duration,
             addedDateMillis = DateUtils.now(),
         )
