@@ -7,7 +7,12 @@ import io.ktor.resources.*
 class MusicResource {
 
     @Resource("upload")
-    class Upload(
+    data class Upload(
+        val parent: MusicResource = MusicResource()
+    )
+
+    @Resource("check")
+    data class Check(
         val parent: MusicResource = MusicResource()
     )
 

@@ -10,7 +10,7 @@ fun Routing.musicRouting() {
         songsOfUser()
         getMusicFile()
         deleteSongs()
-        updateSong()
+        updateMusics()
         checkMusicIdsValidity()
         getMusicCover()
     }

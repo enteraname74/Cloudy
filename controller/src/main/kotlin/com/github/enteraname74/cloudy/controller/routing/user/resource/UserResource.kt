@@ -7,13 +7,13 @@ import kotlin.uuid.Uuid
 class UserResource {
 
     @Resource("{id}")
-    class Delete(
+    data class Delete(
         val parent: UserResource = UserResource(),
         val id: Uuid,
     )
 
     @Resource("generateCode")
-    class GenerateCode(
+    data class GenerateCode(
         val parent: UserResource = UserResource(),
     )
 }
