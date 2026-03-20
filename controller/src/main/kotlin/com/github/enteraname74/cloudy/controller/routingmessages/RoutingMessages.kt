@@ -45,6 +45,8 @@ interface RoutingMessages {
     val PLAYLIST_NOT_POSSESSED_BY_USER: String
     val PLAYLIST_ALREADY_EXISTING: String
 
+    val CANNOT_SAVE_PLAYLIST: String
+
     fun playlistNotPossessedByUser(playlistId: Uuid): String
 
     val MISSING_TOKEN_INFORMATION: String

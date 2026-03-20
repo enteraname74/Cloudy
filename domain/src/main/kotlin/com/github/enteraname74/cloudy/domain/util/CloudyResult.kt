@@ -11,5 +11,8 @@ sealed interface CloudyResult<T> {
         }
 }
 
-fun <T> T.toCloudyResult(): CloudyResult.Success<T> =
+fun <T> T.toCloudySuccess(): CloudyResult.Success<T> =
     CloudyResult.Success(this)
+
+fun <T> T?.toCloudyResult(): CloudyResult<T> =
+    this?.let { CloudyResult.Success(it) } ?: CloudyResult.Error()

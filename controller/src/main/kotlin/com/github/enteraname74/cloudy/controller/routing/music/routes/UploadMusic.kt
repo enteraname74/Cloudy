@@ -12,6 +12,7 @@ import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
@@ -67,7 +68,7 @@ fun Route.uploadMusic() {
                 return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
             is CloudyResult.Success -> {
-                val uploadedResult: CloudyResult<Unit> = musicService.save(
+                val uploadedResult: CloudyResult<Music> = musicService.save(
                     user = user,
                     fileData = musicFile.data.first,
                     musicUpload = musicFile.data.second,
@@ -79,7 +80,7 @@ fun Route.uploadMusic() {
                         return@post badRequest(routingMessages.CANNOT_SAVE_SONG)
                     }
                     is CloudyResult.Success -> {
-                        call.respond(HttpStatusCode.Accepted)
+                        call.respond(uploadedResult.data)
                     }
                 }
             }

@@ -10,6 +10,7 @@ import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.usecase.playlist.UploadPlaylistUseCase
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
@@ -64,16 +65,13 @@ class PlaylistService(
         )
 
     suspend fun upload(
-        playlists: List<PlaylistUpload>,
+        playlistUpload: PlaylistUpload,
         user: User,
-    ) {
-        playlists.forEach { playlistUpload ->
-            uploadPlaylistUseCase(
-                playlistUpload = playlistUpload,
-                user = user,
-            )
-        }
-    }
+    ): CloudyResult<PlaylistWithMusics> =
+        uploadPlaylistUseCase(
+            playlistUpload = playlistUpload,
+            user = user,
+        )
 
     suspend fun deleteFromPlaylist(
         playlistId: Uuid,
@@ -135,13 +133,14 @@ class PlaylistService(
      * returns a list of all the ids of the initial list that are not present
      * in the db.
      */
+    // TODO OPTIMIZATION: Logic should be at DB layer, avoid fetching all playlists for checks.
     suspend fun getDeletedPlaylistsIds(
         idsToCheck: List<Uuid>,
         userId: Uuid
     ): List<Uuid> {
         val allPlaylistOfUser: List<Uuid> = playlistRepository.allOfUser(
             userId = userId,
-        ).map { it.id }
+        ).map { it.playlist.id }
 
         return idsToCheck.filterNot { it in allPlaylistOfUser }
     }

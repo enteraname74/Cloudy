@@ -48,6 +48,7 @@ object EnRoutingMessages: RoutingMessages {
     override val PLAYLISTS_DELETED: String = "Playlists have been deleted"
     override val PLAYLIST_NOT_POSSESSED_BY_USER: String = "This playlist is not possessed by the user."
     override val PLAYLIST_ALREADY_EXISTING: String = "This playlist already exists."
+    override val CANNOT_SAVE_PLAYLIST: String = "Cannot save playlist."
 
     override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "The album with id: $playlistId is not possessed by the user."

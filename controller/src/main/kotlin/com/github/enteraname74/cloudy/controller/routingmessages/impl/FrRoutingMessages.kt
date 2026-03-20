@@ -48,6 +48,7 @@ object FrRoutingMessages: RoutingMessages {
     override val PLAYLISTS_DELETED: String = "Les playlists ont été supprimées."
     override val PLAYLIST_NOT_POSSESSED_BY_USER: String = "Cette playlist n'est pas possédée par l'utilisateur."
     override val PLAYLIST_ALREADY_EXISTING: String = "Cette playlist existe déja."
+    override val CANNOT_SAVE_PLAYLIST: String = "Impossible de sauvegarder la playlist."
 
     override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "La playlist ayant l'identifiant : $playlistId, n'est pas possédée par l'utilisateur."

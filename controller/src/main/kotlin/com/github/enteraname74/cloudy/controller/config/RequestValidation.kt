@@ -3,13 +3,10 @@ package com.github.enteraname74.cloudy.controller.config
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusicsBody
-import com.github.enteraname74.cloudy.controller.routing.music.model.UpdateMusicsBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
-import io.ktor.server.plugins.requestvalidation.RequestValidation
-import io.ktor.server.plugins.requestvalidation.RequestValidationException
-import io.ktor.server.plugins.requestvalidation.ValidationResult
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
+import io.ktor.server.application.*
+import io.ktor.server.plugins.requestvalidation.*
 
 fun Application.configureRequestValidation() {
     install(RequestValidation) {
@@ -27,8 +24,8 @@ fun Application.configureRequestValidation() {
                 ValidationResult.Invalid(InvalidRequestType.UserInformation.name)
             }
         }
-        validate<UpdateMusicsBody> { musicUpdates ->
-            if (musicUpdates.musics.all { it.isValid() }) {
+        validate<MusicUpdate> { musicUpdate ->
+            if (musicUpdate.isValid()) {
                 ValidationResult.Valid
             } else {
                 ValidationResult.Invalid(InvalidRequestType.InvalidData.name)

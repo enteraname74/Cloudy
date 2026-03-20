@@ -4,18 +4,18 @@ import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.routing.music.model.UpdateMusicsBody
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.logging.cloudyLogger
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.request.receive
+import io.ktor.server.request.*
 import io.ktor.server.resources.put
-import io.ktor.server.response.respond
+import io.ktor.server.response.*
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
@@ -32,17 +32,17 @@ fun Route.updateMusics() {
             message = routingMessages.CANNOT_FIND_USER,
         )
 
-        val updateMusicsBody: UpdateMusicsBody = call.receive()
+        val musicUpdate: MusicUpdate = call.receive()
 
-        val result: CloudyResult<Unit> = musicService.update(
-            musicUpdates = updateMusicsBody.musics,
+        val result: CloudyResult<Music> = musicService.update(
+            musicUpdate = musicUpdate,
             user = user,
         )
 
         if (result is CloudyResult.Error) {
             badRequest(routingMessages.cannotUpdateSong(result.message.orEmpty()))
         } else {
-            call.respond(HttpStatusCode.OK)
+            call.respond(result)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.domain.usecase.music
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
@@ -23,7 +24,7 @@ class UploadMusicUseCase(
         fingerprint: String,
         user: User,
         musicPath: String,
-    ): CloudyResult<Unit> {
+    ): CloudyResult<Music> {
         val artistOfMusic: List<Artist> = musicUpload.artists.map { artistUpload ->
             uploadArtistUseCase(
                 artistUpload = artistUpload,
@@ -61,7 +62,7 @@ class UploadMusicUseCase(
                 username = user.username,
                 cover = null,
             )
-        }.toSimple()
+        }
 
         return when (result) {
             is CloudyResult.Error -> result

@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -17,6 +18,9 @@ class PlaylistRepositoryImpl(
         playlistDataSource.getFromId(
             playlistId = playlistId,
         )
+
+    override suspend fun getWithMusics(playlistId: Uuid): PlaylistWithMusics? =
+        playlistDataSource.getWithMusics(playlistId)
 
     override suspend fun getFromCoverPath(coverPath: String): Playlist? =
         playlistDataSource.getFromCoverPath(
@@ -88,7 +92,7 @@ class PlaylistRepositoryImpl(
         playlistDataSource.deleteAll(playlistIds)
     }
 
-    override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<Playlist> =
+    override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<PlaylistWithMusics> =
         playlistDataSource.allOfUser(
             userId = userId,
             paginatedRequest = paginatedRequest,

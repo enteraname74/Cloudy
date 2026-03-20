@@ -8,8 +8,8 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 
 class UpdateMusicUseCase(
@@ -22,7 +22,7 @@ class UpdateMusicUseCase(
     suspend operator fun invoke(
         musicUpdate: MusicUpdate,
         user: User,
-    ): CloudyResult<Unit> {
+    ): CloudyResult<Music> {
         val existingMusic: Music = musicRepository.getFromUser(
             musicId = musicUpdate.id,
             userId = user.id,
@@ -47,7 +47,7 @@ class UpdateMusicUseCase(
             ),
             username = user.username,
             cover = null,
-        ).toSimple()
+        )
 
         return when (result) {
             is CloudyResult.Error -> result

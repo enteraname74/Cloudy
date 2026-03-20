@@ -43,7 +43,7 @@ class MusicService(
         fileData: FileData,
         musicUpload: MusicUpload,
         shouldSearchForMetadata: Boolean,
-    ): CloudyResult<Unit> {
+    ): CloudyResult<Music> {
 
         val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
             user = user,
@@ -68,21 +68,13 @@ class MusicService(
     }
 
     suspend fun update(
-        musicUpdates: List<MusicUpdate>,
+        musicUpdate: MusicUpdate,
         user: User,
-    ): CloudyResult<Unit> {
-        for (update in musicUpdates) {
-            val result = updateMusicUseCase(
-                musicUpdate = update,
-                user = user,
-            )
-
-            if (result is CloudyResult.Error) return CloudyResult.Error(
-                message = update.id,
-            )
-        }
-        return CloudyResult.Success(Unit)
-    }
+    ): CloudyResult<Music> =
+        updateMusicUseCase(
+            musicUpdate = musicUpdate,
+            user = user,
+        )
 
     private suspend fun updateArtistLinkOfMusic(
         previousArtists: List<Artist>,
@@ -150,6 +142,7 @@ class MusicService(
      * returns a list of all the ids of the initial list that are not present
      * in the db.
      */
+    // TODO OPTIMIZATION: Logic should be at DB layer, avoid fetching all musics for checks.
     suspend fun getDeletedMusicsIds(
         idsToCheck: List<String>,
         userId: Uuid
