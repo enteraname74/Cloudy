@@ -2,8 +2,8 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -177,6 +177,15 @@ class MusicRepositoryImpl(
                 userId = userId,
                 paginatedRequest = paginatedRequest,
             )
+
+    override suspend fun getExistingIds(
+        userId: Uuid,
+        ids: List<String>
+    ): List<String> =
+        musicDataSource.getExistingIds(
+            userId = userId,
+            ids = ids,
+        )
 
     override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)

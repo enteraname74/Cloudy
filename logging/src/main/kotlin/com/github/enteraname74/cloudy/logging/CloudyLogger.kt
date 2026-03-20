@@ -1,7 +1,9 @@
 package com.github.enteraname74.cloudy.logging
 
-import io.ktor.server.routing.*
-import io.ktor.util.logging.*
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.application
+import io.ktor.util.logging.KtorSimpleLogger
+import io.ktor.util.logging.Logger
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 

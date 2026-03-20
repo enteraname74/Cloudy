@@ -14,6 +14,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
@@ -83,6 +84,20 @@ class MusicDataSourceImpl : MusicDataSource {
                 }
                 .paginated(paginatedRequest)
                 .map { it.toMusic() }
+        }
+
+    override suspend fun getExistingIds(
+        userId: Uuid,
+        ids: List<String>
+    ): List<String> =
+        workTransaction {
+            MusicTable
+                .select(MusicTable.id)
+                .where {
+                    (MusicTable.userId eq userId) and
+                            (MusicTable.id inList ids)
+                }
+                .map { it[MusicTable.id].toString() }
         }
 
     override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =

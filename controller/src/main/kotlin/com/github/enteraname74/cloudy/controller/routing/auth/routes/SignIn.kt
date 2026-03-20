@@ -12,10 +12,10 @@ import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.server.request.*
+import io.ktor.server.request.receive
 import io.ktor.server.resources.post
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 
 fun Route.signIn() {

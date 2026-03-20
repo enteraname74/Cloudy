@@ -5,8 +5,10 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.FileUtils
-import io.ktor.http.content.*
-import io.ktor.utils.io.*
+import io.ktor.http.content.MultiPartData
+import io.ktor.http.content.PartData
+import io.ktor.http.content.forEachPart
+import io.ktor.utils.io.toByteArray
 
 object MultiPartDataUtils {
     suspend fun retrieveImageData(fileItem: PartData.FileItem): FileData? {

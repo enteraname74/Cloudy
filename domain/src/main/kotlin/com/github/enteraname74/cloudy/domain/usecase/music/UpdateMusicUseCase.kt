@@ -9,7 +9,7 @@ import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
-import com.github.enteraname74.cloudy.domain.usecase.musicartist.SetArtistsOfMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 
 class UpdateMusicUseCase(

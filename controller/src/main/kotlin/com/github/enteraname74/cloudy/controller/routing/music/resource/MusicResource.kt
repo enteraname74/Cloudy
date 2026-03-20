@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.routing.music.resource
 
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import io.ktor.resources.*
+import io.ktor.resources.Resource
 
 @Resource("/music")
 class MusicResource {

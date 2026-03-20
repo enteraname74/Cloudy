@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest

@@ -5,9 +5,9 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.server.resources.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.resources.get
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 

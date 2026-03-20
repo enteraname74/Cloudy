@@ -1,22 +1,29 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
-import com.github.enteraname74.cloudy.controller.ext.*
+import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
+import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
+import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.server.request.*
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.MultiPartData
+import io.ktor.server.request.header
+import io.ktor.server.request.receiveMultipart
 import io.ktor.server.resources.post
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 
 fun Route.uploadMusic() {

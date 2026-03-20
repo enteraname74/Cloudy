@@ -2,11 +2,14 @@ package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
-import com.github.enteraname74.cloudy.domain.model.Playlist
-import com.github.enteraname74.cloudy.domain.model.UploadedPlaylistData
+import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
+import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
+import com.github.enteraname74.cloudy.domain.usecase.playlist.UploadPlaylistUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
@@ -14,6 +17,7 @@ class PlaylistService(
     private val playlistRepository: PlaylistRepository,
     private val musicRepository: MusicRepository,
     private val musicPlaylistRepository: MusicPlaylistRepository,
+    private val uploadPlaylistUseCase: UploadPlaylistUseCase,
 ) {
     suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistRepository.getFromId(playlistId)
@@ -24,7 +28,7 @@ class PlaylistService(
     suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest
-    ): List<Playlist> =
+    ): List<PlaylistWithMusics> =
         playlistRepository.allOfUser(
             userId = userId,
             paginatedRequest = paginatedRequest,
@@ -59,46 +63,14 @@ class PlaylistService(
             username = username,
         )
 
-    /**
-     * Upload playlists from the user.
-     * Returns a list of a playlist and its legacy id (send by the user).
-     */
-    suspend fun uploadPlaylists(
-        playlists: List<Playlist>,
-        userId: Uuid,
-    ): List<UploadedPlaylistData> {
-
-        /*
-        We will save only the playlists that are not already saved (with the same name)
-         */
-        val uniquePlaylists = playlists.distinctBy { it.name }
-        val playlistsToSave =
-            uniquePlaylists.filter {
-                playlistRepository.getFromInformation(
-                    name = it.name,
-                    userId = userId,
-                ) == null
-            }
-
-        /*
-        We will attribute news ids for the playlists
-         */
-        val mapOfIds: Map<Uuid, Uuid> = buildMap {
-            playlistsToSave.forEach {
-                put(Uuid.random(), it.id)
-            }
-        }
-
-        return playlistRepository.upsertAll(
-            playlists = playlistsToSave.map { playlist ->
-                playlist.copy(
-                    id = mapOfIds.entries.first { it.value == playlist.id }.key,
-                )
-            }
-        ).map { playlist ->
-            UploadedPlaylistData(
-                playlist = playlist,
-                userPlaylistId = mapOfIds[playlist.id]!!,
+    suspend fun upload(
+        playlists: List<PlaylistUpload>,
+        user: User,
+    ) {
+        playlists.forEach { playlistUpload ->
+            uploadPlaylistUseCase(
+                playlistUpload = playlistUpload,
+                user = user,
             )
         }
     }

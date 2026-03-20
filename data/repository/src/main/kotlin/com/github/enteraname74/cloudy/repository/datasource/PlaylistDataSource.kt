@@ -1,8 +1,7 @@
 package com.github.enteraname74.cloudy.repository.datasource
 
-import com.github.enteraname74.cloudy.domain.model.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
 import kotlin.uuid.Uuid
 
 interface PlaylistDataSource {
@@ -14,6 +13,9 @@ interface PlaylistDataSource {
     ): Playlist?
     suspend fun getFromInformation(
         name: String,
+        userId: Uuid,
+    ): Playlist?
+    suspend fun getFavorite(
         userId: Uuid,
     ): Playlist?
     suspend fun upsert(playlist: Playlist): Playlist

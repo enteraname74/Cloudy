@@ -1,4 +1,4 @@
-package com.github.enteraname74.cloudy.domain.usecase.musicartist
+package com.github.enteraname74.cloudy.domain.usecase.artist
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository

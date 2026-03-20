@@ -10,10 +10,10 @@ import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.http.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.resources.get
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.response.respondBytes
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import java.io.File
 

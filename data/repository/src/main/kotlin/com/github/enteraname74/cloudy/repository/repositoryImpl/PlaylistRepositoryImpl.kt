@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -28,6 +28,9 @@ class PlaylistRepositoryImpl(
             name = name,
             userId = userId,
         )
+
+    override suspend fun getFavorite(userId: Uuid): Playlist? =
+        playlistDataSource.getFavorite(userId)
 
     override suspend fun upsert(
         playlist: Playlist,

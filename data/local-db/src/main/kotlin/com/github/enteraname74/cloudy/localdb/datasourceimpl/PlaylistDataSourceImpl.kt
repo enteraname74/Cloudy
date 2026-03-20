@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.PlaylistEntity
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
@@ -16,6 +16,7 @@ import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
+import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
@@ -43,6 +44,16 @@ class PlaylistDataSourceImpl: PlaylistDataSource {
             PlaylistEntity
                 .find {
                     (PlaylistTable.name eq name) and (PlaylistTable.userId eq userId)
+                }
+                .firstOrNull()
+                ?.toPlaylist()
+        }
+
+    override suspend fun getFavorite(userId: Uuid): Playlist? =
+        workTransaction {
+            PlaylistEntity
+                .find {
+                    (isFavorite eq Op.TRUE) and (PlaylistTable.userId eq userId)
                 }
                 .firstOrNull()
                 ?.toPlaylist()

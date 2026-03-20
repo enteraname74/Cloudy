@@ -6,8 +6,8 @@ import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.domain.ext.toUuid
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import java.util.*
 import kotlin.uuid.Uuid
 

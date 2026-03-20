@@ -4,8 +4,12 @@ import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusicsBody
 import com.github.enteraname74.cloudy.controller.routing.music.model.UpdateMusicsBody
-import io.ktor.server.application.*
-import io.ktor.server.plugins.requestvalidation.*
+import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.requestvalidation.RequestValidation
+import io.ktor.server.plugins.requestvalidation.RequestValidationException
+import io.ktor.server.plugins.requestvalidation.ValidationResult
 
 fun Application.configureRequestValidation() {
     install(RequestValidation) {
@@ -27,16 +31,21 @@ fun Application.configureRequestValidation() {
             if (musicUpdates.musics.all { it.isValid() }) {
                 ValidationResult.Valid
             } else {
-                ValidationResult.Invalid(InvalidRequestType.MusicUpdate.name)
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
             }
         }
         validate<CheckMusicsBody> { check ->
-            println("THERE WITH: $check")
             if (check.ids.all { it.isNotBlank() }) {
-
                 ValidationResult.Valid
             } else {
-                ValidationResult.Invalid(InvalidRequestType.MusicCheck.name)
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<UploadPlaylistBody> { body ->
+            if (body.playlists.all { it.isValid() }) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
             }
         }
     }
@@ -44,8 +53,7 @@ fun Application.configureRequestValidation() {
 
 enum class InvalidRequestType {
     UserInformation,
-    MusicUpdate,
-    MusicCheck,
+    InvalidData,
     Unknown;
 
     companion object {
