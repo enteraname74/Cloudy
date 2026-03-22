@@ -36,6 +36,8 @@ fun ApplicationContext.generateToken(
         .sign(Algorithm.HMAC256(secret))
 }
 
+// TODO: Add expiration date
+// TODO: Find a way to ensure token is only used once
 fun ApplicationContext.generateInscriptionToken(): String {
     val environment = call.application.environment
     val secret = environment.config.property("jwt.secret").getString()
