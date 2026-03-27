@@ -25,7 +25,6 @@ fun Route.updateMusics() {
     val userService by inject<UserService>()
 
     put<MusicResource> {
-        cloudyLogger.debug("UPDATE CALLED")
         val userId: Uuid = getUserIdFromToken() ?: return@put missingTokenInformation()
         val routingMessages: RoutingMessages = getRoutingMessages()
         val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
@@ -39,10 +38,9 @@ fun Route.updateMusics() {
             user = user,
         )
 
-        if (result is CloudyResult.Error) {
-            badRequest(routingMessages.cannotUpdateSong(result.message.orEmpty()))
-        } else {
-            call.respond(result)
+        when (result) {
+            is CloudyResult.Error -> badRequest(routingMessages.cannotUpdateSong(result.message.orEmpty()))
+            is CloudyResult.Success -> call.respond(result.data)
         }
     }
 }

@@ -28,13 +28,16 @@ fun Route.deleteSongs() {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         musicIds.forEach { musicId ->
-            val isPossessedByUser = musicService.isMusicPossessedByUser(
-                musicId = musicId,
-                userId = userId,
-            )
+            val doesExist = musicService.getFromId(musicId) != null
+            if (doesExist) {
+                val isPossessedByUser = musicService.isMusicPossessedByUser(
+                    musicId = musicId,
+                    userId = userId,
+                )
 
-            if (!isPossessedByUser) {
-                return@delete forbidden(routingMessages.songNotPossessedByUser(musicId))
+                if (!isPossessedByUser) {
+                    return@delete forbidden(routingMessages.songNotPossessedByUser(musicId))
+                }
             }
         }
 

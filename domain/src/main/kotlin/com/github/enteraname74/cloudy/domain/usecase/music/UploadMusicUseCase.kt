@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 
 class UploadMusicUseCase(
     private val uploadArtistUseCase: UploadArtistUseCase,
@@ -74,7 +75,7 @@ class UploadMusicUseCase(
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase()
-                result
+                musicRepository.getFromId(fingerprint).toCloudyResult()
             }
         }
     }

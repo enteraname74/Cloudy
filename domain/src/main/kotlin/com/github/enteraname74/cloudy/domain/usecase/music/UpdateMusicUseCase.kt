@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 
 class UpdateMusicUseCase(
     private val updateAlbumUseCase: UpdateAlbumUseCase,
@@ -59,7 +60,7 @@ class UpdateMusicUseCase(
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase()
-                result
+                musicRepository.getFromId(musicUpdate.id).toCloudyResult()
             }
         }
     }

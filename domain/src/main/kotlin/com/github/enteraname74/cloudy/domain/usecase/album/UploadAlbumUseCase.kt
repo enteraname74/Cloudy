@@ -19,12 +19,11 @@ class UploadAlbumUseCase(
             albumArtist = albumUpload.artistUpload.name,
             userId = user.id,
         )
-
+        val artist = uploadArtistUseCase(
+            artistUpload = albumUpload.artistUpload,
+            user = user,
+        )
         return if (existingAlbum != null) {
-            val artist = uploadArtistUseCase(
-                artistUpload = albumUpload.artistUpload,
-                user = user,
-            )
             albumRepository.upsert(
                 album = existingAlbum.merge(
                     albumUpload = albumUpload,
@@ -34,13 +33,9 @@ class UploadAlbumUseCase(
                 username = user.username,
             )
         } else {
-            val newArtist = uploadArtistUseCase(
-                artistUpload = albumUpload.artistUpload,
-                user = user,
-            )
             albumRepository.upsert(
                 album = albumUpload.toNewAlbum(
-                    artist = newArtist,
+                    artist = artist,
                     userId = user.id,
                 ),
                 coverData = null,
