@@ -8,8 +8,8 @@ import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
 import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.server.request.receive

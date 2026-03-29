@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.config
 
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install

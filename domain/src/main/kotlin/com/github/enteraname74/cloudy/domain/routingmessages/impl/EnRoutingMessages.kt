@@ -1,6 +1,6 @@
-package com.github.enteraname74.cloudy.controller.routingmessages.impl
+package com.github.enteraname74.cloudy.domain.routingmessages.impl
 
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import kotlin.uuid.Uuid
 
 object EnRoutingMessages: RoutingMessages {
@@ -58,6 +58,12 @@ object EnRoutingMessages: RoutingMessages {
 
     override val WRONG_ID: String = "The given id is incorrect."
     override val WRONG_BODY_DATA: String = "The given data is incorrect."
+
+    override val USER_ALREADY_IN_PLAYED_LIST: String = "User already in played list."
+    override val PLAYED_LIST_NOT_FOUND: String = "Played list not found."
+    override val PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST: String = "Played list not found or user not in played list."
+    override val NOT_OWNER_OF_PLAYED_LIST: String = "The user is not the owner of the played list."
+    override val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String = "The user doesn't have the permission to remove someone else from the played list."
 
     override fun internalServerError(error: String): String =
         """

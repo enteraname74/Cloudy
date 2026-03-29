@@ -3,7 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing.auth.model
 import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.config.auth.TokenType
 import com.github.enteraname74.cloudy.config.auth.generateToken
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import kotlinx.serialization.Serializable
 import java.time.Instant
 import java.time.temporal.ChronoUnit

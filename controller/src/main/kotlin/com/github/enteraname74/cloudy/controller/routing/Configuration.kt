@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.routing.album.albumRouting
 import com.github.enteraname74.cloudy.controller.routing.artist.artistRouting
 import com.github.enteraname74.cloudy.controller.routing.auth.authRouting
 import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
+import com.github.enteraname74.cloudy.controller.routing.player.playerRouting
 import com.github.enteraname74.cloudy.controller.routing.playlist.playlistRouting
 import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
 import io.ktor.server.application.Application
@@ -21,6 +22,7 @@ fun Application.configureRouting() {
         albumRouting()
         artistRouting()
         playlistRouting()
+        playerRouting()
         get("/hello") {
             call.respondText("Hello Ktor My Beloved!")
         }

@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource

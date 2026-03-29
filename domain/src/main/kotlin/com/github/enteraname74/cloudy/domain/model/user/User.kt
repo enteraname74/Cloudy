@@ -1,4 +1,4 @@
-package com.github.enteraname74.cloudy.domain.model
+package com.github.enteraname74.cloudy.domain.model.user
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import kotlinx.serialization.Serializable

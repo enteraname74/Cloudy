@@ -8,7 +8,7 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.ModifiedPlaylist
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.fromModifiedPlaylist
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist

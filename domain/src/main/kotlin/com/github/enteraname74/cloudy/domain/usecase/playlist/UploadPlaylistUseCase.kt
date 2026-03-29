@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.domain.usecase.playlist
 
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics

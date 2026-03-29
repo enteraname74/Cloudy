@@ -3,6 +3,10 @@ package com.github.enteraname74.cloudy.controller.config
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusicsBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.JoinPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.NewPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.RemoveUserFromPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.UpdatePlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
 import io.ktor.server.application.*
@@ -40,6 +44,34 @@ fun Application.configureRequestValidation() {
         }
         validate<UploadPlaylistBody> { body ->
             if (body.playlists.all { it.isValid() }) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<NewPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<JoinPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<RemoveUserFromPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<UpdatePlayedListBody> { body ->
+            if (body.isValid()) {
                 ValidationResult.Valid
             } else {
                 ValidationResult.Invalid(InvalidRequestType.InvalidData.name)

@@ -4,8 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.domain.ext.toUuid
-import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.model.UserType
+import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import java.util.*

@@ -6,7 +6,7 @@ import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.config.auth.TOKEN_ROLE_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.auth.TOKEN_USERNAME_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.util.Messages
-import com.github.enteraname74.cloudy.domain.model.UserType
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install

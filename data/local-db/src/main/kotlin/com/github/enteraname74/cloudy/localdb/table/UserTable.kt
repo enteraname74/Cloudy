@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.UuidTable
 import org.jetbrains.exposed.v1.dao.UuidEntity

@@ -9,7 +9,8 @@ import org.jetbrains.exposed.v1.dao.Entity
 import org.jetbrains.exposed.v1.dao.EntityClass
 
 internal object MusicPlaylistTable : IdTable<String>() {
-    override val id = varchar("256", 128).entityId()
+    // TODO: replace with text() as we cannot guarantee correct size
+    override val id = varchar("id", 256).entityId()
     override val primaryKey = PrimaryKey(id)
 
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)

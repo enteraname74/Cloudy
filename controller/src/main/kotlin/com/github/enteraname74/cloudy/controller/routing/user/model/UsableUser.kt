@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.user.model
 
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 

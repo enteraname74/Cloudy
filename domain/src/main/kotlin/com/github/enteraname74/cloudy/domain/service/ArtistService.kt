@@ -1,14 +1,8 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.MusicArtist
-import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
-import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -17,8 +11,6 @@ import kotlin.uuid.Uuid
 class ArtistService(
     private val artistRepository: ArtistRepository,
     private val musicRepository: MusicRepository,
-    private val musicArtistRepository: MusicArtistRepository,
-    private val albumRepository: AlbumRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
 ) {
     suspend fun getAllOfUser(
@@ -29,75 +21,6 @@ class ArtistService(
             userId = userId,
             paginatedRequest = paginatedRequest,
         )
-
-    suspend fun update(
-        modifiedArtist: Artist,
-        coverData: FileData?,
-        user: User,
-    ): Artist {
-        // We fetch the songs and albums of the artist
-        val songsOfArtist: List<Music> = musicRepository.allFromArtist(artistId = modifiedArtist.id)
-        val albumsOfArtist: List<Album> = albumRepository.allOfArtist(artistId = modifiedArtist.id)
-
-        /*
-        We check if an artist with the same name exist.
-        If that's the case, we will redirect songs and albums of the modified artist to this one.
-        The modified artist will then be deleted.
-         */
-        val alreadyExistingArtist: Artist? = artistRepository.getFromInformation(
-            name = modifiedArtist.name,
-            userId = user.id,
-        )
-
-        val savedArtist: Artist = if (alreadyExistingArtist != null && alreadyExistingArtist.id != modifiedArtist.id) {
-            artistRepository.deleteById(artistId = modifiedArtist.id)
-
-            // We redirect the songs of the modified artist to the already existing one :
-            musicArtistRepository.upsertAll(
-                musicArtists = songsOfArtist.map {
-                    MusicArtist(
-                        musicId = it.fingerprint,
-                        artistId = alreadyExistingArtist.id,
-                        userId = user.id,
-                    )
-                }
-            )
-
-            artistRepository.upsert(
-                artist = alreadyExistingArtist.copy(
-                    isInQuickAccess = modifiedArtist.isInQuickAccess,
-                ),
-                coverData = coverData,
-                username = user.username,
-            )
-        } else {
-            artistRepository.upsert(
-                artist = modifiedArtist,
-                coverData = coverData,
-                username = user.username,
-            )
-        }
-
-        // TODO: Do better
-        val updatedSongs = songsOfArtist
-//        val updatedSongs = songsOfArtist.map {
-//            it.copy(artist = getArtistNameForMusicUseCase(it.id))
-//        }
-        musicRepository.upsertAll(
-            musicIds = updatedSongs,
-            username = user.username,
-        )
-
-        // We update/redirect albums of the artist with the new information
-        val updatedAlbums = albumsOfArtist.map {
-            it.copy(
-                artist = savedArtist,
-            )
-        }
-        albumRepository.upsertAll(updatedAlbums)
-
-        return savedArtist
-    }
 
     suspend fun getFromId(artistId: Uuid): Artist? =
         artistRepository.getFromId(artistId = artistId)
@@ -144,20 +67,4 @@ class ArtistService(
         }
     }
 
-    /**
-     * Given a list of artist ids to check,
-     * returns a list of all the ids of the initial list that are not present
-     * in the db.
-     */
-    suspend fun getDeletedArtistIds(
-        idsToCheck: List<Uuid>,
-        userId: Uuid
-    ): List<Uuid> {
-        val allArtistsOfUser: List<Uuid> = artistRepository
-            .getAllOfUser(
-                userId = userId,
-            ).map { it.id }
-
-        return idsToCheck.filterNot { it in allArtistsOfUser }
-    }
 }

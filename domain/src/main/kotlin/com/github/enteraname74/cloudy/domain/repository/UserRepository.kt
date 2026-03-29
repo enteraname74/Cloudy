@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.domain.repository
 
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import kotlin.uuid.Uuid
 
 interface UserRepository {

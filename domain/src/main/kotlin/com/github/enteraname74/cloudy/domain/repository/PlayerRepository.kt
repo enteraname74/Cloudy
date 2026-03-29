@@ -1,0 +1,77 @@
+package com.github.enteraname74.cloudy.domain.repository
+
+import com.github.enteraname74.cloudy.domain.model.player.PlayedList
+import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
+import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import kotlin.uuid.Uuid
+
+interface PlayerRepository {
+    suspend fun create(
+        hostId: Uuid,
+        deviceId: String,
+        initialMusicIds: List<String>,
+    ): PlayedList
+
+    suspend fun update(
+        playedListUpdate: PlayedListUpdate,
+    ): PlayedList
+
+    suspend fun addUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    )
+
+    suspend fun removeUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    )
+
+    suspend fun deleteAllOfUser(
+        userId: Uuid
+    )
+
+    suspend fun deleteIfEmpty(listId: Uuid)
+
+    suspend fun delete(listId: Uuid)
+
+    suspend fun isOwnerOfPlayedList(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    ): Boolean
+
+    suspend fun isUserInList(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    ): Boolean
+
+    suspend fun getFromCode(
+        code: String,
+    ): PlayedList?
+
+    suspend fun getFromUser(
+        id: Uuid,
+        userId: Uuid,
+        deviceId: String,
+    ): PlayedList?
+
+    suspend fun getAllMusicOfList(
+        listId: Uuid,
+        paginatedRequest: PaginatedRequest,
+    ): List<PlayerMusic>
+
+    suspend fun clearAndSetMusics(
+        listId: Uuid,
+        musics: List<PlayerMusic>,
+    )
+
+    suspend fun isUserInPlayedList(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    ): Boolean
+}

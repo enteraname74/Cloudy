@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.localdb.table.UserEntity
 import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.localdb.util.workTransaction

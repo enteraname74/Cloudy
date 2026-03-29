@@ -7,6 +7,9 @@ import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.UserTable
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicTable
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListTable
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListUserTable
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
@@ -24,7 +27,10 @@ object AppDatabase {
                 UserTable,
                 PlaylistTable,
                 MusicArtistTable,
-                MusicPlaylistTable
+                MusicPlaylistTable,
+                PlayedListTable,
+                PlayedListUserTable,
+                PlayedListMusicTable,
             )
         }
     }

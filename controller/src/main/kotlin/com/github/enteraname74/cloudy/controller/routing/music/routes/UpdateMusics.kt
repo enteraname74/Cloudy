@@ -5,14 +5,13 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.server.request.*
 import io.ktor.server.resources.put
 import io.ktor.server.response.*

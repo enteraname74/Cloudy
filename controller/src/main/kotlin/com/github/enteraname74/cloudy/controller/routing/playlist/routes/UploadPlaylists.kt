@@ -5,14 +5,12 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.cannotFindUser
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.resource.PlaylistResource
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond

@@ -3,7 +3,7 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.ext.toGb
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import kotlin.uuid.Uuid
@@ -61,6 +61,7 @@ class UserService(
         return userRepository.getAll()
     }
 
+    // TODO PLAYER: check and delete empty played list
     suspend fun deleteUser(userId: Uuid) {
         userRepository.delete(id = userId)
     }

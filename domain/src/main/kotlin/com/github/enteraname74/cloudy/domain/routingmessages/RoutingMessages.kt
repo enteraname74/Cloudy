@@ -1,7 +1,7 @@
-package com.github.enteraname74.cloudy.controller.routingmessages
+package com.github.enteraname74.cloudy.domain.routingmessages
 
-import com.github.enteraname74.cloudy.controller.routingmessages.impl.EnRoutingMessages
-import com.github.enteraname74.cloudy.controller.routingmessages.impl.FrRoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.impl.EnRoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.impl.FrRoutingMessages
 import kotlin.uuid.Uuid
 
 interface RoutingMessages {
@@ -54,6 +54,12 @@ interface RoutingMessages {
 
     val WRONG_ID: String
     val WRONG_BODY_DATA: String
+
+    val USER_ALREADY_IN_PLAYED_LIST: String
+    val PLAYED_LIST_NOT_FOUND: String
+    val PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST: String
+    val NOT_OWNER_OF_PLAYED_LIST: String
+    val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String
 
     fun internalServerError(error: String): String
 

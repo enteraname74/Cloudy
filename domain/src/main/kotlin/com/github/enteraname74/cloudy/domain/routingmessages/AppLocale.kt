@@ -1,4 +1,4 @@
-package com.github.enteraname74.cloudy.controller.routingmessages
+package com.github.enteraname74.cloudy.domain.routingmessages
 
 enum class AppLocale(val value: String) {
     Fr("fr"),

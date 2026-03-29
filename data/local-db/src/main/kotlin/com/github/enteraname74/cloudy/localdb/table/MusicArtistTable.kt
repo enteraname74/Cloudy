@@ -13,6 +13,7 @@ import org.jetbrains.exposed.v1.jdbc.batchUpsert
  * Table for storing MusicArtists.
  */
 internal object MusicArtistTable: IdTable<String>() {
+    // TODO: Move to text() as we cannot guarantee the length of a music id
     override val id = varchar("id", 256).entityId()
     override val primaryKey = PrimaryKey(id)
 
