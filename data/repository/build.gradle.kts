@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":metadata"))
     implementation(project(":file-access"))
+    implementation(project(":logging"))
 }
 
 kotlin {

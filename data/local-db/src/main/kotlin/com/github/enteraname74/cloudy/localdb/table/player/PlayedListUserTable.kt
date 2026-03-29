@@ -44,7 +44,7 @@ internal class PlayedListUserEntity(id: EntityID<String>): Entity<String>(id) {
     var listId by PlayedListUserTable.listId
     var joinedAt by PlayedListUserTable.joinedAt
 
-    fun toSimpleUser(): PlayerUser =
+    fun toPlayerUser(): PlayerUser =
         PlayerUser(
             id = user.id.value,
             deviceId = deviceId,

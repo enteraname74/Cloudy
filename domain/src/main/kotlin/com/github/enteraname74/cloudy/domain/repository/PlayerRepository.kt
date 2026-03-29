@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.repository
 
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -64,14 +65,15 @@ interface PlayerRepository {
         paginatedRequest: PaginatedRequest,
     ): List<PlayerMusic>
 
-    suspend fun clearAndSetMusics(
-        listId: Uuid,
-        musics: List<PlayerMusic>,
-    )
-
     suspend fun isUserInPlayedList(
         userId: Uuid,
         listId: Uuid,
         deviceId: String,
     ): Boolean
+
+    suspend fun addMusics(
+        userId: Uuid,
+        listId: Uuid,
+        musics: List<Music>
+    )
 }

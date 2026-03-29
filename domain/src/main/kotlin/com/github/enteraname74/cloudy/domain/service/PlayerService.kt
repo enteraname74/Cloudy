@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -19,6 +20,7 @@ class PlayerService(
     private val playerRepository: PlayerRepository,
     private val userRepository: UserRepository,
 ) {
+    private val logger = CloudyLogger(this::class)
 
     suspend fun create(
         hostId: Uuid,
@@ -176,5 +178,31 @@ class PlayerService(
         } else {
             CloudyResult.Error(routingMessages.NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST)
         }
+    }
+
+    suspend fun addMusics(
+        userId: Uuid,
+        deviceId: String,
+        listId: Uuid,
+        musicIds: List<String>,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<Unit> {
+
+        val isInList: Boolean = playerRepository.isUserInPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        if (!isInList) {
+            return CloudyResult.Error(routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST)
+        }
+        val musics: List<Music> = musicRepository.getAll(musicIds)
+
+        playerRepository.addMusics(
+            userId = userId,
+            listId = listId,
+            musics = musics,
+        )
+        return CloudyResult.Success(Unit)
     }
 }

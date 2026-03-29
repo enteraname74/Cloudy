@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.repository.datasource
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
@@ -58,14 +59,28 @@ interface PlayerDataSource {
         paginatedRequest: PaginatedRequest,
     ): List<PlayerMusic>
 
-    suspend fun clearAndSetMusics(
-        listId: Uuid,
-        musics: List<PlayerMusic>,
-    )
-
     suspend fun getFromUser(
         id: Uuid,
         userId: Uuid,
         deviceId: String,
     ): PlayedList?
+
+    suspend fun getAllAfterCurrentMusic(
+        listId: Uuid,
+    ): List<PlayerMusic>
+
+    suspend fun getCurrentMusic(listId: Uuid): PlayerMusic?
+
+    suspend fun getExistingMusicIds(
+        listId: Uuid,
+        musicIds: List<String>
+    ): List<String>
+
+    suspend fun getAllUsersByJoinedAt(
+        listId: Uuid,
+    ): List<PlayerUser>
+
+    suspend fun upsertMusics(
+        playerMusics: List<PlayerMusic>,
+    )
 }

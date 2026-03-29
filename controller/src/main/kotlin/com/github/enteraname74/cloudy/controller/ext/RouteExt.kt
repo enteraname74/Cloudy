@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.domain.routingmessages.AppLocale
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
 import io.ktor.server.request.header
 import io.ktor.server.response.respond
@@ -23,9 +24,7 @@ suspend inline fun <reified T: Any> RoutingContext.respond(result: CloudyResult<
     when (result) {
         is CloudyResult.Error<T> -> badRequest(result.message.orEmpty())
         is CloudyResult.Success<T> -> {
-            if (result.data != Unit) {
-                call.respond(result.data)
-            }
+            call.respond(result.data)
         }
     }
 }

@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.model.player.SimplePlayerMusic
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -149,17 +150,6 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .paginated(paginatedRequest)
                 .map { it.toPlayerMusic() }
         }
-
-    override suspend fun clearAndSetMusics(
-        listId: Uuid,
-        musics: List<PlayerMusic>
-    ) {
-        workTransaction {
-            PlayedListMusicTable.deleteWhere { this.listId eq listId }
-            PlayedListMusicTable.upsertAll(musics)
-        }
-    }
-
     override suspend fun addUser(
         userId: Uuid,
         deviceId: String,
@@ -204,4 +194,60 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 ?.let(PlayedListEntity::wrapRow)
                 ?.toPlayedList()
         }
+
+    override suspend fun getAllAfterCurrentMusic(listId: Uuid): List<PlayerMusic> =
+        workTransaction {
+            val current = PlayedListMusicTable
+                .selectAll()
+                .where { PlayedListMusicTable.listId eq listId }
+                .orderBy(PlayedListMusicTable.lastPlayedMillis to SortOrder.DESC)
+                .limit(1)
+                .firstOrNull()
+
+            val currentOrder = current?.get(PlayedListMusicTable.order) ?: return@workTransaction emptyList()
+
+            PlayedListMusicEntity.find {
+                (PlayedListMusicTable.listId eq listId) and
+                        (PlayedListMusicTable.order greater currentOrder)
+            }
+                .orderBy(PlayedListMusicTable.order to SortOrder.ASC)
+                .map { it.toPlayerMusic() }
+        }
+
+    override suspend fun getCurrentMusic(listId: Uuid): PlayerMusic? =
+        workTransaction {
+            PlayedListMusicEntity
+                .find { (PlayedListMusicTable.listId eq listId) }
+                .orderBy(Pair(PlayedListMusicTable.lastPlayedMillis, SortOrder.DESC_NULLS_LAST))
+                .limit(1)
+                .firstOrNull()
+                ?.toPlayerMusic()
+        }
+
+    override suspend fun getExistingMusicIds(
+        listId: Uuid,
+        musicIds: List<String>
+    ): List<String> = workTransaction {
+        PlayedListMusicTable
+            .select(PlayedListMusicTable.musicId)
+            .where {
+                (PlayedListMusicTable.listId eq listId) and
+                        (PlayedListMusicTable.musicId inList musicIds)
+            }.mapNotNull { it.getOrNull(PlayedListMusicTable.musicId)?.value }
+    }
+
+    override suspend fun getAllUsersByJoinedAt(listId: Uuid): List<PlayerUser> =
+        workTransaction {
+            PlayedListUserEntity.find {
+                PlayedListUserTable.listId eq listId
+            }.orderBy(Pair(PlayedListUserTable.joinedAt, SortOrder.ASC))
+                .distinctBy { it.user.id }
+                .map { it.toPlayerUser() }
+        }
+
+    override suspend fun upsertMusics(playerMusics: List<PlayerMusic>) {
+        workTransaction {
+            PlayedListMusicTable.upsertAll(playerMusics)
+        }
+    }
 }

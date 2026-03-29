@@ -40,4 +40,9 @@ class PlayerResource {
                 limitPerPage = maxPerPage,
             )
     }
+
+    @Resource("addMusics")
+    class AddMusics(
+        val parent: PlayerResource = PlayerResource()
+    )
 }
