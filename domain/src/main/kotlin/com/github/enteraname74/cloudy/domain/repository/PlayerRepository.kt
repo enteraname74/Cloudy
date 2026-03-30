@@ -62,6 +62,7 @@ interface PlayerRepository {
 
     suspend fun getAllMusicOfList(
         listId: Uuid,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<PlayerMusic>
 
@@ -82,4 +83,9 @@ interface PlayerRepository {
         listId: Uuid,
         musicIds: List<String>,
     )
+
+    suspend fun hasReadPermission(
+        userId: Uuid,
+        musicId: String
+    ): Boolean
 }

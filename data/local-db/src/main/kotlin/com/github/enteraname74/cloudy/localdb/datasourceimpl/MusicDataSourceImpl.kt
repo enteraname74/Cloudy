@@ -22,7 +22,9 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
         workTransaction {
             MusicTable.upsertAll(listOf(music))
-            MusicEntity.findById(music.fingerprint)!!.toMusic()
+            MusicEntity.findById(music.fingerprint)!!.toMusic(
+                buildScope = { Music.Scope.User }
+            )
         }
 
     override suspend fun upsertAll(musics: List<Music>) {
@@ -35,7 +37,7 @@ class MusicDataSourceImpl : MusicDataSource {
         workTransaction {
             MusicEntity
                 .findById(musicId)
-                ?.toMusic()
+                ?.toMusic(buildScope = { Music.Scope.User })
         }
 
     override suspend fun getFromUser(
@@ -46,7 +48,7 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicEntity
                 .find { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
                 .firstOrNull()
-                ?.toMusic()
+                ?.toMusic(buildScope = { Music.Scope.User })
         }
 
     override suspend fun getFromCoverPath(coverPath: String): Music? =
@@ -54,14 +56,14 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicEntity
                 .find { MusicTable.coverPath eq coverPath }
                 .firstOrNull()
-                ?.toMusic()
+                ?.toMusic(buildScope = { Music.Scope.User })
         }
 
     override suspend fun getAll(ids: List<String>): List<Music> =
         workTransaction {
             MusicEntity
                 .find { MusicTable.id inList ids }
-                .map { it.toMusic() }
+                .map { it.toMusic(buildScope = { Music.Scope.User }) }
         }
 
     override suspend fun deleteAll(ids: List<String>) {
@@ -83,7 +85,7 @@ class MusicDataSourceImpl : MusicDataSource {
                             (MusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
-                .map { it.toMusic() }
+                .map { it.toMusic(buildScope = { Music.Scope.User }) }
         }
 
     override suspend fun getExistingIdsOfUser(
@@ -120,14 +122,16 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicEntity
                 .find { (MusicTable.id eq fingerprint) and (MusicTable.userId eq userId) }
                 .firstOrNull()
-                ?.toMusic()
+                ?.toMusic(
+                    buildScope = { Music.Scope.User }
+                )
         }
 
     override suspend fun allFromAlbum(albumId: Uuid): List<Music> =
         workTransaction {
             MusicEntity
                 .find { MusicTable.albumId eq albumId }
-                .map { it.toMusic() }
+                .map { it.toMusic(buildScope = { Music.Scope.User }) }
         }
 
     override suspend fun allFromArtist(artistId: Uuid): List<Music> =
@@ -143,6 +147,6 @@ class MusicDataSourceImpl : MusicDataSource {
 
             MusicEntity
                 .wrapRows(query)
-                .map { it.toMusic() }
+                .map { it.toMusic(buildScope = { Music.Scope.User }) }
         }
 }

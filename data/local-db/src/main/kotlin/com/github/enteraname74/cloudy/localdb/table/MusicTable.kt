@@ -8,6 +8,7 @@ import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.dao.Entity
 import org.jetbrains.exposed.v1.dao.EntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import kotlin.uuid.Uuid
 
 internal object MusicTable: IdTable<String>() {
     override val id = varchar("id", 128).entityId()
@@ -59,7 +60,9 @@ internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
     val album by AlbumEntity referencedOn MusicTable.albumId
     var artists by ArtistEntity via MusicArtistTable
 
-    fun toMusic(): Music =
+    fun toMusic(
+        buildScope: (musicUserId: Uuid) -> Music.Scope
+    ): Music =
         Music(
             fingerprint = id.value,
             userId = userId.value,
@@ -74,5 +77,6 @@ internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
             lastUpdateAtMillis = lastUpdateAt,
             nbPlayed = nbPlayed,
             isInQuickAccess = isInQuickAccess,
+            scope = buildScope(userId.value),
         )
 }

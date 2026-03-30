@@ -127,6 +127,7 @@ class PlayerService(
 
         return playerRepository.getAllMusicOfList(
             listId = listId,
+            userId = userId,
             paginatedRequest = paginatedRequest,
         ).toCloudySuccess()
     }

@@ -93,10 +93,12 @@ class PlayerRepositoryImpl(
 
     override suspend fun getAllMusicOfList(
         listId: Uuid,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest
     ): List<PlayerMusic> =
         playerDataSource.getAllMusicOfList(
             listId = listId,
+            userId = userId,
             paginatedRequest = paginatedRequest,
         )
 
@@ -261,4 +263,10 @@ class PlayerRepositoryImpl(
             )
         }
     }
+
+    override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =
+        playerDataSource.hasReadPermission(
+            userId = userId,
+            musicId = musicId,
+        )
 }

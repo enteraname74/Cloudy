@@ -56,6 +56,7 @@ interface PlayerDataSource {
 
     suspend fun getAllMusicOfList(
         listId: Uuid,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<PlayerMusic>
 
@@ -97,5 +98,10 @@ interface PlayerDataSource {
     suspend fun areAnyMusicAfterCurrentOne(
         listId: Uuid,
         musicIds: List<String>
+    ): Boolean
+
+    suspend fun hasReadPermission(
+        userId: Uuid,
+        musicId: String
     ): Boolean
 }

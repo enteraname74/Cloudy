@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.table.player
 
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
 import com.github.enteraname74.cloudy.domain.model.player.SimplePlayerMusic
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
@@ -10,6 +11,7 @@ import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.dao.Entity
 import org.jetbrains.exposed.v1.dao.EntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import kotlin.uuid.Uuid
 
 internal object PlayedListMusicTable : IdTable<String>() {
     override val id = text("id").entityId()
@@ -49,9 +51,11 @@ internal class PlayedListMusicEntity(id: EntityID<String>): Entity<String>(id) {
     var lastPlayedMillis by PlayedListMusicTable.lastPlayedMillis
     var order by PlayedListMusicTable.order
 
-    fun toPlayerMusic(): PlayerMusic = PlayerMusic(
+    fun toPlayerMusic(
+        buildScope: (musicUserId: Uuid) -> Music.Scope
+    ): PlayerMusic = PlayerMusic(
         playedListId = listId.value,
-        music = music.toMusic(),
+        music = music.toMusic(buildScope),
         order = order,
         lastPlayedMillis = lastPlayedMillis
     )

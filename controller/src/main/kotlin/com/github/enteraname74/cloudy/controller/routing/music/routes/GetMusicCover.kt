@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
+import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
@@ -16,6 +17,7 @@ import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import java.io.File
+import kotlin.uuid.Uuid
 
 fun Route.getMusicCover() {
     val musicService by inject<MusicService>()
@@ -25,6 +27,7 @@ fun Route.getMusicCover() {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val correspondingMusic: Music = musicService.getFromCoverPath(
             coverPath = "${Music.COVER_PATH}${musicResource.coverId}",
@@ -35,7 +38,7 @@ fun Route.getMusicCover() {
 
         val musicFile: File = musicService.getMusicFile(
             musicId = correspondingMusic.fingerprint,
-            username = username,
+            userId = userId,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
             message = routingMessages.FILE_NOT_FOUND,

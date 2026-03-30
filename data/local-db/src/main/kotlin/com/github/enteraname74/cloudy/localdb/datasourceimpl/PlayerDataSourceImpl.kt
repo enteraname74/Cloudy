@@ -1,10 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.player.PlayedList
-import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
-import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
-import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
-import com.github.enteraname74.cloudy.domain.model.player.SimplePlayerMusic
+import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.player.*
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.player.*
@@ -146,6 +143,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
 
     override suspend fun getAllMusicOfList(
         listId: Uuid,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest
     ): List<PlayerMusic> =
         workTransaction {
@@ -155,7 +153,17 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 }
                 .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC))
                 .paginated(paginatedRequest)
-                .map { it.toPlayerMusic() }
+                .map {
+                    it.toPlayerMusic(
+                        buildScope = { musicUserId ->
+                            if (musicUserId == userId) {
+                                Music.Scope.User
+                            } else {
+                                Music.Scope.SharedPlayedList
+                            }
+                        }
+                    )
+                }
         }
 
     override suspend fun addUser(
@@ -219,7 +227,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
                         (PlayedListMusicTable.order greater currentOrder)
             }
                 .orderBy(PlayedListMusicTable.order to SortOrder.ASC)
-                .map { it.toPlayerMusic() }
+                .map { it.toPlayerMusic(buildScope = { Music.Scope.User }) }
         }
 
     override suspend fun getCurrentMusic(listId: Uuid): PlayerMusic? =
@@ -229,7 +237,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .orderBy(Pair(PlayedListMusicTable.lastPlayedMillis, SortOrder.DESC_NULLS_LAST))
                 .limit(1)
                 .firstOrNull()
-                ?.toPlayerMusic()
+                ?.toPlayerMusic(buildScope = { Music.Scope.User })
         }
 
     override suspend fun getExistingMusicIds(
@@ -267,7 +275,9 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
             .limit(1)
             .firstOrNull()
-            ?.toPlayerMusic()
+            ?.toPlayerMusic(
+                buildScope = { Music.Scope.User }
+            )
     }
 
     override suspend fun getNextMusic(
@@ -283,7 +293,9 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
             .limit(1)
             .firstOrNull()
-            ?.toPlayerMusic()
+            ?.toPlayerMusic(
+                buildScope = { Music.Scope.User }
+            )
 
         next ?: getFirstMusic(listId)
     }
@@ -315,4 +327,22 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .limit(1)
             .firstOrNull() != null
     }
+
+    override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =
+        workTransaction {
+            PlayedListUserTable
+                .join(
+                    PlayedListMusicTable,
+                    JoinType.INNER,
+                    onColumn = PlayedListUserTable.listId,
+                    otherColumn = PlayedListMusicTable.listId
+                )
+                .selectAll()
+                .where {
+                    (PlayedListUserTable.userId eq userId) and
+                            (PlayedListMusicTable.musicId eq musicId)
+                }
+                .limit(1)
+                .firstOrNull() != null
+        }
 }
