@@ -7,6 +7,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.routes.deletePla
 import com.github.enteraname74.cloudy.controller.routing.player.routes.getPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.getPlayedListMusics
 import com.github.enteraname74.cloudy.controller.routing.player.routes.joinPlayedList
+import com.github.enteraname74.cloudy.controller.routing.player.routes.playerSocket
 import com.github.enteraname74.cloudy.controller.routing.player.routes.removeMusicsFromPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.removeUserFromPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.updatePlayedList
@@ -24,4 +25,5 @@ fun Routing.playerRouting() {
         addMusicsToPlayedList()
         removeMusicsFromPlayedList()
     }
+    playerSocket()
 }

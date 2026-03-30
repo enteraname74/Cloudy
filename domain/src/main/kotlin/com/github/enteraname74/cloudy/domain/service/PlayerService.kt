@@ -12,12 +12,14 @@ import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudySuccess
+import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
 import kotlin.uuid.Uuid
 
 class PlayerService(
     private val musicRepository: MusicRepository,
     private val playerRepository: PlayerRepository,
     private val userRepository: UserRepository,
+    private val playerUserCommunication: PlayerUserCommunication,
 ) {
 
     suspend fun create(
@@ -57,6 +59,10 @@ class PlayerService(
         )
         return if (isOwner) {
             val updatedPlayedList: PlayedList = playerRepository.update(playedListUpdate)
+            playerUserCommunication.broadcastListUpdated(
+                listId = playedListUpdate.listId,
+                exceptDeviceId = deviceId,
+            )
             CloudyResult.Success(updatedPlayedList)
         } else {
             CloudyResult.Error(routingMessages.NOT_OWNER_OF_PLAYED_LIST)
@@ -85,6 +91,10 @@ class PlayerService(
             userId = userId,
             listId = playedList.id,
             deviceId = deviceId,
+        )
+        playerUserCommunication.broadcastListUpdated(
+            listId = playedList.id,
+            exceptDeviceId = deviceId,
         )
 
         return CloudyResult.Success(playedList.id)
@@ -148,6 +158,10 @@ class PlayerService(
             return CloudyResult.Error(routingMessages.NOT_OWNER_OF_PLAYED_LIST)
         }
         playerRepository.delete(listId)
+        playerUserCommunication.broadcastListUpdated(
+            listId = listId,
+            exceptDeviceId = deviceId,
+        )
 
         return CloudyResult.Success(Unit)
     }
@@ -175,6 +189,10 @@ class PlayerService(
                 deviceId = deviceIdToRemove,
             )
             playerRepository.deleteIfEmpty(listId)
+            playerUserCommunication.broadcastListUpdated(
+                listId = listId,
+                exceptDeviceId = deviceId,
+            )
             CloudyResult.Success(Unit)
         } else {
             CloudyResult.Error(routingMessages.NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST)
@@ -205,6 +223,10 @@ class PlayerService(
             userId = userId,
             listId = listId,
             musics = musics,
+        )
+        playerUserCommunication.broadcastListUpdated(
+            listId = listId,
+            exceptDeviceId = deviceId,
         )
         return CloudyResult.Success(Unit)
     }
@@ -246,6 +268,21 @@ class PlayerService(
             listId = listId,
             musicIds = musicRepository.getExistingIds(musicIds),
         )
+        playerUserCommunication.broadcastListUpdated(
+            listId = listId,
+            exceptDeviceId = deviceId,
+        )
         return CloudyResult.Success(Unit)
     }
+
+    suspend fun isUserInList(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+    ): Boolean =
+        playerRepository.isUserInList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
 }

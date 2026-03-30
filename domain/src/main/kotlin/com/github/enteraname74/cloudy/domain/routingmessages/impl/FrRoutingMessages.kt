@@ -64,6 +64,7 @@ object FrRoutingMessages: RoutingMessages {
     override val PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST: String = "La liste de lecture n'existe pas ou l'utilisateur n'est pas dans la liste."
     override val NOT_OWNER_OF_PLAYED_LIST: String = "L'utilisateur n'est pas propriétaire de la liste."
     override val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String = "L'utilisateur ne peut pas supprimer quelqu'un d'autre de la liste."
+    override val MISING_DEVICE_ID: String = "L'identifiant d'appareil est absent"
 
     override fun internalServerError(error: String): String =
         """

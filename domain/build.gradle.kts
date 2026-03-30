@@ -8,6 +8,7 @@ version = "0.0.1"
 
 dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.websockets)
     testImplementation(kotlin("test"))
     implementation(project(":logging"))
 }

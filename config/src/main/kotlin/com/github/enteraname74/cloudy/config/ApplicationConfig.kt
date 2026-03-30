@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.config.plugin.configureDI
 import com.github.enteraname74.cloudy.config.plugin.configureDatabase
 import com.github.enteraname74.cloudy.config.plugin.configureHTTP
 import com.github.enteraname74.cloudy.config.plugin.configureSerialization
+import com.github.enteraname74.cloudy.config.plugin.configureSockets
 import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.server.application.Application
 import io.ktor.server.routing.RoutingContext
@@ -19,7 +20,7 @@ fun Application.configureApplication() {
     configureDatabase()
     configureSerialization()
     configureHTTP()
-//    configureSockets()
+    configureSockets()
     upsertAdmin()
 }
 

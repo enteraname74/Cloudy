@@ -76,4 +76,5 @@ fun ApplicationContext.isAdmin(): Boolean {
     return UserType.fromString(role) == UserType.Admin
 }
 
+// TODO Release: move to env
 private const val AUTH_NAME = "auth-jwt"

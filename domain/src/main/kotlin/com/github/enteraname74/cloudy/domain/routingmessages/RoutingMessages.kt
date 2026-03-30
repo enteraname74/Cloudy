@@ -60,6 +60,7 @@ interface RoutingMessages {
     val PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST: String
     val NOT_OWNER_OF_PLAYED_LIST: String
     val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String
+    val MISING_DEVICE_ID: String
 
     fun internalServerError(error: String): String
 
