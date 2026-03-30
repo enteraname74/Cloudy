@@ -84,17 +84,23 @@ class PlayerDataSourceImpl : PlayerDataSource {
     }
 
 
-    override suspend fun deleteIfEmpty(listId: Uuid) {
+    override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
         workTransaction {
             PlayedListTable.deleteWhere {
-                (this.id eq listId) and notExists(
-                    PlayedListUserTable.selectAll().where {
-                        PlayedListUserTable.listId eq listId
-                    }
-                )
-            }
+                (this.id eq listId) and
+                        (
+                                notExists(
+                                    PlayedListUserTable.selectAll().where {
+                                        PlayedListUserTable.listId eq listId
+                                    }
+                                ) or notExists(
+                                    PlayedListMusicTable.selectAll().where {
+                                        PlayedListMusicTable.listId eq listId
+                                    }
+                                )
+                                )
+            } > 0
         }
-    }
 
     override suspend fun delete(listId: Uuid) {
         workTransaction {

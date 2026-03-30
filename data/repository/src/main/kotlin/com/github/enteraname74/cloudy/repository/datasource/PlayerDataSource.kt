@@ -34,7 +34,7 @@ interface PlayerDataSource {
         userId: Uuid
     )
 
-    suspend fun deleteIfEmpty(listId: Uuid)
+    suspend fun deleteIfEmpty(listId: Uuid): Boolean
 
     suspend fun delete(listId: Uuid)
 

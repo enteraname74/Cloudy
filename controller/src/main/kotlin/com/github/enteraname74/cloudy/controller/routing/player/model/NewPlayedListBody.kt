@@ -8,5 +8,5 @@ data class NewPlayedListBody(
     val musicIds: List<String>,
 ) {
     fun isValid(): Boolean =
-        deviceId.isNotBlank()
+        deviceId.isNotBlank() && musicIds.isNotEmpty()
 }

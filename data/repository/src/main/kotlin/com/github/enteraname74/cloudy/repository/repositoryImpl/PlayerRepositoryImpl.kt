@@ -14,7 +14,6 @@ import kotlin.uuid.Uuid
 class PlayerRepositoryImpl(
     private val playerDataSource: PlayerDataSource
 ) : PlayerRepository {
-
     override suspend fun create(
         hostId: Uuid,
         deviceId: String,
@@ -227,6 +226,7 @@ class PlayerRepositoryImpl(
             // If we can't find a next music to play, the played list is empty, so we delete the played list.
             if (nextMusic == null) {
                 playerDataSource.delete(listId)
+                return
             } else {
                 // Else, we set it to be the new current music.
                 playerDataSource.upsertMusics(
@@ -250,7 +250,9 @@ class PlayerRepositoryImpl(
             musicIds = musicIds,
         )
 
-        if (areAnyMusicToDeleteAfterCurrentOne) {
+        val playedListDeleted: Boolean = playerDataSource.deleteIfEmpty(listId)
+
+        if (areAnyMusicToDeleteAfterCurrentOne && !playedListDeleted) {
             reorderMusicsInList(
                 listId = listId,
                 musics = playerDataSource.getAllAfterCurrentMusic(

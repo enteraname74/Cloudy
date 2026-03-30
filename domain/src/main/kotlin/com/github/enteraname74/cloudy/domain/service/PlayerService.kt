@@ -35,6 +35,8 @@ class PlayerService(
             ids = initialMusicIds,
         )
 
+        if (existingMusicIds.isEmpty()) return CloudyResult.Error(routingMessages.SONG_NOT_POSSESSED_BY_USER)
+
         return playerRepository.create(
             hostId = hostId,
             deviceId = deviceId,
