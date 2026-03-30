@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
-data class AddMusicsToPlayedListBody(
+data class MusicsOperationOnPlayedListBody(
     val deviceId: String,
     val listId: Uuid,
     val musicIds: List<String>,

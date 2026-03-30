@@ -24,7 +24,7 @@ class PlayerResource {
         val parent: PlayerResource = PlayerResource(),
     )
 
-    @Resource("musics")
+    @Resource("allMusics")
     class GetMusics(
         val parent: PlayerResource = PlayerResource(),
         val listId: Uuid,
@@ -41,8 +41,8 @@ class PlayerResource {
             )
     }
 
-    @Resource("addMusics")
-    class AddMusics(
+    @Resource("musics")
+    class Musics(
         val parent: PlayerResource = PlayerResource()
     )
 }

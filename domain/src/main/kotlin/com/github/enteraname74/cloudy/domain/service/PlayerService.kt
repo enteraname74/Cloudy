@@ -12,7 +12,6 @@ import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudySuccess
-import com.github.enteraname74.cloudy.logging.CloudyLogger
 import kotlin.uuid.Uuid
 
 class PlayerService(
@@ -20,7 +19,6 @@ class PlayerService(
     private val playerRepository: PlayerRepository,
     private val userRepository: UserRepository,
 ) {
-    private val logger = CloudyLogger(this::class)
 
     suspend fun create(
         hostId: Uuid,
@@ -32,7 +30,7 @@ class PlayerService(
             return CloudyResult.Error(routingMessages.CANNOT_FIND_USER)
         }
 
-        val existingMusicIds = musicRepository.getExistingIds(
+        val existingMusicIds = musicRepository.getExistingIdsOfUser(
             userId = hostId,
             ids = initialMusicIds,
         )
@@ -198,10 +196,52 @@ class PlayerService(
         }
         val musics: List<Music> = musicRepository.getAll(musicIds)
 
+        if (musics.isEmpty()) return CloudyResult.Success(Unit)
+
         playerRepository.addMusics(
             userId = userId,
             listId = listId,
             musics = musics,
+        )
+        return CloudyResult.Success(Unit)
+    }
+
+    suspend fun removeMusics(
+        userId: Uuid,
+        deviceId: String,
+        listId: Uuid,
+        musicIds: List<String>,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<Unit> {
+
+        val isInList: Boolean = playerRepository.isUserInPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        if (!isInList) {
+            return CloudyResult.Error(routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST)
+        }
+
+        val isOwner = playerRepository.isOwnerOfPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        val availableMusicIds: List<String> = if (isOwner) {
+            musicRepository.getExistingIds(musicIds)
+        } else {
+            musicRepository.getExistingIdsOfUser(
+                userId = userId,
+                ids = musicIds,
+            )
+        }
+        if (availableMusicIds.isEmpty()) return CloudyResult.Success(Unit)
+
+        playerRepository.removeMusics(
+            userId = userId,
+            listId = listId,
+            musicIds = musicRepository.getExistingIds(musicIds),
         )
         return CloudyResult.Success(Unit)
     }

@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
 import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.PlayerDataSource
 import kotlin.uuid.Uuid
@@ -128,8 +129,6 @@ class PlayerRepositoryImpl(
         listId: Uuid,
         musics: List<Music>
     ) {
-        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return
-
         val musicsAfterCurrent: List<PlayerMusic> = playerDataSource.getAllAfterCurrentMusic(
             listId = listId,
         )
@@ -159,9 +158,21 @@ class PlayerRepositoryImpl(
 
         // We merge the existing list and the new musics to add into a temporary list.
         val temporaryList: List<PlayerMusic> = musicsAfterCurrent + temporaryPlayerMusics
+        reorderMusicsInList(
+            listId = listId,
+            musics = temporaryList,
+        )
+    }
+
+    private suspend fun reorderMusicsInList(
+        listId: Uuid,
+        musics: List<PlayerMusic>
+    ) {
+        if (musics.isEmpty()) return
+        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return
 
         // We group the musics by users, to help with the ordering of the new list.
-        val byUsers: Map<Uuid, ArrayDeque<PlayerMusic>> = temporaryList
+        val byUsers: Map<Uuid, ArrayDeque<PlayerMusic>> = musics
             .groupBy { it.music.userId }
             .mapValues { (_, musics) -> ArrayDeque(musics) }
 
@@ -197,5 +208,55 @@ class PlayerRepositoryImpl(
             if (!addedAtLeastOne) break
         }
         playerDataSource.upsertMusics(result)
+    }
+
+    override suspend fun removeMusics(
+        userId: Uuid,
+        listId: Uuid,
+        musicIds: List<String>
+    ) {
+        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return
+        val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)
+
+        // If the current music will be deleted, we must change the current music.
+        if (currentMusicWillBeDeleted) {
+            val nextMusic: PlayerMusic? = playerDataSource.getNextMusic(
+                listId = listId,
+                idsToSkip = musicIds,
+            )
+            // If we can't find a next music to play, the played list is empty, so we delete the played list.
+            if (nextMusic == null) {
+                playerDataSource.delete(listId)
+            } else {
+                // Else, we set it to be the new current music.
+                playerDataSource.upsertMusics(
+                    playerMusics = listOf(
+                        nextMusic.copy(
+                            lastPlayedMillis = DateUtils.now(),
+                        )
+                    )
+                )
+            }
+        }
+
+        // We then check if we should re-arrange musics order after the deletion of songs.
+        val areAnyMusicToDeleteAfterCurrentOne: Boolean = playerDataSource.areAnyMusicAfterCurrentOne(
+            listId = listId,
+            musicIds = musicIds,
+        )
+
+        playerDataSource.deleteMusics(
+            listId = listId,
+            musicIds = musicIds,
+        )
+
+        if (areAnyMusicToDeleteAfterCurrentOne) {
+            reorderMusicsInList(
+                listId = listId,
+                musics = playerDataSource.getAllAfterCurrentMusic(
+                    listId = listId,
+                ),
+            )
+        }
     }
 }

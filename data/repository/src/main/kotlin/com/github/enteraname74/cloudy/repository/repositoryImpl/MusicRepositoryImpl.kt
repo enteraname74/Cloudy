@@ -178,14 +178,17 @@ class MusicRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun getExistingIds(
+    override suspend fun getExistingIdsOfUser(
         userId: Uuid,
         ids: List<String>
     ): List<String> =
-        musicDataSource.getExistingIds(
+        musicDataSource.getExistingIdsOfUser(
             userId = userId,
             ids = ids,
         )
+
+    override suspend fun getExistingIds(ids: List<String>): List<String> =
+        musicDataSource.getExistingIds(ids)
 
     override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)

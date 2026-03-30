@@ -151,6 +151,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .paginated(paginatedRequest)
                 .map { it.toPlayerMusic() }
         }
+
     override suspend fun addUser(
         userId: Uuid,
         deviceId: String,
@@ -250,5 +251,62 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListMusicTable.upsertAll(playerMusics)
         }
+    }
+
+    private suspend fun getFirstMusic(
+        listId: Uuid,
+    ): PlayerMusic? = workTransaction {
+        PlayedListMusicEntity
+            .find { (PlayedListMusicTable.listId eq listId) }
+            .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
+            .limit(1)
+            .firstOrNull()
+            ?.toPlayerMusic()
+    }
+
+    override suspend fun getNextMusic(
+        listId: Uuid,
+        idsToSkip: List<String>
+    ): PlayerMusic? = workTransaction {
+        val current: PlayerMusic = getCurrentMusic(listId) ?: return@workTransaction null
+        val next: PlayerMusic? = PlayedListMusicEntity
+            .find {
+                (PlayedListMusicTable.listId eq listId) and
+                        (PlayedListMusicTable.order greater current.order)
+            }
+            .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
+            .limit(1)
+            .firstOrNull()
+            ?.toPlayerMusic()
+
+        next ?: getFirstMusic(listId)
+    }
+
+    override suspend fun deleteMusics(listId: Uuid, musicIds: List<String>) {
+        workTransaction {
+            PlayedListMusicTable.deleteWhere {
+                (PlayedListMusicTable.listId eq listId) and
+                        (PlayedListMusicTable.musicId inList musicIds)
+            }
+        }
+    }
+
+    override suspend fun areAnyMusicAfterCurrentOne(
+        listId: Uuid,
+        musicIds: List<String>
+    ): Boolean = workTransaction {
+        if (musicIds.isEmpty()) return@workTransaction false
+
+        val currentOrder = getCurrentMusic(listId)?.order ?: return@workTransaction false
+
+        PlayedListMusicTable
+            .selectAll()
+            .where {
+                (PlayedListMusicTable.listId eq listId) and
+                        (PlayedListMusicTable.order greater currentOrder) and
+                        (PlayedListMusicTable.musicId inList musicIds)
+            }
+            .limit(1)
+            .firstOrNull() != null
     }
 }

@@ -86,7 +86,7 @@ class MusicDataSourceImpl : MusicDataSource {
                 .map { it.toMusic() }
         }
 
-    override suspend fun getExistingIds(
+    override suspend fun getExistingIdsOfUser(
         userId: Uuid,
         ids: List<String>
     ): List<String> =
@@ -97,6 +97,14 @@ class MusicDataSourceImpl : MusicDataSource {
                     (MusicTable.userId eq userId) and
                             (MusicTable.id inList ids)
                 }
+                .map { it[MusicTable.id].toString() }
+        }
+
+    override suspend fun getExistingIds(ids: List<String>): List<String> =
+        workTransaction {
+            MusicTable
+                .select(MusicTable.id)
+                .where { MusicTable.id inList ids }
                 .map { it[MusicTable.id].toString() }
         }
 

@@ -19,10 +19,15 @@ interface MusicDataSource {
         userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Music>
-    suspend fun getExistingIds(
+    suspend fun getExistingIdsOfUser(
         userId: Uuid,
         ids: List<String>,
     ): List<String>
+
+    suspend fun getExistingIds(
+        ids: List<String>,
+    ): List<String>
+
     suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean
     suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music?
     suspend fun allFromAlbum(albumId: Uuid): List<Music>

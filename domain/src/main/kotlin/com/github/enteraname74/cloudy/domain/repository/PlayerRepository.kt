@@ -76,4 +76,10 @@ interface PlayerRepository {
         listId: Uuid,
         musics: List<Music>
     )
+
+    suspend fun removeMusics(
+        userId: Uuid,
+        listId: Uuid,
+        musicIds: List<String>,
+    )
 }

@@ -53,8 +53,12 @@ interface MusicRepository {
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Music>
 
-    suspend fun getExistingIds(
+    suspend fun getExistingIdsOfUser(
         userId: Uuid,
+        ids: List<String>,
+    ): List<String>
+
+    suspend fun getExistingIds(
         ids: List<String>,
     ): List<String>
 

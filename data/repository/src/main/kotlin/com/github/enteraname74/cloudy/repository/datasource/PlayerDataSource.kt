@@ -83,4 +83,19 @@ interface PlayerDataSource {
     suspend fun upsertMusics(
         playerMusics: List<PlayerMusic>,
     )
+
+    suspend fun getNextMusic(
+        listId: Uuid,
+        idsToSkip: List<String>,
+    ): PlayerMusic?
+
+    suspend fun deleteMusics(
+        listId: Uuid,
+        musicIds: List<String>
+    )
+
+    suspend fun areAnyMusicAfterCurrentOne(
+        listId: Uuid,
+        musicIds: List<String>
+    ): Boolean
 }
