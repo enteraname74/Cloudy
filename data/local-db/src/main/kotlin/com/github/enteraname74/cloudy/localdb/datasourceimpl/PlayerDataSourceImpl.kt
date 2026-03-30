@@ -147,6 +147,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .find {
                     PlayedListMusicTable.listId eq listId
                 }
+                .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC))
                 .paginated(paginatedRequest)
                 .map { it.toPlayerMusic() }
         }

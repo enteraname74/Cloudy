@@ -128,6 +128,8 @@ class PlayerRepositoryImpl(
         listId: Uuid,
         musics: List<Music>
     ) {
+        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return
+
         val musicsAfterCurrent: List<PlayerMusic> = playerDataSource.getAllAfterCurrentMusic(
             listId = listId,
         )
@@ -164,14 +166,24 @@ class PlayerRepositoryImpl(
             .mapValues { (_, musics) -> ArrayDeque(musics) }
 
         val users: List<PlayerUser> = playerDataSource.getAllUsersByJoinedAt(listId)
+        if (users.isEmpty()) return
 
-        val currentMusic = playerDataSource.getCurrentMusic(listId) ?: return
+        /*
+        We want to rotate the users list to start the distribution of musics with the next user after the current one.
+        So, If we have user A - B - C - D, and the current music if of user C, the distribution order for the next ones will be :
+        D - A - B - C
+         */
+        val currentUserIndex: Int = users.indexOfFirst { it.id == currentMusic.music.userId }
+
+        val startIndex = if (currentUserIndex == -1) 0 else (currentUserIndex + 1) % users.size
+        val rotatedUsers = users.drop(startIndex) + users.take(startIndex)
+
         var currentOrder: Double = currentMusic.order + 1
         val result = mutableListOf<PlayerMusic>()
         while (true) {
             var addedAtLeastOne = false
 
-            for (user in users) {
+            for (user in rotatedUsers) {
                 val music = byUsers[user.id]?.removeFirstOrNull() ?: continue
                 result.add(
                     music.copy(
