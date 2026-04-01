@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.localdb.table.player
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
 import com.github.enteraname74.cloudy.domain.model.player.SimplePlayerMusic
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import org.jetbrains.exposed.v1.core.ReferenceOption
@@ -20,6 +21,7 @@ internal object PlayedListMusicTable : IdTable<String>() {
     val listId = reference("listId", PlayedListTable.id, onDelete = ReferenceOption.CASCADE)
     val musicId = reference("musicId", MusicTable.id, onDelete = ReferenceOption.CASCADE)
     val lastPlayedMillis = long("lastPlayedMillis").nullable()
+    val lastUpdateAt = long("lastUpdateAt")
     val order = double("order")
 
     fun upsertAll(musics: List<PlayerMusic>) {
@@ -28,6 +30,7 @@ internal object PlayedListMusicTable : IdTable<String>() {
             this[listId] = music.playedListId
             this[musicId] = music.music.fingerprint
             this[lastPlayedMillis] = music.lastPlayedMillis
+            this[lastUpdateAt] = DateUtils.now()
             this[order] = music.order
         }
     }
@@ -38,6 +41,7 @@ internal object PlayedListMusicTable : IdTable<String>() {
             this[listId] = music.playedListId
             this[musicId] = music.musicId
             this[lastPlayedMillis] = music.lastPlayedMillis
+            this[lastUpdateAt] = DateUtils.now()
             this[order] = music.order
         }
     }

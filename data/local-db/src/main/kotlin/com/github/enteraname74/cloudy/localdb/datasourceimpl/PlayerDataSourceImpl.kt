@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.player.*
 import com.github.enteraname74.cloudy.localdb.util.paginated
+import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.PlayerDataSource
 import org.jetbrains.exposed.v1.core.*
@@ -149,7 +150,8 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListMusicEntity
                 .find {
-                    PlayedListMusicTable.listId eq listId
+                    (PlayedListMusicTable.listId eq listId) and
+                            (PlayedListMusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC))
                 .paginated(paginatedRequest)
