@@ -285,4 +285,28 @@ class PlayerService(
             listId = listId,
             deviceId = deviceId,
         )
+
+    suspend fun getDeletedMusicIds(
+        listId: Uuid,
+        userId: Uuid,
+        deviceId: String,
+        routingMessages: RoutingMessages,
+        musicIds: List<String>
+    ): CloudyResult<List<String>> {
+        val isInList: Boolean = playerRepository.isUserInPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        if (!isInList) {
+            return CloudyResult.Error(routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST)
+        }
+
+        val existingIds: List<String> = playerRepository.getExistingMusicIds(
+            listId = listId,
+            musicIds = musicIds,
+        )
+
+        return CloudyResult.Success(musicIds - existingIds.toSet())
+    }
 }

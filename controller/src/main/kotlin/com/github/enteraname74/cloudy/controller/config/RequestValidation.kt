@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.controller.config
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusicsBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.CheckPlayerMusicIdsBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.MusicsOperationOnPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.JoinPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.NewPlayedListBody
@@ -79,6 +80,13 @@ fun Application.configureRequestValidation() {
             }
         }
         validate<MusicsOperationOnPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<CheckPlayerMusicIdsBody> { body ->
             if (body.isValid()) {
                 ValidationResult.Valid
             } else {

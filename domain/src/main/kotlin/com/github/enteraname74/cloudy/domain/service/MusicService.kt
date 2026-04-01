@@ -131,10 +131,11 @@ class MusicService(
         idsToCheck: List<String>,
         userId: Uuid
     ): List<String> {
-        val allMusicOfUser: List<String> = musicRepository.getAllOfUser(
+        val existingIds: List<String> = musicRepository.getExistingIdsOfUser(
+            ids = idsToCheck,
             userId = userId,
-        ).map { it.fingerprint }
+        )
 
-        return idsToCheck.filterNot { it in allMusicOfUser }
+        return idsToCheck.filterNot { it in existingIds }
     }
 }

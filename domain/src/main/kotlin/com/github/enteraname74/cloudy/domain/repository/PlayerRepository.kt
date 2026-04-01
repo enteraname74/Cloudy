@@ -88,4 +88,9 @@ interface PlayerRepository {
         userId: Uuid,
         musicId: String
     ): Boolean
+
+    suspend fun getExistingMusicIds(
+        listId: Uuid,
+        musicIds: List<String>
+    ): List<String>
 }

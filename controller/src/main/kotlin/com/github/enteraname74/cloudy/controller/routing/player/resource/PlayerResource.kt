@@ -41,6 +41,11 @@ class PlayerResource {
             )
     }
 
+    @Resource("check")
+    class Check(
+        val parent: PlayerResource = PlayerResource()
+    )
+
     @Resource("musics")
     class Musics(
         val parent: PlayerResource = PlayerResource()

@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.routing.player
 
 import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
 import com.github.enteraname74.cloudy.controller.routing.player.routes.addMusicsToPlayedList
+import com.github.enteraname74.cloudy.controller.routing.player.routes.checkPlayerMusicIds
 import com.github.enteraname74.cloudy.controller.routing.player.routes.createPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.deletePlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.getPlayedList
@@ -24,6 +25,7 @@ fun Routing.playerRouting() {
         updatePlayedList()
         addMusicsToPlayedList()
         removeMusicsFromPlayedList()
+        checkPlayerMusicIds()
     }
     playerSocket()
 }

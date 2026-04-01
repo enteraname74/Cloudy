@@ -269,4 +269,13 @@ class PlayerRepositoryImpl(
             userId = userId,
             musicId = musicId,
         )
+
+    override suspend fun getExistingMusicIds(
+        listId: Uuid,
+        musicIds: List<String>
+    ): List<String> =
+        playerDataSource.getExistingMusicIds(
+            listId = listId,
+            musicIds = musicIds,
+        )
 }
