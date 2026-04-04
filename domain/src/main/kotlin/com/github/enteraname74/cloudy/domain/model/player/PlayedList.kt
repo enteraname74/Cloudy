@@ -21,9 +21,6 @@ data class PlayedList(
         companion object {
             fun fromValueOrPaused(value: String): State =
                 entries.find { it.value == value } ?: Paused
-
-            fun fromValue(value: String): State? =
-                entries.find { it.value == value }
         }
     }
 }
