@@ -85,7 +85,7 @@ class PlayerService(
             deviceId = deviceId,
         )
         if (alreadyInList) {
-            return CloudyResult.Error(routingMessages.USER_ALREADY_IN_PLAYED_LIST)
+            return CloudyResult.Success(playedList.id)
         }
 
         playerRepository.addUser(
