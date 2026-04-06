@@ -279,4 +279,26 @@ class PlayerRepositoryImpl(
             listId = listId,
             musicIds = musicIds,
         )
+
+    override suspend fun setCurrentMusic(
+        musicId: String,
+        listId: Uuid,
+        userId: Uuid
+    ) {
+        val playerMusic = playerDataSource.getPlayerMusic(
+            musicId = musicId,
+            listId = listId,
+            userId = userId
+        )
+
+        playerMusic?.let {
+            playerDataSource.upsertMusics(
+                playerMusics = listOf(
+                    it.copy(
+                        lastPlayedMillis = DateUtils.now(),
+                    )
+                )
+            )
+        }
+    }
 }

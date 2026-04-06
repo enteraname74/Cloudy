@@ -8,6 +8,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.model.MusicsOper
 import com.github.enteraname74.cloudy.controller.routing.player.model.JoinPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.NewPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.RemoveUserFromPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.UpdateCurrentMusicBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.UpdatePlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
@@ -87,6 +88,13 @@ fun Application.configureRequestValidation() {
             }
         }
         validate<CheckPlayerMusicIdsBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<UpdateCurrentMusicBody> { body ->
             if (body.isValid()) {
                 ValidationResult.Valid
             } else {

@@ -347,4 +347,27 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .limit(1)
                 .firstOrNull() != null
         }
+
+    override suspend fun getPlayerMusic(
+        musicId: String,
+        listId: Uuid,
+        userId: Uuid,
+    ): PlayerMusic? =
+        workTransaction {
+            PlayedListMusicEntity.find {
+                (PlayedListMusicTable.musicId eq musicId) and (
+                        (PlayedListMusicTable.listId eq listId)
+                        )
+            }
+                .firstOrNull()
+                ?.toPlayerMusic(
+                    buildScope = { musicUserId ->
+                        if (musicUserId == userId) {
+                            Music.Scope.User
+                        } else {
+                            Music.Scope.SharedPlayedList
+                        }
+                    }
+                )
+        }
 }

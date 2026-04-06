@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.routes.joinPlaye
 import com.github.enteraname74.cloudy.controller.routing.player.routes.playerSocket
 import com.github.enteraname74.cloudy.controller.routing.player.routes.removeMusicsFromPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.removeUserFromPlayedList
+import com.github.enteraname74.cloudy.controller.routing.player.routes.updateCurrentMusic
 import com.github.enteraname74.cloudy.controller.routing.player.routes.updatePlayedList
 import io.ktor.server.routing.Routing
 
@@ -26,6 +27,7 @@ fun Routing.playerRouting() {
         addMusicsToPlayedList()
         removeMusicsFromPlayedList()
         checkPlayerMusicIds()
+        updateCurrentMusic()
     }
     playerSocket()
 }

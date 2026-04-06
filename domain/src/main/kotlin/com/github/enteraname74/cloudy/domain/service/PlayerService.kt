@@ -325,4 +325,29 @@ class PlayerService(
 
         return CloudyResult.Success(musicIds - existingIds.toSet())
     }
+
+    suspend fun updateCurrentMusic(
+        listId: Uuid,
+        userId: Uuid,
+        deviceId: String,
+        routingMessages: RoutingMessages,
+        musicId: String,
+    ): CloudyResult<Unit> {
+        val isInList: Boolean = playerRepository.isUserInPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        if (!isInList) {
+            return CloudyResult.Error(routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST)
+        }
+
+        playerRepository.setCurrentMusic(
+            listId = listId,
+            musicId = musicId,
+            userId = userId,
+        )
+
+        return CloudyResult.Success(Unit)
+    }
 }

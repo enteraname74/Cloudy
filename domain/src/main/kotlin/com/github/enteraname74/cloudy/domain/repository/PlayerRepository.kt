@@ -96,4 +96,10 @@ interface PlayerRepository {
         listId: Uuid,
         musicIds: List<String>
     ): List<String>
+
+    suspend fun setCurrentMusic(
+        musicId: String,
+        listId: Uuid,
+        userId: Uuid,
+    )
 }

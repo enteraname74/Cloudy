@@ -104,4 +104,10 @@ interface PlayerDataSource {
         userId: Uuid,
         musicId: String
     ): Boolean
+
+    suspend fun getPlayerMusic(
+        musicId: String,
+        listId: Uuid,
+        userId: Uuid,
+    ): PlayerMusic?
 }

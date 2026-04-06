@@ -9,8 +9,8 @@
     </root>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="io.netty" level="INFO"/>
-    <logger name="io.ktor.routing.Routing" level="TRACE"/>
-    <logger name="io.ktor.server" level="ERROR" />
-    <logger name="io.ktor.core" level="ERROR" />
+    <logger name="io.ktor.routing.Routing" level="trace"/>
+    <logger name="io.ktor.server" level="trace" />
+    <logger name="io.ktor.core" level="trace" />
     <logger name="Exposed" level="INFO"/>
 </configuration>
