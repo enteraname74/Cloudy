@@ -59,9 +59,10 @@ class PlayerService(
         )
         return if (isOwner) {
             val updatedPlayedList: PlayedList = playerRepository.update(playedListUpdate)
-            playerUserCommunication.broadcastListUpdated(
+            playerUserCommunication.broadcastEvent(
                 listId = playedListUpdate.listId,
                 exceptDeviceId = deviceId,
+                event = PlayerUserCommunication.Event.SyncPlayedList,
             )
             CloudyResult.Success(updatedPlayedList)
         } else {
@@ -92,9 +93,10 @@ class PlayerService(
             listId = playedList.id,
             deviceId = deviceId,
         )
-        playerUserCommunication.broadcastListUpdated(
+        playerUserCommunication.broadcastEvent(
             listId = playedList.id,
             exceptDeviceId = deviceId,
+            event = PlayerUserCommunication.Event.SyncUsers,
         )
 
         return CloudyResult.Success(playedList.id)
@@ -158,9 +160,10 @@ class PlayerService(
             return CloudyResult.Error(routingMessages.NOT_OWNER_OF_PLAYED_LIST)
         }
         playerRepository.delete(listId)
-        playerUserCommunication.broadcastListUpdated(
+        playerUserCommunication.broadcastEvent(
             listId = listId,
             exceptDeviceId = deviceId,
+            event = PlayerUserCommunication.Event.PlayedListDeleted,
         )
 
         return CloudyResult.Success(Unit)
@@ -188,10 +191,16 @@ class PlayerService(
                 listId = listId,
                 deviceId = deviceIdToRemove,
             )
-            playerRepository.deleteIfEmpty(listId)
-            playerUserCommunication.broadcastListUpdated(
+            val playedListDeleted = playerRepository.deleteIfEmpty(listId)
+            playerUserCommunication.broadcastEvent(
                 listId = listId,
-                exceptDeviceId = deviceId,
+                // Broadcast to all if deleted played list event
+                exceptDeviceId = deviceId.takeIf { !playedListDeleted },
+                event = if (playedListDeleted) {
+                    PlayerUserCommunication.Event.PlayedListDeleted
+                } else {
+                    PlayerUserCommunication.Event.SyncUsers
+                },
             )
             CloudyResult.Success(Unit)
         } else {
@@ -224,9 +233,10 @@ class PlayerService(
             listId = listId,
             musics = musics,
         )
-        playerUserCommunication.broadcastListUpdated(
+        playerUserCommunication.broadcastEvent(
             listId = listId,
             exceptDeviceId = deviceId,
+            event = PlayerUserCommunication.Event.SyncMusics,
         )
         return CloudyResult.Success(Unit)
     }
@@ -263,14 +273,20 @@ class PlayerService(
         }
         if (availableMusicIds.isEmpty()) return CloudyResult.Success(Unit)
 
-        playerRepository.removeMusics(
+        val playedListDeleted = playerRepository.removeMusics(
             userId = userId,
             listId = listId,
             musicIds = musicRepository.getExistingIds(musicIds),
         )
-        playerUserCommunication.broadcastListUpdated(
+        playerUserCommunication.broadcastEvent(
             listId = listId,
-            exceptDeviceId = deviceId,
+            // Broadcast to all if deleted played list event
+            exceptDeviceId = deviceId.takeIf { !playedListDeleted },
+            event = if (playedListDeleted) {
+                PlayerUserCommunication.Event.PlayedListDeleted
+            } else {
+                PlayerUserCommunication.Event.SyncMusics
+            },
         )
         return CloudyResult.Success(Unit)
     }

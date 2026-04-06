@@ -58,9 +58,8 @@ class PlayerRepositoryImpl(
         )
     }
 
-    override suspend fun deleteIfEmpty(listId: Uuid) {
+    override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
         playerDataSource.deleteIfEmpty(listId)
-    }
 
     override suspend fun delete(listId: Uuid) {
         playerDataSource.delete(listId)
@@ -215,8 +214,8 @@ class PlayerRepositoryImpl(
         userId: Uuid,
         listId: Uuid,
         musicIds: List<String>
-    ) {
-        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return
+    ): Boolean {
+        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return false
         val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)
 
         // If the current music will be deleted, we must change the current music.
@@ -228,7 +227,7 @@ class PlayerRepositoryImpl(
             // If we can't find a next music to play, the played list is empty, so we delete the played list.
             if (nextMusic == null) {
                 playerDataSource.delete(listId)
-                return
+                return true
             } else {
                 // Else, we set it to be the new current music.
                 playerDataSource.upsertMusics(
@@ -262,6 +261,8 @@ class PlayerRepositoryImpl(
                 ),
             )
         }
+
+        return playedListDeleted
     }
 
     override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =

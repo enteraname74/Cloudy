@@ -31,12 +31,16 @@ class PlayerUserCommunication {
         }
     }
 
-    suspend fun broadcastListUpdated(listId: Uuid, exceptDeviceId: String? = null) {
+    suspend fun broadcastEvent(
+        listId: Uuid,
+        event: Event,
+        exceptDeviceId: String? = null,
+    ) {
         val targets = connections[listId]?.toList().orEmpty()
         targets.forEach { connection ->
             if (connection.deviceId != exceptDeviceId) {
                 runCatching {
-                    connection.session.sendSerialized(Event.SyncRequired)
+                    connection.session.sendSerialized(event)
                 }.getOrElse {
                     logger.error("Couldn't send message through socket: $it")
                 }
@@ -45,6 +49,9 @@ class PlayerUserCommunication {
     }
 
     enum class Event {
-        SyncRequired
+        SyncMusics,
+        SyncPlayedList,
+        SyncUsers,
+        PlayedListDeleted,
     }
 }

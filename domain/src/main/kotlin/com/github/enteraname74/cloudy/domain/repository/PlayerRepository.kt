@@ -34,7 +34,7 @@ interface PlayerRepository {
         userId: Uuid
     )
 
-    suspend fun deleteIfEmpty(listId: Uuid)
+    suspend fun deleteIfEmpty(listId: Uuid) : Boolean
 
     suspend fun delete(listId: Uuid)
 
@@ -78,11 +78,14 @@ interface PlayerRepository {
         musics: List<Music>
     )
 
+    /**
+     * @return true if the played list was deleted because of empty songs, false otherwise
+     */
     suspend fun removeMusics(
         userId: Uuid,
         listId: Uuid,
         musicIds: List<String>,
-    )
+    ) : Boolean
 
     suspend fun hasReadPermission(
         userId: Uuid,

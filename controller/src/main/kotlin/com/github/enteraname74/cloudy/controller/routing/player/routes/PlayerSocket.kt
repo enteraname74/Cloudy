@@ -60,6 +60,18 @@ fun Route.playerSocket() {
                 userId = userId,
                 deviceId = deviceId,
             )
+            /*
+            We will always try to remove the user,
+            for case where he was improperly disconnected (missing internet, quiting the app before quitting the list)
+             */
+            playerService.remove(
+                userId = userId,
+                listId = listId,
+                deviceId = deviceId,
+                deviceIdToRemove = deviceId,
+                userIdToRemove = userId,
+                routingMessages = routingMessages,
+            )
         }
     }
 }
