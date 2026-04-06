@@ -51,7 +51,6 @@ class PlayerUserCommunication {
     enum class Event {
         SyncMusics,
         SyncPlayedList,
-        SyncUsers,
         PlayedListDeleted,
     }
 }

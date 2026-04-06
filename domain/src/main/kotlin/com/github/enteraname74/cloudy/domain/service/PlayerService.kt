@@ -75,7 +75,7 @@ class PlayerService(
         code: String,
         deviceId: String,
         routingMessages: RoutingMessages,
-    ): CloudyResult<Uuid> {
+    ): CloudyResult<PlayedList> {
         val playedList: PlayedList = playerRepository.getFromCode(code) ?: return CloudyResult.Error(
             routingMessages.PLAYED_LIST_NOT_FOUND,
         )
@@ -85,7 +85,7 @@ class PlayerService(
             deviceId = deviceId,
         )
         if (alreadyInList) {
-            return CloudyResult.Success(playedList.id)
+            return CloudyResult.Success(playedList)
         }
 
         playerRepository.addUser(
@@ -96,10 +96,10 @@ class PlayerService(
         playerUserCommunication.broadcastEvent(
             listId = playedList.id,
             exceptDeviceId = deviceId,
-            event = PlayerUserCommunication.Event.SyncUsers,
+            event = PlayerUserCommunication.Event.SyncPlayedList,
         )
 
-        return CloudyResult.Success(playedList.id)
+        return CloudyResult.Success(playedList)
     }
 
     suspend fun getPlayedList(
@@ -199,7 +199,7 @@ class PlayerService(
                 event = if (playedListDeleted) {
                     PlayerUserCommunication.Event.PlayedListDeleted
                 } else {
-                    PlayerUserCommunication.Event.SyncUsers
+                    PlayerUserCommunication.Event.SyncPlayedList
                 },
             )
             CloudyResult.Success(Unit)
