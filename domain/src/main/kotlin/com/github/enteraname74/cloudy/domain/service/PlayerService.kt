@@ -99,7 +99,12 @@ class PlayerService(
             event = PlayerUserCommunication.Event.SyncPlayedList,
         )
 
-        return CloudyResult.Success(playedList)
+        val updatedList = playerRepository.getFromCode(code)
+        return if (updatedList != null) {
+            CloudyResult.Success(updatedList)
+        } else {
+            CloudyResult.Error()
+        }
     }
 
     suspend fun getPlayedList(
