@@ -1,8 +1,10 @@
 package com.github.enteraname74.cloudy.controller.routing.player.routes
 
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
+import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayerSocketUser
 import com.github.enteraname74.cloudy.domain.service.PlayerService
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
@@ -32,13 +34,15 @@ fun Route.playerSocket() {
             return@webSocket
         }
 
-        val isUserInList: Boolean = playerService.isUserInList(
+        val playedListResult: CloudyResult<PlayedList> = playerService.getPlayedList(
             userId = userId,
             listId = listId,
             deviceId = deviceId,
+            routingMessages = routingMessages,
         )
-        if (!isUserInList) {
-            close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST))
+
+        (playedListResult as? CloudyResult.Error<PlayedList>)?.let {
+            close(CloseReason(CloseReason.Codes.CANNOT_ACCEPT, playedListResult.message.orEmpty()))
             return@webSocket
         }
 
@@ -61,10 +65,10 @@ fun Route.playerSocket() {
                 deviceId = deviceId,
             )
             /*
-            We will always try to remove the user,
+            We will always try to disconnect the user,
             for case where he was improperly disconnected (missing internet, quiting the app before quitting the list)
              */
-            playerService.remove(
+            playerService.removeOrDisconnect(
                 userId = userId,
                 listId = listId,
                 deviceId = deviceId,

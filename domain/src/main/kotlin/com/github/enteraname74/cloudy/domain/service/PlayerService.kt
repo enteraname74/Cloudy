@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
@@ -174,7 +175,7 @@ class PlayerService(
         return CloudyResult.Success(Unit)
     }
 
-    suspend fun remove(
+    suspend fun removeOrDisconnect(
         userId: Uuid,
         listId: Uuid,
         deviceId: String,
@@ -190,27 +191,39 @@ class PlayerService(
             deviceId = deviceId,
         )
 
-        return if (userQuitting || isOwner) {
+        if (!userQuitting && !isOwner) return CloudyResult.Error(routingMessages.NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST)
+
+        /*
+        If the user quits himself the played list, we will just mark him as disconnected.
+        Else, if the user is removed from the host, we will delete him.
+         */
+        if (userQuitting) {
+            playerRepository.setUserStatus(
+                userId = userIdToRemove,
+                listId = listId,
+                deviceId = deviceIdToRemove,
+                status = PlayerUser.Status.Disconnected,
+            )
+        } else {
             playerRepository.removeUser(
                 userId = userIdToRemove,
                 listId = listId,
                 deviceId = deviceIdToRemove,
             )
-            val playedListDeleted = playerRepository.deleteIfEmpty(listId)
-            playerUserCommunication.broadcastEvent(
-                listId = listId,
-                // Broadcast to all if deleted played list event
-                exceptDeviceId = deviceId.takeIf { !playedListDeleted },
-                event = if (playedListDeleted) {
-                    PlayerUserCommunication.Event.PlayedListDeleted
-                } else {
-                    PlayerUserCommunication.Event.SyncPlayedList
-                },
-            )
-            CloudyResult.Success(Unit)
-        } else {
-            CloudyResult.Error(routingMessages.NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST)
         }
+
+        val playedListDeleted = playerRepository.deleteIfEmpty(listId)
+        playerUserCommunication.broadcastEvent(
+            listId = listId,
+            // Broadcast to all if deleted played list event
+            exceptDeviceId = deviceId.takeIf { !playedListDeleted },
+            event = if (playedListDeleted) {
+                PlayerUserCommunication.Event.PlayedListDeleted
+            } else {
+                PlayerUserCommunication.Event.SyncPlayedList
+            },
+        )
+        return CloudyResult.Success(Unit)
     }
 
     suspend fun addMusics(

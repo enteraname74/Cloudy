@@ -9,4 +9,10 @@ data class PlayerUser(
     val deviceId: String,
     val username: String,
     val joinedAt: Long,
-)
+    val status: Status,
+) {
+    enum class Status {
+        Connected,
+        Disconnected,
+    }
+}

@@ -87,6 +87,31 @@ class PlayerRepositoryImpl(
             deviceId = deviceId,
         )
 
+    override suspend fun getUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String
+    ): PlayerUser? =
+        playerDataSource.getUser(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+
+    override suspend fun setUserStatus(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+        status: PlayerUser.Status
+    ) {
+        playerDataSource.setUserStatus(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+            status = status,
+        )
+    }
+
     override suspend fun getFromCode(code: String): PlayedList? =
         playerDataSource.getFromCode(code = code)
 

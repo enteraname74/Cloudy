@@ -122,18 +122,62 @@ class PlayerDataSourceImpl : PlayerDataSource {
             firstJoiner?.user?.id?.value == userId && firstJoiner.deviceId == deviceId
         }
 
+    private fun getUserEntity(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String
+    ): PlayedListUserEntity? =
+        PlayedListUserEntity.find {
+            (PlayedListUserTable.listId eq listId) and
+                    (PlayedListUserTable.userId eq userId) and
+                    (PlayedListUserTable.deviceId eq deviceId)
+        }.firstOrNull()
+
     override suspend fun isUserInList(
         userId: Uuid,
         listId: Uuid,
         deviceId: String
     ): Boolean =
         workTransaction {
-            !PlayedListUserEntity.find {
-                (PlayedListUserTable.listId eq listId) and
-                        (PlayedListUserTable.userId eq userId) and
-                        (PlayedListUserTable.deviceId eq deviceId)
-            }.empty()
+            getUserEntity(
+                userId = userId,
+                listId = listId,
+                deviceId = deviceId,
+            ) != null
         }
+
+
+    override suspend fun getUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String
+    ): PlayerUser? =
+        workTransaction {
+            getUserEntity(
+                userId = userId,
+                listId = listId,
+                deviceId = deviceId,
+            )?.toPlayerUser()
+        }
+
+
+    override suspend fun setUserStatus(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+        status: PlayerUser.Status
+    ) {
+        workTransaction {
+            val user = getUserEntity(
+                userId = userId,
+                listId = listId,
+                deviceId = deviceId,
+            )
+            user?.let {
+                it.status = status
+            }
+        }
+    }
 
     override suspend fun getFromCode(code: String): PlayedList? =
         workTransaction {

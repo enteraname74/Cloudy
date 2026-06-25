@@ -20,17 +20,19 @@ internal object PlayedListUserTable: IdTable<String>() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val deviceId = text("deviceId")
     val joinedAt = long("joinedAt")
+    val status = enumeration<PlayerUser.Status>("status")
 
     fun insert(
         userId: Uuid,
         deviceId: String,
-        listId: Uuid
+        listId: Uuid,
     ) {
         this.insert {
             it[id] = "$listId-$userId-$deviceId"
             it[this.listId] = listId
             it[this.deviceId] = deviceId
             it[this.userId] = userId
+            it[this.status] = PlayerUser.Status.Connected
             it[joinedAt] = DateUtils.now()
         }
     }
@@ -43,6 +45,7 @@ internal class PlayedListUserEntity(id: EntityID<String>): Entity<String>(id) {
     var deviceId by PlayedListUserTable.deviceId
     var listId by PlayedListUserTable.listId
     var joinedAt by PlayedListUserTable.joinedAt
+    var status by PlayedListUserTable.status
 
     fun toPlayerUser(): PlayerUser =
         PlayerUser(
@@ -50,5 +53,6 @@ internal class PlayedListUserEntity(id: EntityID<String>): Entity<String>(id) {
             deviceId = deviceId,
             username = user.username,
             joinedAt = joinedAt,
+            status = status,
         )
 }

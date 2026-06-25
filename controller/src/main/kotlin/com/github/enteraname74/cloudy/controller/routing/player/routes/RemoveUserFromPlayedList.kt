@@ -19,7 +19,7 @@ fun Route.removeUserFromPlayedList() {
         val body: RemoveUserFromPlayedListBody = call.receive()
         val userId = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
-        val result = playerService.remove(
+        val result = playerService.removeOrDisconnect(
             userId = userId,
             listId = body.listId,
             deviceId = body.deviceId,

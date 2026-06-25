@@ -50,6 +50,19 @@ interface PlayerDataSource {
         deviceId: String,
     ): Boolean
 
+    suspend fun getUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String
+    ): PlayerUser?
+
+    suspend fun setUserStatus(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+        status: PlayerUser.Status,
+    )
+
     suspend fun getFromCode(
         code: String,
     ): PlayedList?

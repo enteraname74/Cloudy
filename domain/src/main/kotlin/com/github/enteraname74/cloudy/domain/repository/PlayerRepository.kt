@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
@@ -49,6 +50,19 @@ interface PlayerRepository {
         listId: Uuid,
         deviceId: String,
     ): Boolean
+
+    suspend fun getUser(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String
+    ): PlayerUser?
+
+    suspend fun setUserStatus(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+        status: PlayerUser.Status,
+    )
 
     suspend fun getFromCode(
         code: String,
