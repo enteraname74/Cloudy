@@ -80,20 +80,38 @@ class PlayerService(
         val playedList: PlayedList = playerRepository.getFromCode(code) ?: return CloudyResult.Error(
             routingMessages.PLAYED_LIST_NOT_FOUND,
         )
-        val alreadyInList: Boolean = playerRepository.isUserInList(
+        val user: PlayerUser? = playerRepository.getUser(
             userId = userId,
             listId = playedList.id,
             deviceId = deviceId,
         )
-        if (alreadyInList) {
-            return CloudyResult.Success(playedList)
+        // Nothing to do, user is already in the played list and connected
+
+        when (user?.status) {
+            // Nothing to do, user is already in the played list and connected
+            PlayerUser.Status.Connected -> {
+                return CloudyResult.Success(playedList)
+            }
+            // We will need to register the user as connected again
+            PlayerUser.Status.Disconnected -> {
+                playerRepository.setUserStatus(
+                    userId = userId,
+                    listId = playedList.id,
+                    deviceId = deviceId,
+                    status = PlayerUser.Status.Connected,
+                )
+            }
+            // Else, we will add the fresh user to the played list
+            null -> {
+                playerRepository.addUser(
+                    userId = userId,
+                    listId = playedList.id,
+                    deviceId = deviceId,
+                )
+            }
         }
 
-        playerRepository.addUser(
-            userId = userId,
-            listId = playedList.id,
-            deviceId = deviceId,
-        )
+        // For a new user or a reconnection, we will broadcast a sync event
         playerUserCommunication.broadcastEvent(
             listId = playedList.id,
             exceptDeviceId = deviceId,
