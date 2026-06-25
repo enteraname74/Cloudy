@@ -14,6 +14,7 @@ object FrRoutingMessages: RoutingMessages {
     override val INVALID_INSCRIPTION_CODE: String = "Le code d'inscription fournis est invalide."
     override val MISSING_PERMISSION_FOR_DELETION: String = "L'utilisateur n'a pas les droits pour supprimer ce profil."
     override val USER_DELETED: String = "Le profil utilisateur a été supprimé."
+    override val INSCRIPTION_CODE_NOT_FOUND: String = "Le code d'inscription n'existe pas."
 
     override val NO_FILE_DATA: String = "Le fichier est vide."
     override val USER_MAX_STORAGE_REACHED: String = "L'utilisateur a atteint se limite de stockage disponible."

@@ -14,6 +14,7 @@ object EnRoutingMessages: RoutingMessages {
     override val INVALID_INSCRIPTION_CODE: String = "The given inscription code is invalid."
     override val MISSING_PERMISSION_FOR_DELETION: String = "The user cannot delete the requested profile."
     override val USER_DELETED: String = "The user was deleted."
+    override val INSCRIPTION_CODE_NOT_FOUND: String = "Inscription code not found."
 
     override val NO_FILE_DATA: String = "No file data found."
     override val USER_MAX_STORAGE_REACHED: String = "The user has no storage space left."

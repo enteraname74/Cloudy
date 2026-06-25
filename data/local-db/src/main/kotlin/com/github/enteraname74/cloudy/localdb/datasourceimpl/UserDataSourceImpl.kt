@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.upsert
 import kotlin.uuid.Uuid
 
-class UserDataSourceImpl: UserDataSource {
+class UserDataSourceImpl : UserDataSource {
     override suspend fun getFromUsername(username: String): User? =
         workTransaction {
             UserEntity.find {

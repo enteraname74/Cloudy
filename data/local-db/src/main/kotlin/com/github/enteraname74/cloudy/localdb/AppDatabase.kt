@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
+import com.github.enteraname74.cloudy.localdb.table.UserInscriptionCodeTable
 import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListTable
@@ -31,6 +32,7 @@ object AppDatabase {
                 PlayedListTable,
                 PlayedListUserTable,
                 PlayedListMusicTable,
+                UserInscriptionCodeTable,
             )
         }
     }

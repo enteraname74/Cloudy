@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.datasource
 
 import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
 import kotlin.uuid.Uuid
 
 interface UserDataSource {

@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
-import com.github.enteraname74.cloudy.config.auth.isTokenValid
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
@@ -8,13 +7,13 @@ import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
 import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
 import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
-import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.server.request.receive
+import io.ktor.server.request.*
 import io.ktor.server.resources.post
-import io.ktor.server.response.respond
+import io.ktor.server.response.*
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 
@@ -30,7 +29,7 @@ fun Route.signIn() {
             return@post badRequest(message = routingMessages.USERNAME_TAKEN)
         }
 
-        if (!isTokenValid(token = user.inscriptionCode)) {
+        if (userService.getCode(code = user.inscriptionCode) == null) {
             return@post badRequest(message = routingMessages.INVALID_INSCRIPTION_CODE)
         }
 
@@ -47,6 +46,9 @@ fun Route.signIn() {
             is CloudyResult.Success -> {
                 val savedUser: User = cloudyResult.data
                 val tokens = buildUserTokens(user = savedUser)
+                // We delete the inscription code used by the user to create its account
+                // TODO: Use a socket to inform owner of code that his code was used and to fetch the update codes
+                userService.deleteUsedCode(code = user.inscriptionCode)
                 call.respond(
                     UserAuth(
                         user = savedUser.toConnectedUser(),

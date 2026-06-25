@@ -16,6 +16,8 @@ interface RoutingMessages {
     val MISSING_PERMISSION_FOR_DELETION: String
     val USER_DELETED: String
 
+    val INSCRIPTION_CODE_NOT_FOUND: String
+
     val NO_FILE_DATA: String
     val USER_MAX_STORAGE_REACHED: String
     val FILE_TOO_HEAVY: String

@@ -36,18 +36,6 @@ fun ApplicationContext.generateToken(
         .sign(Algorithm.HMAC256(secret))
 }
 
-// TODO: Add expiration date
-// TODO: Find a way to ensure token is only used once
-fun ApplicationContext.generateInscriptionToken(): String {
-    val environment = call.application.environment
-    val secret = environment.config.property("jwt.secret").getString()
-    val issuer = environment.config.property("jwt.issuer").getString()
-
-    return JWT.create()
-        .withIssuer(issuer)
-        .sign(Algorithm.HMAC256(secret))
-}
-
 fun ApplicationContext.getUsernameFromToken(): String? {
     val principal = call.principal<JWTPrincipal>()
     return principal?.payload?.getClaim(TOKEN_USERNAME_CLAIM_KEY)?.asString()
@@ -67,19 +55,6 @@ fun ApplicationContext.isTokenARefreshOne(): Boolean {
         ?.let {
             TokenType.fromString(it)
         } == TokenType.Refresh
-}
-
-fun ApplicationContext.isTokenValid(token: String): Boolean {
-    val secret = call.application.environment.config.property("jwt.secret").getString()
-    val issuer = call.application.environment.config.property("jwt.issuer").getString()
-
-    return runCatching {
-        JWT
-            .require(Algorithm.HMAC256(secret))
-            .withIssuer(issuer)
-            .build()
-            .verify(token)
-    }.getOrNull() != null
 }
 
 internal const val TOKEN_USERNAME_CLAIM_KEY = "username"
