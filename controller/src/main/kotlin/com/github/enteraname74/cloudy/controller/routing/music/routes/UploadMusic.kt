@@ -68,7 +68,7 @@ fun Route.uploadMusic() {
                 return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
             is CloudyResult.Success -> {
-                val uploadedResult: CloudyResult<Music> = musicService.save(
+                val uploadedResult: CloudyResult<Music> = musicService.saveUserFile(
                     user = user,
                     fileData = musicFile.data.first,
                     musicUpload = musicFile.data.second,

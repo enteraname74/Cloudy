@@ -24,10 +24,10 @@ internal class AcoustidResultAnalyzer(
      */
     private fun getAlbumName(recording: AcoustidRecording): String =
         if (recording.releaseGroups.isNullOrEmpty()) {
-            initialMetadata.album
+            initialMetadata.album.name
         } else {
             recording.releaseGroups.find { album ->
-                album.title == initialMetadata.album
+                album.title == initialMetadata.album.name
             }?.title ?: recording.releaseGroups.first().title
         }
 
@@ -37,13 +37,15 @@ internal class AcoustidResultAnalyzer(
      * @param recording the recording containing the artist name.
      * @return the name of the artist. If nothing was found, returns the artist from the initial metadata.
      */
-    private fun getArtistName(recording: AcoustidRecording): String =
+    private fun getArtistName(recording: AcoustidRecording): MusicMetadata.Artist =
         if (recording.artists.isNullOrEmpty()) {
-            initialMetadata.artist
+            initialMetadata.getMainArtistOrUnknown()
         } else {
-            recording.artists.find { artist ->
-                artist.name == initialMetadata.artist
-            }?.name ?: recording.artists.first().name
+            MusicMetadata.Artist(
+                name = recording.artists.find { artist ->
+                    artist.name == initialMetadata.getMainArtistOrUnknown().name
+                }?.name ?: recording.artists.first().name
+            )
         }
 
     /**
@@ -104,11 +106,17 @@ internal class AcoustidResultAnalyzer(
         val optimalMatch: AcoustidMatch = getOptimalMatch() ?: return initialMetadata
         val optimalRecording: AcoustidRecording = getOptimalRecording(match = optimalMatch) ?: return initialMetadata
 
+        // TODO ACOUSTID: Better system for multiple artists.
+        val mainArtist = getArtistName(optimalRecording)
         return MusicMetadata(
             name = getMusicTitle(optimalRecording),
-            album = getAlbumName(optimalRecording),
-            artist = getArtistName(optimalRecording),
+            album = MusicMetadata.Album(
+                name = getAlbumName(optimalRecording),
+                artist = mainArtist
+            ),
+            artists = listOf(mainArtist ),
             duration = initialMetadata.duration,
+            albumPosition = null,
         )
     }
 }

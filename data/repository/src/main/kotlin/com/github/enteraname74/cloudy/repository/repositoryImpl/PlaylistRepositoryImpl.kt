@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
@@ -57,8 +58,10 @@ class PlaylistRepositoryImpl(
             }
 
             coverFileManager.save(
-                username = username,
-                fileData = cover,
+                data = FileSavingData.UserFile(
+                    username = username,
+                    fileData = cover,
+                )
             )
         }
 

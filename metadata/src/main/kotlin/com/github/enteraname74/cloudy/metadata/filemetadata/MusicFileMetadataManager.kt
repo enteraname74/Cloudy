@@ -26,11 +26,25 @@ class MusicFileMetadataManager {
             val audioFile = AudioFileIO.read(musicFile)
             val tag = audioFile.tag
 
+            val albumArtist = tag.getFirst(FieldKey.ALBUM_ARTIST)?.takeIf { it.isNotBlank() }
+            val artist = tag.getFirst(FieldKey.ARTIST)
+
+            val artists: List<MusicMetadata.Artist> = buildList {
+                if (albumArtist != null && albumArtist != artist) {
+                    add(MusicMetadata.Artist(name = albumArtist))
+                }
+                add(MusicMetadata.Artist(name = artist))
+            }
+
             MusicMetadata(
                 name = tag.getFirst(FieldKey.TITLE),
-                artist = tag.getFirst(FieldKey.ARTIST),
-                album = tag.getFirst(FieldKey.ALBUM),
+                artists = artists,
+                album = MusicMetadata.Album(
+                    name = tag.getFirst(FieldKey.ALBUM),
+                    artist = artists.firstOrNull() ?: MusicMetadata.unknownArtist(),
+                    ),
                 duration = audioFile.audioHeader.trackLength.toLong(),
+                albumPosition = tag.getFirst(FieldKey.TRACK)?.toIntOrNull(),
             ).replaceBlank()
         } catch (e: Exception) {
             logger.error("Failed to retrieve metadata of file ${musicFile.name} with error ${e.message}")

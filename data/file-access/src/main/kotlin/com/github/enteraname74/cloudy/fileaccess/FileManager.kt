@@ -1,7 +1,9 @@
 package com.github.enteraname74.cloudy.fileaccess
 
-import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.logging.CloudyLogger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.uuid.Uuid
 
@@ -71,17 +73,66 @@ abstract class FileManager {
     /**
      * Saves a file and returns its id (its name without an extension).
      */
-    fun save(username: String, fileData: FileData): Uuid {
+    suspend fun save(data: FileSavingData): Uuid? =
+        when (data) {
+            is FileSavingData.MusicUrl -> saveFromUrl(data = data)
+            is FileSavingData.UserFile -> saveUserData(data = data)
+        }
+
+    private fun saveUserData(
+        data: FileSavingData.UserFile,
+    ): Uuid {
         val fileId = Uuid.random()
-        val filename = "$fileId.${fileData.extension}"
-        val filepath = "${getFileDirectory(username)}/$filename"
+        val filename = "$fileId.${data.fileData.extension}"
+        val filepath = "${getFileDirectory(data.username)}/$filename"
 
         val fileToSave = File(filepath)
 
         fileToSave.parentFile?.mkdirs()
-        fileToSave.writeBytes(fileData.data)
+        fileToSave.writeBytes(data.fileData.data)
 
         return fileId
+    }
+
+    /**
+     * Fetch and save a music from yt.
+     *
+     * @return the id of the music if saved.
+     */
+    private suspend fun saveFromUrl(
+        data: FileSavingData.MusicUrl,
+    ): Uuid? = withContext(Dispatchers.IO) {
+        val fileId = Uuid.random()
+        // TODO YT: In future, let user choose the format
+        val filename = "$fileId.m4a"
+        val filepath = "${getFileDirectory(data.username)}/$filename"
+
+        try {
+            val process = ProcessBuilder(
+                "yt-dlp",
+                "-f", "bestaudio[ext=m4a]/bestaudio",
+                "-x",
+                "--audio-format", "m4a",
+                "--embed-metadata",
+                "--embed-thumbnail",
+                "--convert-thumbnails", "jpg",
+                "-o", filepath,
+                data.url
+            )
+                .redirectErrorStream(true)
+                .start()
+
+            val output = process.inputStream.bufferedReader().readText()
+            val exitCode = process.waitFor()
+
+            if (exitCode != 0) {
+                throw RuntimeException("yt-dlp failed with code $exitCode:\n$output")
+            }
+            fileId
+        } catch (e: Exception) {
+            logger.error("Failed to download music from yt: ${data.url}, got exception: ${e.message}")
+            null
+        }
     }
 
     companion object {

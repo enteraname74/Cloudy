@@ -11,6 +11,11 @@ class MusicResource {
         val parent: MusicResource = MusicResource()
     )
 
+    @Resource("fetch")
+    data class FetchFromUrl(
+        val parent: MusicResource = MusicResource(),
+    )
+
     @Resource("check")
     data class Check(
         val parent: MusicResource = MusicResource()

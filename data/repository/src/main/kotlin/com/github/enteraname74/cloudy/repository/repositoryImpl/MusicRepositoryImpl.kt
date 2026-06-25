@@ -9,6 +9,8 @@ import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadPr
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
@@ -23,14 +25,17 @@ class MusicRepositoryImpl(
 ) : MusicRepository {
     override suspend fun startUploadProcess(
         user: User,
-        fileData: FileData,
-        shouldSearchForMetadata: Boolean
+        data: FileSavingData,
+        shouldSearchForMetadata: Boolean,
+        musicUpload: MusicUpload?,
     ): UploadProcessState {
         // We save the file
-        val temporarySavedFileId: Uuid = musicFileManager.save(
-            username = user.username,
-            fileData = fileData,
+        val temporarySavedFileId: Uuid? = musicFileManager.save(
+            data = data,
         )
+
+        if (temporarySavedFileId == null) return UploadProcessState.Error
+
         // We retrieve the saved file to analyze its fingerprint for metadata
         val temporarySavedFile: File = musicFileManager.getByName(
             username = user.username,
@@ -45,6 +50,9 @@ class MusicRepositoryImpl(
 
         val fingerprint: String =
             musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile) ?: return UploadProcessState.Error
+        val finalMusicUpload: MusicUpload = musicUpload ?: musicFileMetadataManager
+            .getMetadataOfFile(musicFile = temporarySavedFile)
+            .toMusicUpload()
 
         /*
         We check if a music with the same fingerprint has already been saved.
@@ -65,12 +73,13 @@ class MusicRepositoryImpl(
             musicFileManager.rename(
                 from = temporarySavedFileId.toString(),
                 username = user.username,
-                to = "$fingerprint.${fileData.extension}"
+                to = "$fingerprint.${data.extension}"
             )
         }
 
         return UploadProcessState.ContinueProcess(
             fingerprint = fingerprint,
+            musicUpload = finalMusicUpload,
         )
     }
 

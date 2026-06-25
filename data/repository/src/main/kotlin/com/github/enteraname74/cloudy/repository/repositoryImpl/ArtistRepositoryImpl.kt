@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import kotlin.uuid.Uuid
 
@@ -58,8 +59,10 @@ class ArtistRepositoryImpl(
             }
 
             coverFileManager.save(
-                username = username,
-                fileData = cover,
+                data = FileSavingData.UserFile(
+                    username = username,
+                    fileData = cover,
+                )
             )
         }
 

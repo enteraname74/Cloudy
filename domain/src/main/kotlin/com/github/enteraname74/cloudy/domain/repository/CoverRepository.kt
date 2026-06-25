@@ -17,5 +17,5 @@ interface CoverRepository {
     suspend fun save(
         username: String,
         coverData: FileData,
-    ): Uuid
+    ): Uuid?
 }

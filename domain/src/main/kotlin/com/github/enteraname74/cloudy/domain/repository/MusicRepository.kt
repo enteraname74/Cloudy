@@ -1,8 +1,10 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
@@ -20,8 +22,9 @@ interface MusicRepository {
      */
     suspend fun startUploadProcess(
         user: User,
-        fileData: FileData,
+        data: FileSavingData,
         shouldSearchForMetadata: Boolean,
+        musicUpload: MusicUpload?,
     ): UploadProcessState
 
     /**
@@ -78,6 +81,7 @@ interface MusicRepository {
          */
         data class ContinueProcess(
             val fingerprint: String,
+            val musicUpload: MusicUpload,
         ): UploadProcessState
     }
 }

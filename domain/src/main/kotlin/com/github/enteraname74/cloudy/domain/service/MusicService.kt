@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
@@ -53,17 +54,17 @@ class MusicService(
     suspend fun getFromCoverPath(coverPath: String): Music? =
         musicRepository.getFromCoverPath(coverPath = coverPath)
 
-    suspend fun save(
+    private suspend fun saveData(
         user: User,
-        fileData: FileData,
-        musicUpload: MusicUpload,
+        fileSavingData: FileSavingData,
         shouldSearchForMetadata: Boolean,
+        musicUpload: MusicUpload?,
     ): CloudyResult<Music> {
-
         val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
             user = user,
-            fileData = fileData,
+            data = fileSavingData,
             shouldSearchForMetadata = shouldSearchForMetadata,
+            musicUpload = musicUpload,
         )
 
         return when (uploadProcess) {
@@ -73,7 +74,7 @@ class MusicService(
 
             is UploadProcessState.ContinueProcess -> {
                 uploadMusicUseCase(
-                    musicUpload = musicUpload,
+                    musicUpload = uploadProcess.musicUpload,
                     fingerprint = uploadProcess.fingerprint,
                     user = user,
                     musicPath = "music/${uploadProcess.fingerprint}",
@@ -81,6 +82,36 @@ class MusicService(
             }
         }
     }
+
+    suspend fun saveUserFile(
+        user: User,
+        fileData: FileData,
+        musicUpload: MusicUpload,
+        shouldSearchForMetadata: Boolean,
+    ): CloudyResult<Music> =
+        saveData(
+            user = user,
+            fileSavingData = FileSavingData.UserFile(
+                username = user.username,
+                fileData = fileData,
+            ),
+            shouldSearchForMetadata = shouldSearchForMetadata,
+            musicUpload = musicUpload,
+        )
+
+    suspend fun saveFromUrl(
+        user: User,
+        url: String,
+    ): CloudyResult<Music> =
+        saveData(
+            user = user,
+            fileSavingData = FileSavingData.MusicUrl(
+                username = user.username,
+                url = url,
+            ),
+            shouldSearchForMetadata = false,
+            musicUpload = null,
+        )
 
     suspend fun update(
         musicUpdate: MusicUpdate,

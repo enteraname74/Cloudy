@@ -2,7 +2,6 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
 import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
-import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.repository.datasource.UserInscriptionCodeDataSource
 import kotlin.uuid.Uuid
 

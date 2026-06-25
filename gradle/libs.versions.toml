@@ -9,6 +9,7 @@ logback = "1.5.32"
 exposed = "1.1.1"
 postgresql = "42.7.10"
 sqlite-jdbc = "3.41.2.2"
+coroutines = "1.10.2"
 
 [libraries]
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
@@ -33,6 +34,8 @@ jaudiotagger = { module = "net.jthink:jaudiotagger", version.ref = "jaudiotagger
 
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-ktor = { module = "io.insert-koin:koin-ktor", version.ref = "koin" }
+
+kotlinx-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
 
 ktor-simple-cache = { module = "com.ucasoft.ktor:ktor-simple-cache-jvm", version.ref = "ktor-simple-cache" }
 ktor-server-cors = { module = "io.ktor:ktor-server-cors-jvm", version.ref = "ktor" }
