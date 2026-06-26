@@ -23,7 +23,9 @@ internal class PlayedListEntity(id: EntityID<Uuid>) : UuidEntity(id) {
     val users by PlayedListUserEntity referrersOn PlayedListUserTable.listId
 
     fun toPlayedList(): PlayedList {
-        val simpleUsers = users.map { it.toPlayerUser() }.sortedBy { it.joinedAt }
+        val simpleUsers = users
+            .map { it.toPlayerUser() }
+            .sortedWith(compareBy({ it.status }, { it.joinedAt }))
 
         return PlayedList(
             id = id.value,

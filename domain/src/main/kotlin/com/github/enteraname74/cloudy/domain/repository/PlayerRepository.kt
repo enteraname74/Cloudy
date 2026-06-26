@@ -39,6 +39,12 @@ interface PlayerRepository {
 
     suspend fun delete(listId: Uuid)
 
+    /**
+     * Owner of a played list is designated with the following rules:
+     * - must be in the list
+     * - must be connected (see PlayerUser.Status)
+     * - is the oldest user respecting the previous conditions
+     */
     suspend fun isOwnerOfPlayedList(
         userId: Uuid,
         listId: Uuid,
