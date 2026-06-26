@@ -43,7 +43,7 @@ class MusicFileMetadataManager {
                     name = tag.getFirst(FieldKey.ALBUM),
                     artist = artists.firstOrNull() ?: MusicMetadata.unknownArtist(),
                     ),
-                duration = audioFile.audioHeader.trackLength.toLong(),
+                duration = (audioFile.audioHeader.trackLength * 1_000).toLong(),
                 albumPosition = tag.getFirst(FieldKey.TRACK)?.toIntOrNull(),
             ).replaceBlank()
         } catch (e: Exception) {
