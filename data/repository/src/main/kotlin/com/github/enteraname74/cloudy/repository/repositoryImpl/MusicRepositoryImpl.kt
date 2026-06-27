@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
@@ -22,6 +23,7 @@ class MusicRepositoryImpl(
     private val musicFileManager: MusicFileManager,
     private val musicInformationRetriever: MusicInformationRetriever,
     private val musicFileMetadataManager: MusicFileMetadataManager,
+    private val playerRepository: PlayerRepository,
 ) : MusicRepository {
     override suspend fun startUploadProcess(
         user: User,
@@ -168,6 +170,13 @@ class MusicRepositoryImpl(
         musicDataSource.getAll(ids)
 
     override suspend fun deleteAll(ids: List<String>, username: String) {
+        // We must ensure that played lists are reorderd correctly if a music was in it.
+        playerRepository.removeMusics(
+            listIds = playerRepository.getPlayedListIdsOfMusics(ids),
+            musicIds = ids,
+            socketDeviceIdToIgnore = null,
+        )
+
         ids.forEach { id ->
             musicFileManager.delete(
                 name = id,

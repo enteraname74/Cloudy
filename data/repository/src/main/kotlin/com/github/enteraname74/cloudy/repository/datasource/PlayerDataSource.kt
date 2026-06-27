@@ -38,6 +38,11 @@ interface PlayerDataSource {
         userId: Uuid
     )
 
+    suspend fun getMusicIdsOfUser(
+        userId: Uuid,
+        listId: Uuid,
+    ): List<String>
+
     suspend fun deleteIfEmpty(listId: Uuid): Boolean
 
     suspend fun delete(listId: Uuid)
@@ -127,4 +132,8 @@ interface PlayerDataSource {
         listId: Uuid,
         userId: Uuid,
     ): PlayerMusic?
+
+    suspend fun getPlayedListIdsOfMusics(
+        musicIds: List<String>,
+    ): List<Uuid>
 }

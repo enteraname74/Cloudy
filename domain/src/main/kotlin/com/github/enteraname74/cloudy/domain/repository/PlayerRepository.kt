@@ -29,6 +29,10 @@ interface PlayerRepository {
         deviceId: String,
     )
 
+    /**
+     * Remove a user from the played list. with its music.
+     * List order is updated.
+     */
     suspend fun removeUser(
         userId: Uuid,
         listId: Uuid,
@@ -107,14 +111,15 @@ interface PlayerRepository {
     )
 
     /**
+     * For each list:
      * Removes musics, reorder the list if needed and delete the list if not musics are left.
      *
-     * @return true if the played list was deleted because of empty songs, false otherwise
      */
     suspend fun removeMusics(
-        listId: Uuid,
+        listIds: List<Uuid>,
         musicIds: List<String>,
-    ) : Boolean
+        socketDeviceIdToIgnore: String?,
+    )
 
     suspend fun hasReadPermission(
         userId: Uuid,
@@ -131,4 +136,11 @@ interface PlayerRepository {
         listId: Uuid,
         userId: Uuid,
     )
+
+    /**
+     * Retrieves all played list ids containing a given music id.
+     */
+    suspend fun getPlayedListIdsOfMusics(
+        musicIds: List<String>,
+    ): List<Uuid>
 }

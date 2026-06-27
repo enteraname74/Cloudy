@@ -326,19 +326,10 @@ class PlayerService(
         }
         if (availableMusicIds.isEmpty()) return CloudyResult.Success(Unit)
 
-        val playedListDeleted = playerRepository.removeMusics(
-            listId = listId,
+        playerRepository.removeMusics(
             musicIds = musicRepository.getExistingIds(musicIds),
-        )
-        playerUserCommunication.broadcastEvent(
-            listId = listId,
-            // Broadcast to all if deleted played list event
-            exceptDeviceId = deviceId.takeIf { !playedListDeleted },
-            event = if (playedListDeleted) {
-                PlayerUserCommunication.Event.PlayedListDeleted
-            } else {
-                PlayerUserCommunication.Event.SyncMusics
-            },
+            listIds = listOf(listId),
+            socketDeviceIdToIgnore = deviceId
         )
         return CloudyResult.Success(Unit)
     }

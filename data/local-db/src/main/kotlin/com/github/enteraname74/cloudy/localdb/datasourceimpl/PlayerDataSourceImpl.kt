@@ -86,6 +86,16 @@ class PlayerDataSourceImpl : PlayerDataSource {
         }
     }
 
+    override suspend fun getMusicIdsOfUser(
+        userId: Uuid,
+        listId: Uuid
+    ): List<String> =
+        workTransaction {
+            PlayedListMusicEntity.find {
+                (PlayedListMusicTable.listId eq listId)
+            }.filter { it.music.userId == userId }
+                .map { it.music.id.value }
+        }
 
     override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
         workTransaction {
@@ -419,5 +429,14 @@ class PlayerDataSourceImpl : PlayerDataSource {
                         }
                     }
                 )
+        }
+
+    override suspend fun getPlayedListIdsOfMusics(musicIds: List<String>): List<Uuid> =
+        workTransaction {
+            PlayedListMusicEntity.find {
+                (PlayedListMusicTable.musicId) inList musicIds
+            }
+                .distinctBy { it.listId }
+                .map { it.listId.value }
         }
 }

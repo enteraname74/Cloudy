@@ -8,11 +8,13 @@ import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
 import com.github.enteraname74.cloudy.repository.datasource.PlayerDataSource
 import kotlin.uuid.Uuid
 
 class PlayerRepositoryImpl(
-    private val playerDataSource: PlayerDataSource
+    private val playerDataSource: PlayerDataSource,
+    private val playerUserCommunication: PlayerUserCommunication,
 ) : PlayerRepository {
     override suspend fun create(
         hostId: Uuid,
@@ -48,6 +50,16 @@ class PlayerRepositoryImpl(
         listId: Uuid,
         deviceId: String,
     ) {
+        val musicIdsOfUser: List<String> = playerDataSource
+            .getMusicIdsOfUser(
+                userId = userId,
+                listId = listId,
+            )
+        removeMusics(
+            listIds = listOf(listId),
+            musicIds = musicIdsOfUser,
+            socketDeviceIdToIgnore = null,
+        )
         playerDataSource.removeUser(
             userId = userId,
             listId = listId,
@@ -238,57 +250,74 @@ class PlayerRepositoryImpl(
     }
 
     override suspend fun removeMusics(
-        listId: Uuid,
-        musicIds: List<String>
-    ): Boolean {
-        val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: return false
-        val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)
+        listIds: List<Uuid>,
+        musicIds: List<String>,
+        socketDeviceIdToIgnore: String?,
+    ) {
 
-        // If the current music will be deleted, we must change the current music.
-        if (currentMusicWillBeDeleted) {
-            val nextMusic: PlayerMusic? = playerDataSource.getNextMusic(
-                listId = listId,
-                idsToSkip = musicIds,
-            )
-            // If we can't find a next music to play, the played list is empty, so we delete the played list.
-            if (nextMusic == null) {
-                playerDataSource.delete(listId)
-                return true
-            } else {
-                // Else, we set it to be the new current music.
-                playerDataSource.upsertMusics(
-                    playerMusics = listOf(
-                        nextMusic.copy(
-                            lastPlayedMillis = DateUtils.now(),
+        for (listId in listIds) {
+            val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: continue
+            val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)
+
+            // If the current music will be deleted, we must change the current music.
+            if (currentMusicWillBeDeleted) {
+                val nextMusic: PlayerMusic? = playerDataSource.getNextMusic(
+                    listId = listId,
+                    idsToSkip = musicIds,
+                )
+                // If we can't find a next music to play, the played list is empty, so we delete the played list.
+                if (nextMusic == null) {
+                    playerDataSource.delete(listId)
+                    playerUserCommunication.broadcastEvent(
+                        listId = listId,
+                        event = PlayerUserCommunication.Event.PlayedListDeleted,
+                    )
+                    continue
+                } else {
+                    // Else, we set it to be the new current music.
+                    playerDataSource.upsertMusics(
+                        playerMusics = listOf(
+                            nextMusic.copy(
+                                lastPlayedMillis = DateUtils.now(),
+                            )
                         )
                     )
+                }
+            }
+
+            // We then check if we should re-arrange musics order after the deletion of songs.
+            val areAnyMusicToDeleteAfterCurrentOne: Boolean = playerDataSource.areAnyMusicAfterCurrentOne(
+                listId = listId,
+                musicIds = musicIds,
+            )
+
+            playerDataSource.deleteMusics(
+                listId = listId,
+                musicIds = musicIds,
+            )
+
+            val playedListDeleted: Boolean = playerDataSource.deleteIfEmpty(listId)
+
+            if (areAnyMusicToDeleteAfterCurrentOne && !playedListDeleted) {
+                reorderMusicsInList(
+                    listId = listId,
+                    musics = playerDataSource.getAllAfterCurrentMusic(
+                        listId = listId,
+                    ),
                 )
             }
-        }
 
-        // We then check if we should re-arrange musics order after the deletion of songs.
-        val areAnyMusicToDeleteAfterCurrentOne: Boolean = playerDataSource.areAnyMusicAfterCurrentOne(
-            listId = listId,
-            musicIds = musicIds,
-        )
-
-        playerDataSource.deleteMusics(
-            listId = listId,
-            musicIds = musicIds,
-        )
-
-        val playedListDeleted: Boolean = playerDataSource.deleteIfEmpty(listId)
-
-        if (areAnyMusicToDeleteAfterCurrentOne && !playedListDeleted) {
-            reorderMusicsInList(
+            playerUserCommunication.broadcastEvent(
                 listId = listId,
-                musics = playerDataSource.getAllAfterCurrentMusic(
-                    listId = listId,
-                ),
+                // Broadcast to all if deleted played list event
+                exceptDeviceId = socketDeviceIdToIgnore?.takeIf { !playedListDeleted },
+                event = if (playedListDeleted) {
+                    PlayerUserCommunication.Event.PlayedListDeleted
+                } else {
+                    PlayerUserCommunication.Event.SyncMusics
+                },
             )
         }
-
-        return playedListDeleted
     }
 
     override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =
@@ -327,4 +356,7 @@ class PlayerRepositoryImpl(
             )
         }
     }
+
+    override suspend fun getPlayedListIdsOfMusics(musicIds: List<String>): List<Uuid> =
+        playerDataSource.getPlayedListIdsOfMusics(musicIds)
 }
