@@ -1,4 +1,22 @@
 services:
+  traefik:
+    image: traefik:v3.7
+    container_name: cloudy_traefik
+    user: "0:0"
+    security_opt:
+      - label=disable
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+      - "8081:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
   postgres:
     image: postgres:17
     container_name: cloudy_postgres_db
@@ -7,7 +25,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -24,8 +42,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    ports:
-      - "8080:8080"
     environment:
       ACOUSTID_API_KEY: ${ACOUSTID_API_KEY}
       AUTH_SECRET: ${AUTH_SECRET}
@@ -39,6 +55,11 @@ services:
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
     volumes:
       - ./app_docker_data:/app:z
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.cloudy.rule=Host(`cloudy.localhost`)"
+      - "traefik.http.routers.cloudy.entrypoints=web"
+      - "traefik.http.services.cloudy.loadbalancer.server.port=${PORT}"
 
 volumes:
   postgres_data:
