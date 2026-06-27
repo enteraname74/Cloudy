@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.UuidTable
 import org.jetbrains.exposed.v1.dao.UuidEntity
@@ -12,7 +13,7 @@ internal object UserTable : UuidTable() {
     val username = varchar("pseudo", 128)
     val hashedPassword = binary("hashedPassword")
     val salt = binary("salt")
-    val isAdmin = bool("isAdmin")
+    val type = enumeration<UserType>("type")
 }
 
 internal class UserEntity(id: EntityID<Uuid>) : UuidEntity(id) {
@@ -21,7 +22,7 @@ internal class UserEntity(id: EntityID<Uuid>) : UuidEntity(id) {
     val username by UserTable.username
     val hashedPassword by UserTable.hashedPassword
     val salt by UserTable.salt
-    val isAdmin by UserTable.isAdmin
+    val type by UserTable.type
 
     fun toUser(): User =
         User(
@@ -31,6 +32,6 @@ internal class UserEntity(id: EntityID<Uuid>) : UuidEntity(id) {
                 salt = salt,
                 hash = hashedPassword,
             ),
-            isAdmin = isAdmin
+            type = type,
         )
 }

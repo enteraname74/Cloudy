@@ -28,6 +28,11 @@ class PlayerDataSourceImpl : PlayerDataSource {
             entity.toPlayedList()
         }
 
+    override suspend fun getPlayedList(listId: Uuid): PlayedList? =
+        workTransaction {
+            PlayedListEntity.findById(listId)?.toPlayedList()
+        }
+
     override suspend fun create(
         hostId: Uuid,
         deviceId: String,

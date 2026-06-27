@@ -5,8 +5,8 @@ import com.github.enteraname74.cloudy.controller.routing.user.routes.*
 import io.ktor.server.routing.*
 
 fun Routing.userRoutes() {
-    allUser()
     authenticatedRoutes {
+        allUser()
         generateInscriptionCode()
         deleteUser()
         allCodesOfUser()

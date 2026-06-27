@@ -30,7 +30,7 @@ class UserDataSourceImpl : UserDataSource {
                 it[username] = user.username
                 it[hashedPassword] = user.hashedPassword.hash
                 it[salt] = user.hashedPassword.salt
-                it[isAdmin] = user.isAdmin
+                it[type] = user.type
             }
 
             UserEntity.findById(user.id)!!.toUser()

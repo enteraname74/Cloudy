@@ -231,6 +231,11 @@ class PlayerService(
         }
 
         val playedListDeleted = playerRepository.deleteIfEmpty(listId)
+
+        // If all users are disconnected, we will pause the list.
+        if (!playedListDeleted) {
+            pauseIfAllDisconnected(listId)
+        }
         playerUserCommunication.broadcastEvent(
             listId = listId,
             // Broadcast to all if deleted played list event
@@ -242,6 +247,19 @@ class PlayerService(
             },
         )
         return CloudyResult.Success(Unit)
+    }
+
+    private suspend fun pauseIfAllDisconnected(listId: Uuid) {
+        val list: PlayedList = playerRepository.getPlayedList(listId) ?: return
+        val allDisconnected: Boolean = list.users.all { it.status == PlayerUser.Status.Disconnected }
+        if (allDisconnected) {
+            playerRepository.update(
+                playedListUpdate = PlayedListUpdate(
+                    listId = listId,
+                    state = PlayedList.State.Paused,
+                )
+            )
+        }
     }
 
     suspend fun addMusics(
@@ -265,7 +283,6 @@ class PlayerService(
         if (musics.isEmpty()) return CloudyResult.Success(Unit)
 
         playerRepository.addMusics(
-            userId = userId,
             listId = listId,
             musics = musics,
         )
@@ -310,7 +327,6 @@ class PlayerService(
         if (availableMusicIds.isEmpty()) return CloudyResult.Success(Unit)
 
         val playedListDeleted = playerRepository.removeMusics(
-            userId = userId,
             listId = listId,
             musicIds = musicRepository.getExistingIds(musicIds),
         )
@@ -326,17 +342,6 @@ class PlayerService(
         )
         return CloudyResult.Success(Unit)
     }
-
-    suspend fun isUserInList(
-        userId: Uuid,
-        listId: Uuid,
-        deviceId: String,
-    ): Boolean =
-        playerRepository.isUserInList(
-            userId = userId,
-            listId = listId,
-            deviceId = deviceId,
-        )
 
     suspend fun getDeletedMusicIds(
         listId: Uuid,

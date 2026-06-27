@@ -18,6 +18,10 @@ interface PlayerDataSource {
         playedListUpdate: PlayedListUpdate,
     ): PlayedList
 
+    suspend fun getPlayedList(
+        listId: Uuid
+    ): PlayedList?
+
     suspend fun addUser(
         userId: Uuid,
         deviceId: String,

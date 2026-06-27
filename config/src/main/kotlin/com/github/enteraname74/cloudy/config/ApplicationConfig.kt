@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.config.plugin.configureDatabase
 import com.github.enteraname74.cloudy.config.plugin.configureHTTP
 import com.github.enteraname74.cloudy.config.plugin.configureSerialization
 import com.github.enteraname74.cloudy.config.plugin.configureSockets
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.server.application.Application
 import io.ktor.server.routing.RoutingContext
@@ -42,7 +43,7 @@ fun Application.upsertAdmin() {
         userService.createUser(
             username = username,
             password = password,
-            isAdmin = true,
+            type = UserType.Admin,
         )
     }
 }

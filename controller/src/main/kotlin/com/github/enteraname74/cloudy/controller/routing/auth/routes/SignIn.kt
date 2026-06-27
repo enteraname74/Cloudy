@@ -5,9 +5,10 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
-import com.github.enteraname74.cloudy.controller.routing.auth.model.toConnectedUser
 import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
+import com.github.enteraname74.cloudy.controller.routing.user.model.toSimpleUser
 import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -36,6 +37,7 @@ fun Route.signIn() {
         val cloudyResult: CloudyResult<User> = userService.createUser(
             username = user.username,
             password = user.password,
+            type = UserType.User,
         )
 
         when (cloudyResult) {
@@ -51,7 +53,7 @@ fun Route.signIn() {
                 userService.deleteUsedCode(code = user.inscriptionCode)
                 call.respond(
                     UserAuth(
-                        user = savedUser.toConnectedUser(),
+                        user = savedUser.toSimpleUser(),
                         tokens = tokens,
                     )
                 )

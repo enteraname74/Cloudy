@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
+import com.github.enteraname74.cloudy.domain.model.user.UserType
 import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
@@ -29,7 +30,7 @@ class UserService(
     suspend fun createUser(
         username: String,
         password: String,
-        isAdmin: Boolean = false,
+        type: UserType,
     ): CloudyResult<User> {
         val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
             password = password,
@@ -38,8 +39,8 @@ class UserService(
         val user = User(
             username = username,
             hashedPassword = hashedPassword,
-            isAdmin = isAdmin,
             id = Uuid.random(),
+            type = type,
         )
 
         val savedUser: User = userRepository.upsert(user = user)

@@ -19,6 +19,10 @@ interface PlayerRepository {
         playedListUpdate: PlayedListUpdate,
     ): PlayedList
 
+    suspend fun getPlayedList(
+        listId: Uuid
+    ): PlayedList?
+
     suspend fun addUser(
         userId: Uuid,
         listId: Uuid,
@@ -35,6 +39,11 @@ interface PlayerRepository {
         userId: Uuid
     )
 
+    /**
+     * Delete the played list if one of the condition is met:
+     * - no songs
+     * - no users
+     */
     suspend fun deleteIfEmpty(listId: Uuid) : Boolean
 
     suspend fun delete(listId: Uuid)
@@ -93,16 +102,16 @@ interface PlayerRepository {
     ): Boolean
 
     suspend fun addMusics(
-        userId: Uuid,
         listId: Uuid,
         musics: List<Music>
     )
 
     /**
+     * Removes musics, reorder the list if needed and delete the list if not musics are left.
+     *
      * @return true if the played list was deleted because of empty songs, false otherwise
      */
     suspend fun removeMusics(
-        userId: Uuid,
         listId: Uuid,
         musicIds: List<String>,
     ) : Boolean

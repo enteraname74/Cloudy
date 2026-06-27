@@ -28,6 +28,9 @@ class PlayerRepositoryImpl(
     override suspend fun update(playedListUpdate: PlayedListUpdate): PlayedList =
         playerDataSource.update(playedListUpdate)
 
+    override suspend fun getPlayedList(listId: Uuid): PlayedList? =
+        playerDataSource.getPlayedList(listId)
+
     override suspend fun addUser(
         userId: Uuid,
         listId: Uuid,
@@ -150,7 +153,6 @@ class PlayerRepositoryImpl(
 
 
     override suspend fun addMusics(
-        userId: Uuid,
         listId: Uuid,
         musics: List<Music>
     ) {
@@ -236,7 +238,6 @@ class PlayerRepositoryImpl(
     }
 
     override suspend fun removeMusics(
-        userId: Uuid,
         listId: Uuid,
         musicIds: List<String>
     ): Boolean {
