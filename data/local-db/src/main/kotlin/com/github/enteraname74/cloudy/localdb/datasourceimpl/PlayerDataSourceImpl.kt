@@ -128,10 +128,12 @@ class PlayerDataSourceImpl : PlayerDataSource {
     ): Boolean =
         workTransaction {
             val firstJoiner = PlayedListUserEntity.find {
-                (PlayedListUserTable.listId eq listId) and
-                        (PlayedListUserTable.status eq PlayerUser.Status.Connected)
+                (PlayedListUserTable.listId eq listId)
             }
-                .orderBy(PlayedListUserTable.joinedAt to SortOrder.ASC)
+                .orderBy(
+                    PlayedListUserTable.status to SortOrder.ASC,
+                            PlayedListUserTable.joinedAt to SortOrder.ASC
+                )
                 .limit(1)
                 .firstOrNull()
 
