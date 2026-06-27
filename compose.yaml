@@ -1,24 +1,29 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17
     container_name: cloudy_postgres_db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres_docker_data:/var/lib/postgresql/data:z
+      - postgres_data:/var/lib/postgresql/data
 
   ktor:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: no
+    restart: unless-stopped
     depends_on:
       postgres:
-	  condition: service_healthy
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
@@ -34,3 +39,6 @@ services:
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
     volumes:
       - ./app_docker_data:/app:z
+
+volumes:
+  postgres_data:

@@ -1,12 +1,20 @@
-# Use Amazon Corretto 17 with Alpine as the base image
-FROM amazoncorretto:17-alpine-jdk
+# Use Amazon Corretto 21 with Alpine as the base image
+FROM amazoncorretto:21-alpine-jdk
 
-# Install necessary packages (ffmpeg and chromaprint)
+# Install necessary packages (ffmpeg, chromaprint and curl)
 RUN apk update && \
     apk add --no-cache \
     ffmpeg \
     chromaprint \
+    curl \
     && rm -rf /var/cache/apk/*
+
+
+RUN curl -L \
+      https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_musllinux \
+      -o /usr/local/bin/yt-dlp \
+ && chmod +x /usr/local/bin/yt-dlp \
+ && yt-dlp --version
 
 # Copy the fat jar from the build output into the container
 ARG JAR_FILE=./controller/build/libs/*.jar

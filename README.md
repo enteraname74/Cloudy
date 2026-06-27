@@ -13,12 +13,12 @@ You can use this file as a template to create your `.env` file.
 ## Launch the server
 ### With Docker
 
-Build the jar of the server
+Build the jar of the ktor backend
 ```
 ./gradlew controller:buildFatJar
 ```
 
-Launch the server with docker compose
+Launch the server with docker compose and ensure that the image is always up to date
 ```
-docker compose up
+docker compose build --no-cache --pull ktor && docker compose up -d
 ```

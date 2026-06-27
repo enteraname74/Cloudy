@@ -1,16 +1,21 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="trace">
+
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="org.eclipse.jetty" level="INFO"/>
-    <logger name="io.netty" level="INFO"/>
-    <logger name="io.ktor.routing.Routing" level="trace"/>
-    <logger name="io.ktor.server" level="trace" />
-    <logger name="io.ktor.core" level="trace" />
-    <logger name="Exposed" level="INFO"/>
+
+    <logger name="org.eclipse.jetty" level="WARN"/>
+    <logger name="io.netty" level="WARN"/>
+
+    <logger name="io.ktor.routing.Routing" level="INFO"/>
+    <logger name="io.ktor.server" level="INFO"/>
+    <logger name="io.ktor.core" level="INFO"/>
+
+    <logger name="Exposed" level="WARN"/>
+    <logger name="org.jetbrains.exposed" level="WARN"/>
 </configuration>
