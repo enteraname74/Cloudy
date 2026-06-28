@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing.player.routes
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayerSocketUser
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.service.PlayerService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
@@ -46,6 +47,18 @@ fun Route.playerSocket() {
             return@webSocket
         }
 
+        /**
+         * When a user quit the app and relaunch it,
+         * we may only connect back to the socket without explicitly joining. So we may be disconnected even if we are back.
+         *
+         * We will ensure that the user is connected at this stage
+         */
+        playerService.setUserStatus(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+            status = PlayerUser.Status.Connected,
+        )
         playerUserCommunication.add(
             connection = PlayerSocketUser(
                 listId = listId,

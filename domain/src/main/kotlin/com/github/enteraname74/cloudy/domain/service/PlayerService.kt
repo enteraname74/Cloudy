@@ -126,6 +126,20 @@ class PlayerService(
         }
     }
 
+    suspend fun setUserStatus(
+        userId: Uuid,
+        listId: Uuid,
+        deviceId: String,
+        status: PlayerUser.Status,
+    ) {
+        playerRepository.setUserStatus(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+            status = status,
+        )
+    }
+
     suspend fun getPlayedList(
         listId: Uuid,
         userId: Uuid,
