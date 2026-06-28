@@ -42,4 +42,4 @@ cloudyDB.db
 app_docker_data
 postgres_docker_data
 
-.traefik/certs
+traefik/certs
