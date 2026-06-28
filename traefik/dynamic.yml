@@ -1,0 +1,19 @@
+tls:
+  certificates:
+    - certFile: /certs/local.crt
+      keyFile: /certs/local.key
+
+http:
+  routers:
+    api:
+      rule: "Host(`cloudy.localhost`) || Host(`192.168.1.123`)"
+      entryPoints:
+        - websecure
+      service: api-service
+      tls: {}
+
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://ktor:8080"
