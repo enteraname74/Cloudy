@@ -7,6 +7,7 @@ import kotlin.uuid.Uuid
 interface RoutingMessages {
     val USERNAME_TAKEN: String
     val WRONG_INFORMATION: String
+    val INVALID_INFORMATION: String
     val MISSING_USER_INFORMATION: String
     val CANNOT_CREATE_USER: String
     val CANNOT_FIND_USER: String
@@ -25,7 +26,7 @@ interface RoutingMessages {
     val GIVEN_FILE_IS_NOT_A_MUSIC_FILE: String
     val SONG_NOT_POSSESSED_BY_USER: String
     val CANNOT_SAVE_SONG: String
-    val CANNOT_UPDATE_SONG: String
+    fun cannotUpdateSong(songId: String): String
 
     fun songNotPossessedByUser(musicId: String): String
 
@@ -43,6 +44,8 @@ interface RoutingMessages {
     val PLAYLISTS_DELETED: String
     val PLAYLIST_NOT_POSSESSED_BY_USER: String
     val PLAYLIST_ALREADY_EXISTING: String
+
+    val CANNOT_SAVE_PLAYLIST: String
 
     fun playlistNotPossessedByUser(playlistId: Uuid): String
 

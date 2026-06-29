@@ -10,6 +10,7 @@ interface MusicPlaylistDataSource {
     suspend fun getAllOfPlaylist(playlistId: Uuid): List<MusicPlaylist>
     suspend fun delete(musicPlaylist: MusicPlaylist)
     suspend fun deleteAll(ids: List<String>)
+    suspend fun deleteAllOfPlaylist(playlistId: Uuid)
     suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest,

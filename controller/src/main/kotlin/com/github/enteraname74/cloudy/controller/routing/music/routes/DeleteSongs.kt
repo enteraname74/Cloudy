@@ -6,18 +6,20 @@ import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.http.*
-import io.ktor.server.request.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
+import io.ktor.server.resources.delete
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
 fun Route.deleteSongs() {
     val musicService by inject<MusicService>()
 
-    delete {
+    delete<MusicResource> {
         val musicIds: List<String> = call.receive()
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
@@ -26,13 +28,16 @@ fun Route.deleteSongs() {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         musicIds.forEach { musicId ->
-            val isPossessedByUser = musicService.isMusicPossessedByUser(
-                musicId = musicId,
-                userId = userId,
-            )
+            val doesExist = musicService.getFromId(musicId) != null
+            if (doesExist) {
+                val isPossessedByUser = musicService.isMusicPossessedByUser(
+                    musicId = musicId,
+                    userId = userId,
+                )
 
-            if (!isPossessedByUser) {
-                return@delete forbidden(routingMessages.songNotPossessedByUser(musicId))
+                if (!isPossessedByUser) {
+                    return@delete forbidden(routingMessages.songNotPossessedByUser(musicId))
+                }
             }
         }
 

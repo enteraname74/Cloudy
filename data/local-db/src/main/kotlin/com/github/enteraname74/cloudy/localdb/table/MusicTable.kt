@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.table
 
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
@@ -11,10 +11,11 @@ import org.jetbrains.exposed.v1.jdbc.batchUpsert
 
 internal object MusicTable: IdTable<String>() {
     override val id = varchar("id", 128).entityId()
+    override val primaryKey = PrimaryKey(id)
 
     val name = varchar("name", 128)
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val coverPath = text("coverPath").nullable()
+    val coverPath = text("coverPath")
     val albumPosition = integer("albumPosition").nullable()
     val path = varchar("path", 255)
     val duration = long("duration")

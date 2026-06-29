@@ -6,8 +6,8 @@ import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.domain.ext.toUuid
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
 import java.util.*
 import kotlin.uuid.Uuid
 
@@ -36,6 +36,8 @@ fun ApplicationContext.generateToken(
         .sign(Algorithm.HMAC256(secret))
 }
 
+// TODO: Add expiration date
+// TODO: Find a way to ensure token is only used once
 fun ApplicationContext.generateInscriptionToken(): String {
     val environment = call.application.environment
     val secret = environment.config.property("jwt.secret").getString()

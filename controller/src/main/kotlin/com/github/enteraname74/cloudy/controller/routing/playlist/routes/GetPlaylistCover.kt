@@ -2,14 +2,19 @@ package com.github.enteraname74.cloudy.controller.routing.playlist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
-import com.github.enteraname74.cloudy.controller.ext.*
+import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.forbidden
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
+import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
-import io.ktor.http.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 

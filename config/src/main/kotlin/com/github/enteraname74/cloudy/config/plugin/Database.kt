@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.config.plugin
 
 import com.github.enteraname74.cloudy.localdb.AppDatabase
-import io.ktor.server.application.*
+import io.ktor.server.application.Application
 
 fun Application.configureDatabase() {
     AppDatabase.connectToDatabase(

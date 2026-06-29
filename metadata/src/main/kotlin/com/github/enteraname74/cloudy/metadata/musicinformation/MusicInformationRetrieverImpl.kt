@@ -2,7 +2,7 @@ package com.github.enteraname74.cloudy.metadata.musicinformation
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.metadata.acoustid.AcoustidApiClient
 import com.github.enteraname74.cloudy.metadata.cover.RemoteMusicCoverRetriever
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
@@ -16,6 +16,12 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
     private val metadataManager = MusicFileMetadataManager()
     private val fingerprintRetriever = FingerprintRetriever()
     private val remoteMusicCoverRetriever = RemoteMusicCoverRetriever()
+
+    override suspend fun getFingerprint(musicFile: File): String? =
+        fingerprintRetriever
+            .getFingerprintFromMusic(musicPath = musicFile.path)
+            ?.fingerprint
+            ?.hashed()
 
     override suspend fun getInformationAboutMusicFile(
         musicFile: File,

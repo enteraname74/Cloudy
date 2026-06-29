@@ -49,6 +49,14 @@ class MusicArtistDataSourceImpl : MusicArtistDataSource {
         }
     }
 
+    override suspend fun deleteOfMusic(musicId: String) {
+        workTransaction {
+            MusicArtistTable.deleteWhere {
+                this.musicId eq musicId
+            }
+        }
+    }
+
     override suspend fun isInMultipleArtist(musicId: String): Boolean =
         workTransaction {
             MusicArtistEntity

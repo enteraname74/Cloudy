@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -29,6 +29,15 @@ class AlbumRepositoryImpl(
         albumDataSource.getFromInformation(
             albumName = albumName,
             albumArtist = albumArtist,
+            userId = userId,
+        )
+
+    override suspend fun getFromUser(
+        albumId: Uuid,
+        userId: Uuid
+    ): Album? =
+        albumDataSource.getFromUser(
+            albumId = albumId,
             userId = userId,
         )
 
@@ -107,5 +116,9 @@ class AlbumRepositoryImpl(
 
     override suspend fun deleteAll(albumIds: List<Uuid>) {
         albumDataSource.deleteAll(albumIds)
+    }
+
+    override suspend fun deleteAllEmpty() {
+        albumDataSource.deleteAllEmpty()
     }
 }

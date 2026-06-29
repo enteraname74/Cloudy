@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
@@ -14,6 +14,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
@@ -33,7 +34,17 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun getFromId(musicId: String): Music? =
         workTransaction {
             MusicEntity
-                .find { MusicTable.id eq musicId }
+                .findById(musicId)
+                ?.toMusic()
+        }
+
+    override suspend fun getFromUser(
+        musicId: String,
+        userId: Uuid
+    ): Music? =
+        workTransaction {
+            MusicEntity
+                .find { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
                 .firstOrNull()
                 ?.toMusic()
         }
@@ -75,6 +86,20 @@ class MusicDataSourceImpl : MusicDataSource {
                 .map { it.toMusic() }
         }
 
+    override suspend fun getExistingIds(
+        userId: Uuid,
+        ids: List<String>
+    ): List<String> =
+        workTransaction {
+            MusicTable
+                .select(MusicTable.id)
+                .where {
+                    (MusicTable.userId eq userId) and
+                            (MusicTable.id inList ids)
+                }
+                .map { it[MusicTable.id].toString() }
+        }
+
     override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
         workTransaction {
             MusicEntity
@@ -101,12 +126,12 @@ class MusicDataSourceImpl : MusicDataSource {
         workTransaction {
 
             val query = MusicTable.join(
-                    otherTable = MusicArtistTable,
-                    joinType = JoinType.INNER,
-                    onColumn = MusicTable.id,
-                    otherColumn = MusicArtistTable.musicId,
-                    additionalConstraint = { MusicArtistTable.artistId eq artistId }
-                ).selectAll().withDistinct()
+                otherTable = MusicArtistTable,
+                joinType = JoinType.INNER,
+                onColumn = MusicTable.id,
+                otherColumn = MusicArtistTable.musicId,
+                additionalConstraint = { MusicArtistTable.artistId eq artistId }
+            ).selectAll().withDistinct()
 
             MusicEntity
                 .wrapRows(query)

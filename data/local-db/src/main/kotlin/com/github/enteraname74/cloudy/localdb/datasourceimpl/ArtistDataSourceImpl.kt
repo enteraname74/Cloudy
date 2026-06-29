@@ -1,9 +1,10 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
-import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.ArtistEntity
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
+import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
@@ -11,7 +12,9 @@ import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.notExists
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
 class ArtistDataSourceImpl : ArtistDataSource {
@@ -27,6 +30,17 @@ class ArtistDataSourceImpl : ArtistDataSource {
         workTransaction {
             ArtistEntity
                 .findById(artistId)
+                ?.toArtist()
+        }
+
+    override suspend fun getFromUser(
+        artistId: Uuid,
+        userId: Uuid
+    ): Artist? =
+        workTransaction {
+            ArtistEntity
+                .find { (ArtistTable.id eq artistId) and (ArtistTable.userId eq userId) }
+                .firstOrNull()
                 ?.toArtist()
         }
 
@@ -76,6 +90,18 @@ class ArtistDataSourceImpl : ArtistDataSource {
         workTransaction {
             ArtistTable.deleteWhere {
                 id inList artistIds
+            }
+        }
+    }
+
+    override suspend fun deleteAllEmpty() {
+        workTransaction {
+            ArtistTable.deleteWhere {
+                notExists(
+                    MusicArtistTable
+                        .selectAll()
+                        .where { MusicArtistTable.artistId eq ArtistTable.id }
+                )
             }
         }
     }

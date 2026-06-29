@@ -1,9 +1,13 @@
 package com.github.enteraname74.cloudy.config
 
-import com.github.enteraname74.cloudy.config.plugin.*
+import com.github.enteraname74.cloudy.config.plugin.configureAuthentication
+import com.github.enteraname74.cloudy.config.plugin.configureDI
+import com.github.enteraname74.cloudy.config.plugin.configureDatabase
+import com.github.enteraname74.cloudy.config.plugin.configureHTTP
+import com.github.enteraname74.cloudy.config.plugin.configureSerialization
 import com.github.enteraname74.cloudy.domain.service.UserService
-import io.ktor.server.application.*
-import io.ktor.server.routing.*
+import io.ktor.server.application.Application
+import io.ktor.server.routing.RoutingContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

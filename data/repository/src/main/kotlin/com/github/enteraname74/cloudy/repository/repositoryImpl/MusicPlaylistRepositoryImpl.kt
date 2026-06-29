@@ -39,6 +39,10 @@ class MusicPlaylistRepositoryImpl(
         musicPlaylistDataSource.deleteAll(ids)
     }
 
+    override suspend fun deleteAllOfPlaylist(playlistId: Uuid) {
+        musicPlaylistDataSource.deleteAllOfPlaylist(playlistId)
+    }
+
     override suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest

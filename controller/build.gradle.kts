@@ -11,7 +11,7 @@ ktor {
     docker {
         localImageName.set("cloudy-docker-image")
         imageTag.set("0.0.1")
-        jreVersion.set(JavaVersion.VERSION_17)
+        jreVersion.set(JavaVersion.VERSION_21)
     }
 }
 
@@ -34,6 +34,7 @@ dependencies {
     implementation(libs.ktor.server.resources)
     implementation(libs.ktor.server.request.validation)
     implementation(libs.ktor.server.status.page)
+    implementation(libs.ktor.server.partial.content)
     implementation(libs.ktor.server.swagger)
 
     implementation(libs.ktor.simple.cache)

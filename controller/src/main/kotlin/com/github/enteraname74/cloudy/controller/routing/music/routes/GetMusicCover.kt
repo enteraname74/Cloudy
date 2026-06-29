@@ -5,13 +5,15 @@ import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.Music
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.http.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.resources.get
+import io.ktor.server.response.respondBytes
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import java.io.File
 
@@ -19,17 +21,13 @@ fun Route.getMusicCover() {
     val musicService by inject<MusicService>()
     val coverService by inject<CoverService>()
 
-    get("/cover/{coverId}") {
+    get<MusicResource.Cover> { musicResource ->
         val routingMessages: RoutingMessages = getRoutingMessages()
-
-        val coverId: String = call.parameters["coverId"] ?: return@get badRequest(
-            message = routingMessages.WRONG_ID
-        )
 
         val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
 
         val correspondingMusic: Music = musicService.getFromCoverPath(
-            coverPath = "${Music.COVER_PATH}$coverId",
+            coverPath = "${Music.COVER_PATH}${musicResource.coverId}",
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
             message = routingMessages.WRONG_ID,

@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.domain.util
 
-import io.ktor.http.content.*
+import io.ktor.http.content.PartData
 
 object FileUtils {
     fun getFileExtension(fileName: String): String? =

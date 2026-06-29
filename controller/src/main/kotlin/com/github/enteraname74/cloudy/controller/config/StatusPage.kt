@@ -2,12 +2,13 @@ package com.github.enteraname74.cloudy.controller.config
 
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.plugins.*
-import io.ktor.server.plugins.requestvalidation.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.BadRequestException
+import io.ktor.server.plugins.requestvalidation.RequestValidationException
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respond
 
 internal fun Application.configureStatusPage() {
     install(StatusPages) {
@@ -28,7 +29,6 @@ internal fun Application.configureStatusPage() {
             )
         }
         exception<Throwable> { call, cause ->
-            println("CLUELESS -- cause: $cause")
             call.respond(
                 status = HttpStatusCode.InternalServerError,
                 message = call.getRoutingMessages().internalServerError(
@@ -42,5 +42,6 @@ internal fun Application.configureStatusPage() {
 private fun RoutingMessages.fromInvalidRequestType(type: InvalidRequestType): String =
     when (type) {
         InvalidRequestType.UserInformation -> MISSING_USER_INFORMATION
-        InvalidRequestType.Unknown -> WRONG_INFORMATION
+        InvalidRequestType.InvalidData -> INVALID_INFORMATION
+        InvalidRequestType.Unknown ->  WRONG_INFORMATION
     }

@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
 import com.github.enteraname74.cloudy.controller.routing.user.routes.allUser
 import com.github.enteraname74.cloudy.controller.routing.user.routes.deleteUser
 import com.github.enteraname74.cloudy.controller.routing.user.routes.generateInscriptionCode
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Routing
 
 fun Routing.userRoutes() {
     allUser()

@@ -9,6 +9,7 @@ interface MusicArtistDataSource {
     suspend fun delete(musicArtist: MusicArtist)
     suspend fun upsertAll(musicArtists: List<MusicArtist>)
     suspend fun deleteAll(ids: List<String>)
+    suspend fun deleteOfMusic(musicId: String)
     suspend fun isInMultipleArtist(musicId: String): Boolean
     suspend fun getAllOfUser(
         userId: Uuid,

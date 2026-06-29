@@ -5,9 +5,10 @@ import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidResultAnal
 import com.github.enteraname74.cloudy.metadata.fingerprint.FingerprintData
 import com.github.enteraname74.cloudy.metadata.htppclient.defaultHttpClient
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 
 internal class AcoustidApiClient {
     private val logger = CloudyLogger(this::class)

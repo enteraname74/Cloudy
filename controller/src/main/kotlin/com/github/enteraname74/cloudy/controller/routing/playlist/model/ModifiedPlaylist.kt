@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist.model
 
-import com.github.enteraname74.cloudy.domain.model.Playlist
+import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid

@@ -2,8 +2,8 @@ package com.github.enteraname74.cloudy.metadata.cover
 
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.htppclient.defaultHttpClient
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
 
 internal class RemoteMusicCoverRetriever {
     private val logger = CloudyLogger(this::class)

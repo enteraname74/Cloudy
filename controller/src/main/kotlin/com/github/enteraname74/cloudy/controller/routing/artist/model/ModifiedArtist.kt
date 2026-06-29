@@ -1,6 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.artist.model
 
-import com.github.enteraname74.cloudy.domain.model.Artist
+import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 

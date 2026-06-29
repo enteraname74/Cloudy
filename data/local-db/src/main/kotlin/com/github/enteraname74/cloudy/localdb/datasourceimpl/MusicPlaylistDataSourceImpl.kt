@@ -57,6 +57,14 @@ class MusicPlaylistDataSourceImpl : MusicPlaylistDataSource {
         }
     }
 
+    override suspend fun deleteAllOfPlaylist(playlistId: Uuid) {
+        workTransaction {
+            MusicPlaylistTable.deleteWhere {
+                MusicPlaylistTable.playlistId eq playlistId
+            }
+        }
+    }
+
     override suspend fun getAllOfPlaylist(playlistId: Uuid): List<MusicPlaylist> =
         workTransaction {
             MusicPlaylistEntity

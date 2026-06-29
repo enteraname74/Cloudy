@@ -1,9 +1,8 @@
 package com.github.enteraname74.cloudy.domain.repository
 
-import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
 import kotlin.uuid.Uuid
 
 interface AlbumRepository {
@@ -15,6 +14,10 @@ interface AlbumRepository {
         albumName: String,
         albumArtist: String,
         userId: Uuid
+    ): Album?
+    suspend fun getFromUser(
+        albumId: Uuid,
+        userId: Uuid,
     ): Album?
     suspend fun getAll(albumIds: List<Uuid>): List<Album>
     suspend fun upsert(
@@ -31,4 +34,5 @@ interface AlbumRepository {
     suspend fun deleteAll(albumIds: List<Uuid>)
     suspend fun allOfArtist(artistId: Uuid): List<Album>
     suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean
+    suspend fun deleteAllEmpty()
 }

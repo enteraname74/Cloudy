@@ -7,12 +7,17 @@ import com.github.enteraname74.cloudy.config.auth.TOKEN_ROLE_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.auth.TOKEN_USERNAME_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.util.Messages
 import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.jwt.jwt
+import io.ktor.server.auth.principal
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.route
 
 internal fun Application.configureAuthentication() {
     val secret = environment.config.property("jwt.secret").getString()
