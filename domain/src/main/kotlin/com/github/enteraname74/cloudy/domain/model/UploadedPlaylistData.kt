@@ -1,12 +1,10 @@
 package com.github.enteraname74.cloudy.domain.model
 
-import com.github.enteraname74.cloudy.domain.serializer.UUIDSerializer
 import kotlinx.serialization.Serializable
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 @Serializable
 data class UploadedPlaylistData(
     val playlist: Playlist,
-    @Serializable(with = UUIDSerializer::class)
-    val userPlaylistId: UUID,
+    val userPlaylistId: Uuid,
 )

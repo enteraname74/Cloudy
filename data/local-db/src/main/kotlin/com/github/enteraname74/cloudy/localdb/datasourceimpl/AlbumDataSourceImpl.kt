@@ -2,139 +2,111 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.localdb.table.AlbumEntity
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
-import com.github.enteraname74.cloudy.localdb.table.toAlbum
+import com.github.enteraname74.cloudy.localdb.table.ArtistTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
+import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import java.util.*
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import kotlin.uuid.Uuid
 
 class AlbumDataSourceImpl : AlbumDataSource {
-    override suspend fun getFromId(albumId: UUID): Album? =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where {
-                    AlbumTable.id eq albumId
-                }.firstOrNull()
+    override suspend fun getFromId(albumId: Uuid): Album? =
+        workTransaction {
+            AlbumEntity
+                .findById(albumId)
                 ?.toAlbum()
         }
 
     override suspend fun getFromCoverPath(coverPath: String): Album? =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where {
-                    AlbumTable.coverPath eq coverPath
-                }.firstOrNull()
+        workTransaction {
+            AlbumEntity
+                .find { AlbumTable.coverPath eq coverPath }
+                .firstOrNull()
                 ?.toAlbum()
         }
 
-    override suspend fun getAll(albumIds: List<UUID>): List<Album> =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where { AlbumTable.id inList albumIds }
-                .mapNotNull { it.toAlbum() }
+    override suspend fun getAll(albumIds: List<Uuid>): List<Album> =
+        workTransaction {
+            AlbumEntity
+                .find { AlbumTable.id inList albumIds }
+                .map { it.toAlbum() }
         }
 
-    override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
-        suspendedTransaction {
-            AlbumTable
+    override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: Uuid): Album? =
+        workTransaction {
+            val query = AlbumTable.innerJoin(ArtistTable)
                 .selectAll()
                 .where {
-                    (AlbumTable.name eq albumName) and (AlbumTable.artistName eq albumArtist) and (AlbumTable.userId eq userId)
-                }.firstOrNull()
+                    (AlbumTable.name eq albumName) and
+                            (ArtistTable.name eq albumArtist) and
+                            (ArtistTable.userId eq userId) and
+                            (AlbumTable.userId eq userId)
+                }.withDistinct()
+
+            AlbumEntity
+                .wrapRows(query)
+                .firstOrNull()
                 ?.toAlbum()
         }
 
     override suspend fun upsert(album: Album): Album =
-        suspendedTransaction {
-            AlbumTable.upsert {
-                it[id] = album.id
-                it[name] = album.name
-                it[userId] = album.userId
-                it[coverPath] = album.coverPath
-                it[addedDate] = album.addedDate
-                it[nbPlayed] = album.nbPlayed
-                it[isInQuickAccess] = album.isInQuickAccess
-                it[artistId] = album.artistId
-                it[artistName] = album.artistName
-                it[lastUpdateAt] = album.lastUpdateAt
-            }
-
-            AlbumTable
-                .selectAll()
-                .where { AlbumTable.id eq album.id }
-                .first()
-                .toAlbum()!!
+        workTransaction {
+            AlbumTable.upsertAll(listOf(album))
+            AlbumEntity.findById(album.id)!!.toAlbum()
         }
 
     override suspend fun upsertAll(albums: List<Album>) {
-        suspendedTransaction {
-            AlbumTable.batchUpsert(albums) { album ->
-                this[AlbumTable.id] = album.id
-                this[AlbumTable.name] = album.name
-                this[AlbumTable.userId] = album.userId
-                this[AlbumTable.coverPath] = album.coverPath
-                this[AlbumTable.addedDate] = album.addedDate
-                this[AlbumTable.nbPlayed] = album.nbPlayed
-                this[AlbumTable.isInQuickAccess] = album.isInQuickAccess
-                this[AlbumTable.artistId] = album.artistId
-                this[AlbumTable.artistName] = album.artistName
-                this[AlbumTable.lastUpdateAt] = album.lastUpdateAt
-            }
+        workTransaction {
+            AlbumTable.upsertAll(albums)
         }
     }
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Album> =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where {
+        workTransaction {
+            AlbumEntity
+                .find {
                     (AlbumTable.userId eq userId) and
-                            (AlbumTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
+                            (AlbumTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
-                .mapNotNull { it.toAlbum() }
+                .map { it.toAlbum() }
         }
 
-    override suspend fun deleteById(albumId: UUID) {
-        suspendedTransaction {
-            AlbumTable.deleteWhere {
-                id eq albumId
-            }
+    override suspend fun deleteById(albumId: Uuid) {
+        workTransaction {
+            AlbumEntity.findById(albumId)?.delete()
         }
     }
 
-    override suspend fun deleteAll(albumIds: List<UUID>) {
-        suspendedTransaction {
+    override suspend fun deleteAll(albumIds: List<Uuid>) {
+        workTransaction {
             AlbumTable.deleteWhere {
                 id inList albumIds
             }
         }
     }
 
-    override suspend fun allOfArtist(artistId: UUID): List<Album> =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where { AlbumTable.artistId eq  artistId }
-                .mapNotNull { it.toAlbum() }
+    override suspend fun allOfArtist(artistId: Uuid): List<Album> =
+        workTransaction {
+            AlbumEntity
+                .find { AlbumTable.artistId eq artistId }
+                .map { it.toAlbum() }
         }
 
-    override suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean =
-        suspendedTransaction {
-            AlbumTable
-                .selectAll()
-                .where {
+    override suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean =
+        workTransaction {
+            AlbumEntity
+                .find {
                     (AlbumTable.id eq albumId) and (AlbumTable.userId eq userId)
                 }.count() > 0
         }

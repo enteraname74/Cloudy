@@ -37,6 +37,7 @@ out/
 app
 cloudyDB.db
 
+*.db
 .env
 app_docker_data
 postgres_docker_data

@@ -3,20 +3,20 @@ package com.github.enteraname74.cloudy.config.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.ApplicationContext
-import com.github.enteraname74.cloudy.domain.ext.toUUID
+import com.github.enteraname74.cloudy.domain.ext.toUuid
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
 import java.util.*
+import kotlin.uuid.Uuid
 
 fun ApplicationContext.generateToken(
     user: User,
     expireDate: Date,
     type: TokenType,
 ): String {
-    val environment = this.application.environment
+    val environment = call.application.environment
     val secret = environment.config.property("jwt.secret").getString()
     val issuer = environment.config.property("jwt.issuer").getString()
 
@@ -37,7 +37,7 @@ fun ApplicationContext.generateToken(
 }
 
 fun ApplicationContext.generateInscriptionToken(): String {
-    val environment = this.application.environment
+    val environment = call.application.environment
     val secret = environment.config.property("jwt.secret").getString()
     val issuer = environment.config.property("jwt.issuer").getString()
 
@@ -51,9 +51,9 @@ fun ApplicationContext.getUsernameFromToken(): String? {
     return principal?.payload?.getClaim(TOKEN_USERNAME_CLAIM_KEY)?.asString()
 }
 
-fun ApplicationContext.getUserIdFromToken(): UUID? {
+fun ApplicationContext.getUserIdFromToken(): Uuid? {
     val principal = call.principal<JWTPrincipal>()
-    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUUID()
+    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUuid()
 }
 
 fun ApplicationContext.isTokenARefreshOne(): Boolean {
@@ -68,8 +68,8 @@ fun ApplicationContext.isTokenARefreshOne(): Boolean {
 }
 
 fun ApplicationContext.isTokenValid(token: String): Boolean {
-    val secret = this.application.environment.config.property("jwt.secret").getString()
-    val issuer = this.application.environment.config.property("jwt.issuer").getString()
+    val secret = call.application.environment.config.property("jwt.secret").getString()
+    val issuer = call.application.environment.config.property("jwt.issuer").getString()
 
     return runCatching {
         JWT

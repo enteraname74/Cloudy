@@ -6,10 +6,9 @@ import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import kotlin.uuid.Uuid
 
 class AlbumService(
     private val albumRepository: AlbumRepository,
@@ -17,10 +16,9 @@ class AlbumService(
     private val artistRepository: ArtistRepository,
     private val musicArtistRepository: MusicArtistRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
-    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
     private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
 ) {
-    suspend fun getFromId(albumId: UUID): Album? =
+    suspend fun getFromId(albumId: Uuid): Album? =
         albumRepository.getFromId(
             albumId = albumId,
         )
@@ -31,7 +29,7 @@ class AlbumService(
         )
 
     suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Album> =
         albumRepository.getAllOfUser(
@@ -40,8 +38,8 @@ class AlbumService(
         )
 
     suspend fun isAlbumPossessedByUser(
-        userId: UUID,
-        albumId: UUID,
+        userId: Uuid,
+        albumId: Uuid,
     ): Boolean =
         albumRepository.isAlbumPossessedByUser(
             userId = userId,
@@ -49,7 +47,7 @@ class AlbumService(
         )
 
     suspend fun deleteAll(
-        albumIds: List<UUID>,
+        albumIds: List<Uuid>,
         username: String,
     ) {
         val albumsToDelete: List<Album> = albumRepository.getAll(albumIds)
@@ -63,22 +61,16 @@ class AlbumService(
             }
         }
 
-        val relatedArtists: List<Artist> = buildList {
-            musicsToDelete.forEach {
-                addAll(
-                    artistRepository.getArtistsOfMusic(
-                        musicId = it.id
-                    )
-                )
-            }
-        }.distinct()
+        val relatedArtists: List<Artist> = musicsToDelete
+            .flatMap { it.artists }
+            .distinct()
 
         /*
         Even if the deletion of albums delete the musics,
          we need to ensure that the files will be also deleted.
          */
         musicRepository.deleteAll(
-            ids = musicsToDelete.map { it.id },
+            ids = musicsToDelete.map { it.fingerprint },
             username = username,
         )
 
@@ -96,13 +88,13 @@ class AlbumService(
     ): Album {
         // We fetch the songs of the album to update and its artist
         val songsOfAlbum: List<Music> = musicRepository.allFromAlbum(albumId = modifiedAlbum.id)
-        val previousArtist: Artist? = artistRepository.getFromId(modifiedAlbum.artistId)
+        val previousArtist: Artist? = artistRepository.getFromId(modifiedAlbum.artist.id)
 
         /*
         If there is no existing artist from the album's artist name, we create one.
          */
         val existingArtist: Artist = getOrCreateArtistUseCase(
-            artistName = modifiedAlbum.artistName,
+            artistName = modifiedAlbum.artist.name,
             user = user,
             coverData = null,
         )
@@ -115,7 +107,7 @@ class AlbumService(
             musicArtistRepository.deleteAll(
                 ids = songsOfAlbum.map {
                     MusicArtist(
-                        musicId = it.id,
+                        musicId = it.fingerprint,
                         artistId = artist.id,
                         userId = user.id,
                     ).id
@@ -125,7 +117,7 @@ class AlbumService(
         musicArtistRepository.upsertAll(
             musicArtists = songsOfAlbum.map {
                 MusicArtist(
-                    musicId = it.id,
+                    musicId = it.fingerprint,
                     artistId = existingArtist.id,
                     userId = user.id,
                 )
@@ -139,15 +131,14 @@ class AlbumService(
          */
         val albumInfoToUse: Album? = albumRepository.getFromInformation(
             albumName = modifiedAlbum.name,
-            albumArtist = modifiedAlbum.artistName,
+            albumArtist = modifiedAlbum.artist.name,
             userId = user.id,
         )
 
         val updatedSongs = songsOfAlbum.map {
             it.copy(
-                albumId = albumInfoToUse?.id ?: modifiedAlbum.id,
-                album = modifiedAlbum.name,
-                artist = getArtistNameForMusicUseCase(it.id),
+                album = albumInfoToUse ?: modifiedAlbum,
+                // TODO: update artists?
             )
         }
         musicRepository.upsertAll(
@@ -167,7 +158,7 @@ class AlbumService(
         } else {
             albumRepository.upsert(
                 album = modifiedAlbum.copy(
-                    artistId = existingArtist.id,
+                    artist = existingArtist,
                 ),
                 coverData = coverData,
                 username = user.username,
@@ -175,7 +166,7 @@ class AlbumService(
         }
 
         // If the artist of the album has changed, we check if we can delete the old one.
-        deleteArtistIfEmptyUseCase(artistId = modifiedAlbum.artistId)
+        deleteArtistIfEmptyUseCase(artistId = modifiedAlbum.artist.id)
 
         return savedAlbum
     }
@@ -186,10 +177,10 @@ class AlbumService(
      * in the db.
      */
     suspend fun getDeletedMusicsIds(
-        idsToCheck: List<UUID>,
-        userId: UUID
-    ): List<UUID> {
-        val allAlbumOfUser: List<UUID> = albumRepository.getAllOfUser(
+        idsToCheck: List<Uuid>,
+        userId: Uuid
+    ): List<Uuid> {
+        val allAlbumOfUser: List<Uuid> = albumRepository.getAllOfUser(
             userId = userId,
         ).map { it.id }
 

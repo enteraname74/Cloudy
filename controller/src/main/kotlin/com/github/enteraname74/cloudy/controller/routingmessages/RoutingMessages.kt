@@ -2,7 +2,7 @@ package com.github.enteraname74.cloudy.controller.routingmessages
 
 import com.github.enteraname74.cloudy.controller.routingmessages.impl.EnRoutingMessages
 import com.github.enteraname74.cloudy.controller.routingmessages.impl.FrRoutingMessages
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 interface RoutingMessages {
     val USERNAME_TAKEN: String
@@ -27,24 +27,24 @@ interface RoutingMessages {
     val CANNOT_SAVE_SONG: String
     val CANNOT_UPDATE_SONG: String
 
-    fun songNotPossessedByUser(musicId: UUID): String
+    fun songNotPossessedByUser(musicId: String): String
 
     val ARTISTS_DELETED: String
     val ARTIST_NOT_POSSESSED_BY_USER: String
 
-    fun artistNotPossessedByUser(artistId: UUID): String
+    fun artistNotPossessedByUser(artistId: Uuid): String
 
     val ALBUMS_DELETED: String
     val ALBUM_NOT_POSSESSED_BY_USER: String
 
-    fun albumNotPossessedByUser(albumId: UUID): String
+    fun albumNotPossessedByUser(albumId: Uuid): String
 
     val PLAYLIST_NOT_FOUND: String
     val PLAYLISTS_DELETED: String
     val PLAYLIST_NOT_POSSESSED_BY_USER: String
     val PLAYLIST_ALREADY_EXISTING: String
 
-    fun playlistNotPossessedByUser(playlistId: UUID): String
+    fun playlistNotPossessedByUser(playlistId: Uuid): String
 
     val MISSING_TOKEN_INFORMATION: String
     val NOT_A_REFRESH_TOKEN: String

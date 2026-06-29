@@ -2,7 +2,6 @@ package com.github.enteraname74.cloudy.controller.ext
 
 import com.github.enteraname74.cloudy.config.ApplicationContext
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.response.*
 
 suspend fun ApplicationContext.missingTokenInformation() =

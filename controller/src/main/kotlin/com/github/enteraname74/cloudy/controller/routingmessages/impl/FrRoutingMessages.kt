@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.routingmessages.impl
 
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 object FrRoutingMessages: RoutingMessages {
     override val USERNAME_TAKEN: String = "Ce nom d'utilisateur est déjà pris."
@@ -26,19 +26,19 @@ object FrRoutingMessages: RoutingMessages {
     override val CANNOT_SAVE_SONG: String = "Impossible de sauvegarder la musique."
     override val CANNOT_UPDATE_SONG: String = "Impossible de mettre à jour la musique."
 
-    override fun songNotPossessedByUser(musicId: UUID): String =
+    override fun songNotPossessedByUser(musicId: String): String =
         "La musique ayant l'identifiant : $musicId, n'est pas possédée par l'utilisateur."
 
     override val ARTISTS_DELETED: String = "Les artistes ont été supprimés."
     override val ARTIST_NOT_POSSESSED_BY_USER: String = "Cet artiste n'est pas possédé par l'utilisateur."
 
-    override fun artistNotPossessedByUser(artistId: UUID): String =
+    override fun artistNotPossessedByUser(artistId: Uuid): String =
         "L'artiste ayant l'identifiant : $artistId, n'est pas possédé par l'utilisateur."
 
     override val ALBUMS_DELETED: String = "Les albums ont été supprimés."
     override val ALBUM_NOT_POSSESSED_BY_USER: String = "Cet album n'est pas possédé par l'utilisateur."
 
-    override fun albumNotPossessedByUser(albumId: UUID): String =
+    override fun albumNotPossessedByUser(albumId: Uuid): String =
         "L'album ayant l'identifiant : $albumId, n'est pas possédé par l'utilisateur."
 
     override val PLAYLIST_NOT_FOUND: String = "Impossible de trouver cette playlist."
@@ -46,7 +46,7 @@ object FrRoutingMessages: RoutingMessages {
     override val PLAYLIST_NOT_POSSESSED_BY_USER: String = "Cette playlist n'est pas possédée par l'utilisateur."
     override val PLAYLIST_ALREADY_EXISTING: String = "Cette playlist existe déja."
 
-    override fun playlistNotPossessedByUser(playlistId: UUID): String =
+    override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "La playlist ayant l'identifiant : $playlistId, n'est pas possédée par l'utilisateur."
 
     override val MISSING_TOKEN_INFORMATION: String = "Il manque des informations dans le token fournis."

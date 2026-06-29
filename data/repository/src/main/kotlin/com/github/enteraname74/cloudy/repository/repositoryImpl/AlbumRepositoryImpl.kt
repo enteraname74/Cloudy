@@ -1,21 +1,19 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.ext.toUUID
 import com.github.enteraname74.cloudy.domain.model.Album
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import kotlin.uuid.Uuid
 
 class AlbumRepositoryImpl(
     private val albumDataSource: AlbumDataSource,
     private val coverFileManager: CoverFileManager,
 ) : AlbumRepository {
-    override suspend fun getFromId(albumId: UUID): Album? =
+    override suspend fun getFromId(albumId: Uuid): Album? =
         albumDataSource.getFromId(
             albumId = albumId,
         )
@@ -24,22 +22,22 @@ class AlbumRepositoryImpl(
         albumDataSource.getFromCoverPath(coverPath)
 
 
-    override suspend fun getAll(albumIds: List<UUID>): List<Album> =
+    override suspend fun getAll(albumIds: List<Uuid>): List<Album> =
         albumDataSource.getAll(albumIds)
 
-    override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: UUID): Album? =
+    override suspend fun getFromInformation(albumName: String, albumArtist: String, userId: Uuid): Album? =
         albumDataSource.getFromInformation(
             albumName = albumName,
             albumArtist = albumArtist,
             userId = userId,
         )
 
-    override suspend fun allOfArtist(artistId: UUID): List<Album> =
+    override suspend fun allOfArtist(artistId: Uuid): List<Album> =
         albumDataSource.allOfArtist(
             artistId = artistId,
         )
 
-    override suspend fun isAlbumPossessedByUser(userId: UUID, albumId: UUID): Boolean =
+    override suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean =
         albumDataSource.isAlbumPossessedByUser(
             userId = userId,
             albumId = albumId,
@@ -50,24 +48,24 @@ class AlbumRepositoryImpl(
         coverData: FileData?,
         username: String,
     ): Album {
-        val savedId: UUID? = coverData?.let {
+        val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
-            val previousId: UUID? =
+            val previousName: String? =
                 album
                     .coverPath
                     ?.takeIf { it.startsWith(Album.COVER_PATH) }
-                    ?.split('/')?.last()?.toUUID()
+                    ?.split('/')?.last()
 
-            previousId?.let { id ->
+            previousName?.let { name ->
                 coverFileManager.delete(
-                    id = id,
+                    name = name,
                     username = username,
                 )
             }
 
             coverFileManager.save(
                 username = username,
-                fileData = it,
+                fileData = cover,
             )
         }
 
@@ -77,7 +75,7 @@ class AlbumRepositoryImpl(
 
         return albumDataSource.upsert(
             album.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                lastUpdateAtMillis = DateUtils.now(),
                 coverPath = newCoverPath ?: album.coverPath,
             )
         )
@@ -87,14 +85,14 @@ class AlbumRepositoryImpl(
         albumDataSource.upsertAll(
             albums.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                 )
             }
         )
     }
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Album> =
         albumDataSource
@@ -103,11 +101,11 @@ class AlbumRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun deleteById(albumId: UUID) {
+    override suspend fun deleteById(albumId: Uuid) {
         albumDataSource.deleteById(albumId)
     }
 
-    override suspend fun deleteAll(albumIds: List<UUID>) {
+    override suspend fun deleteAll(albumIds: List<Uuid>) {
         albumDataSource.deleteAll(albumIds)
     }
 }

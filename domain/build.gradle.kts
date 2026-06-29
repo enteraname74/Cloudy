@@ -12,6 +12,12 @@ dependencies {
     implementation(project(":logging"))
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }

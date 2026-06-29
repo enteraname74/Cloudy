@@ -12,6 +12,12 @@ dependencies {
     implementation(project(":file-access"))
 }
 
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }

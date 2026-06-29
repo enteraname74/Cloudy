@@ -15,13 +15,12 @@ import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.http.content.MultiPartData
-import io.ktor.server.application.*
+import io.ktor.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.updateSong() {
     val musicService by inject<MusicService>()
@@ -29,16 +28,14 @@ fun Route.updateSong() {
 
     put {
 
-        val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@put missingTokenInformation()
         val routingMessages: RoutingMessages = getRoutingMessages()
         val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
             message = routingMessages.CANNOT_FIND_USER,
         )
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedMusic>(multipartData)
-
-        when(updateInformation) {
+        when(val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedMusic>(multipartData)) {
             is CloudyResult.Error -> {
                 return@put badRequest(routingMessages.WRONG_INFORMATION)
             }

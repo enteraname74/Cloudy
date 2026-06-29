@@ -1,7 +1,10 @@
 package com.github.enteraname74.cloudy.localdb.util
 
 import kotlinx.coroutines.Dispatchers
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import kotlinx.coroutines.withContext
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 
-internal suspend fun <T> suspendedTransaction(block: suspend () -> T): T =
-    newSuspendedTransaction(Dispatchers.IO) { block() }
+internal suspend fun <T> workTransaction(block: suspend () -> T): T =
+    withContext(Dispatchers.IO) {
+        suspendTransaction { block() }
+    }

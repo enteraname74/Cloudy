@@ -6,7 +6,7 @@ import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import java.util.*
+import kotlin.uuid.Uuid
 
 class UserService(
     private val userRepository: UserRepository,
@@ -18,7 +18,7 @@ class UserService(
     suspend fun getUserFromUsername(username: String): User? =
         userRepository.getFromUsername(username = username)
 
-    suspend fun getUserFromId(userId: UUID): User? =
+    suspend fun getUserFromId(userId: Uuid): User? =
         userRepository.getFromId(userId = userId)
 
     suspend fun createUser(
@@ -34,6 +34,7 @@ class UserService(
             username = username,
             hashedPassword = hashedPassword,
             isAdmin = isAdmin,
+            id = Uuid.random(),
         )
 
         val savedUser: User = userRepository.upsert(user = user)
@@ -43,6 +44,7 @@ class UserService(
 
     suspend fun logUser(username: String, password: String): CloudyResult<User> {
         val user: User = userRepository.getFromUsername(username = username) ?: return CloudyResult.Error()
+
         val isPasswordMatching = hashedPasswordManager.isMatching(
             password = password,
             hashedPassword = user.hashedPassword,
@@ -59,7 +61,7 @@ class UserService(
         return userRepository.getAll()
     }
 
-    suspend fun deleteUser(userId: UUID) {
+    suspend fun deleteUser(userId: Uuid) {
         userRepository.delete(id = userId)
     }
 
@@ -74,8 +76,8 @@ class UserService(
     }
 
     suspend fun canDeleteUser(
-        requester: UUID,
-        userIdToDelete: UUID,
+        requester: Uuid,
+        userIdToDelete: Uuid,
     ): Boolean {
         val userRequester: User = userRepository.getFromId(userId = requester) ?: return false
         val userToDelete: User = userRepository.getFromId(userId = userIdToDelete) ?: return false

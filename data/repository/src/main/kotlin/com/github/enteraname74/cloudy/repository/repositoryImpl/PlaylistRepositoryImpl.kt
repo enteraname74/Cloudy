@@ -1,21 +1,19 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
-import com.github.enteraname74.cloudy.domain.ext.toUUID
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import kotlin.uuid.Uuid
 
 class PlaylistRepositoryImpl(
     private val playlistDataSource: PlaylistDataSource,
     private val coverFileManager: CoverFileManager,
 ): PlaylistRepository {
-    override suspend fun getFromId(playlistId: UUID): Playlist? =
+    override suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistDataSource.getFromId(
             playlistId = playlistId,
         )
@@ -25,7 +23,7 @@ class PlaylistRepositoryImpl(
             coverPath = coverPath,
         )
 
-    override suspend fun getFromInformation(name: String, userId: UUID): Playlist? =
+    override suspend fun getFromInformation(name: String, userId: Uuid): Playlist? =
         playlistDataSource.getFromInformation(
             name = name,
             userId = userId,
@@ -36,24 +34,24 @@ class PlaylistRepositoryImpl(
         coverData: FileData?,
         username: String
     ): Playlist {
-        val savedId: UUID? = coverData?.let {
+        val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
-            val previousId: UUID? =
+            val previousName: String? =
                 playlist
                     .coverPath
                     ?.takeIf { it.startsWith(Playlist.COVER_PATH) }
-                    ?.split('/')?.last()?.toUUID()
+                    ?.split('/')?.last()
 
-            previousId?.let { id ->
+            previousName?.let { name ->
                 coverFileManager.delete(
-                    id = id,
+                    name = name,
                     username = username,
                 )
             }
 
             coverFileManager.save(
                 username = username,
-                fileData = it,
+                fileData = cover,
             )
         }
 
@@ -63,7 +61,7 @@ class PlaylistRepositoryImpl(
 
         return playlistDataSource.upsert(
             playlist = playlist.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                lastUpdateAtMillis = DateUtils.now(),
                 coverPath = newCoverPath ?: playlist.coverPath,
             ),
         )
@@ -73,27 +71,27 @@ class PlaylistRepositoryImpl(
         playlistDataSource.upsertAll(
             playlists = playlists.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                 )
             },
         )
 
-    override suspend fun deleteById(playlistId: UUID) =
+    override suspend fun deleteById(playlistId: Uuid) =
         playlistDataSource.deleteById(
             playlistId = playlistId,
         )
 
-    override suspend fun deleteAll(playlistIds: List<UUID>) {
+    override suspend fun deleteAll(playlistIds: List<Uuid>) {
         playlistDataSource.deleteAll(playlistIds)
     }
 
-    override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
+    override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<Playlist> =
         playlistDataSource.allOfUser(
             userId = userId,
             paginatedRequest = paginatedRequest,
         )
 
-    override suspend fun isPlaylistPossessedByUser(userId: UUID, playlistId: UUID): Boolean =
+    override suspend fun isPlaylistPossessedByUser(userId: Uuid, playlistId: Uuid): Boolean =
         playlistDataSource.isPlaylistPossessedByUser(
             userId = userId,
             playlistId = playlistId,

@@ -15,26 +15,23 @@ import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.http.content.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.updatePlaylist() {
     val playlistService by inject<PlaylistService>()
 
     put {
-        val userId: UUID = getUserIdFromToken() ?: return@put missingTokenInformation()
+        val userId: Uuid = getUserIdFromToken() ?: return@put missingTokenInformation()
         val username: String = getUsernameFromToken() ?: return@put missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedPlaylist>(multipartData)
-
-        when(updateInformation) {
+        when(val updateInformation = MultiPartDataUtils.processUpdateRequest<ModifiedPlaylist>(multipartData)) {
             is CloudyResult.Error -> {
                 return@put badRequest(routingMessages.WRONG_INFORMATION)
             }

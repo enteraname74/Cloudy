@@ -2,11 +2,10 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicArtistDataSource
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 class MusicArtistRepositoryImpl(
     private val musicArtistDataSource: MusicArtistDataSource,
@@ -14,7 +13,7 @@ class MusicArtistRepositoryImpl(
     override suspend fun upsert(musicArtist: MusicArtist) {
         musicArtistDataSource.upsert(
             musicArtist.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                lastUpdateAtMillis = DateUtils.now(),
             )
         )
     }
@@ -27,7 +26,7 @@ class MusicArtistRepositoryImpl(
         musicArtistDataSource.upsertAll(
             musicArtists = musicArtists.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                 )
             }
         )
@@ -37,11 +36,11 @@ class MusicArtistRepositoryImpl(
         musicArtistDataSource.deleteAll(ids)
     }
 
-    override suspend fun isInMultipleArtist(musicId: UUID): Boolean =
+    override suspend fun isInMultipleArtist(musicId: String): Boolean =
         musicArtistDataSource.isInMultipleArtist(musicId)
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest
     ): List<MusicArtist> =
         musicArtistDataSource.getAllOfUser(

@@ -9,14 +9,13 @@ import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import java.io.File
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.*
+import kotlin.uuid.Uuid
 
 class MusicRepositoryImpl(
     private val musicDataSource: MusicDataSource,
@@ -31,19 +30,18 @@ class MusicRepositoryImpl(
         shouldSearchForMetadata: Boolean
     ): UploadProcessState {
         // We save the file
-        val temporarySavedFileId: UUID = musicFileManager.save(
+        val temporarySavedFileId: Uuid = musicFileManager.save(
             username = user.username,
             fileData = fileData,
         )
         // We retrieve the saved file to analyze its fingerprint for metadata
-        val temporarySavedFile: File = musicFileManager.getById(
+        val temporarySavedFile: File = musicFileManager.getByName(
             username = user.username,
-            id = temporarySavedFileId,
+            name = temporarySavedFileId.toString(),
         ) ?: return UploadProcessState.Error
 
         val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
             musicFile = temporarySavedFile,
-            musicId = temporarySavedFileId,
             customMetadata = customMusicMetadata,
             shouldSearchForMetadata = shouldSearchForMetadata,
         )
@@ -59,12 +57,19 @@ class MusicRepositoryImpl(
 
         if (existingMusic != null) {
             musicFileManager.delete(
-                id = temporarySavedFileId,
+                name = temporarySavedFileId.toString(),
                 username = user.username,
             )
             val updatedMusic =
                 saveMusicFileToDbAfterUploadProcess(music = existingMusic.updateFromMetadata(metadata = musicMetadata))
             return UploadProcessState.AlreadyExisting(updatedMusic)
+        } else {
+            // We will rename the temporary file to suit the music fingerprint
+            musicFileManager.rename(
+                from = temporarySavedFileId.toString(),
+                username = user.username,
+                to = "${musicMetadata.fingerprint}.${fileData.extension}"
+            )
         }
 
         return UploadProcessState.ContinueProcess(
@@ -75,7 +80,7 @@ class MusicRepositoryImpl(
     override suspend fun saveMusicFileToDbAfterUploadProcess(music: Music): Music =
         musicDataSource.upsert(
             music.copy(
-                lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC)
+                lastUpdateAtMillis = DateUtils.now()
             )
         )
 
@@ -85,9 +90,9 @@ class MusicRepositoryImpl(
         username: String,
         cover: FileData?,
     ): CloudyResult<Music> {
-        val musicFile: File = musicFileManager.getById(
+        val musicFile: File = musicFileManager.getByName(
             username = username,
-            id = music.id,
+            name = music.fingerprint,
         ) ?: return CloudyResult.Error()
 
         // TODO: What to do for OPUS files?
@@ -100,7 +105,7 @@ class MusicRepositoryImpl(
         return CloudyResult.Success(
             musicDataSource.upsert(
                 music.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                     coverPath = cover?.let { Music.buildLocalCoverPath() } ?: music.coverPath,
                 )
             )
@@ -109,9 +114,9 @@ class MusicRepositoryImpl(
 
     override suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit> {
         musicIds.forEach { music ->
-            val musicFile: File = musicFileManager.getById(
+            val musicFile: File = musicFileManager.getByName(
                 username = username,
-                id = music.id,
+                name = music.fingerprint,
             ) ?: return CloudyResult.Error()
 
             musicFileMetadataManager.setMetadataOfFile(
@@ -124,7 +129,7 @@ class MusicRepositoryImpl(
         musicDataSource.upsertAll(
             musicIds.map {
                 it.copy(
-                    lastUpdateAt = LocalDateTime.now(ZoneOffset.UTC),
+                    lastUpdateAtMillis = DateUtils.now(),
                 )
             }
         )
@@ -132,25 +137,25 @@ class MusicRepositoryImpl(
         return CloudyResult.Success(Unit)
     }
 
-    override suspend fun getFromId(musicId: UUID): Music? =
+    override suspend fun getFromId(musicId: String): Music? =
         musicDataSource.getFromId(musicId = musicId)
 
     override suspend fun getFromCoverPath(coverPath: String): Music? =
         musicDataSource.getFromCoverPath(coverPath = coverPath)
 
-    override suspend fun getMusicFile(musicId: UUID, username: String): File? =
-        musicFileManager.getById(
-            id = musicId,
+    override suspend fun getMusicFile(musicId: String, username: String): File? =
+        musicFileManager.getByName(
+            name = musicId,
             username = username,
         )
 
-    override suspend fun getAll(ids: List<UUID>): List<Music> =
+    override suspend fun getAll(ids: List<String>): List<Music> =
         musicDataSource.getAll(ids)
 
-    override suspend fun deleteAll(ids: List<UUID>, username: String) {
+    override suspend fun deleteAll(ids: List<String>, username: String) {
         ids.forEach { id ->
             musicFileManager.delete(
-                id = id,
+                name = id,
                 username = username,
             )
         }
@@ -158,7 +163,7 @@ class MusicRepositoryImpl(
     }
 
     override suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Music> =
         musicDataSource
@@ -167,18 +172,18 @@ class MusicRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun isMusicPossessedByUser(userId: UUID, musicId: UUID): Boolean =
+    override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)
 
-    override suspend fun getFromFingerprint(fingerprint: String, userId: UUID): Music? =
+    override suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music? =
         musicDataSource.getFromFingerprint(
             fingerprint = fingerprint,
             userId = userId,
         )
 
-    override suspend fun allFromAlbum(albumId: UUID): List<Music> =
+    override suspend fun allFromAlbum(albumId: Uuid): List<Music> =
         musicDataSource.allFromAlbum(albumId)
 
-    override suspend fun allFromArtist(artistId: UUID): List<Music> =
+    override suspend fun allFromArtist(artistId: Uuid): List<Music> =
         musicDataSource.allFromArtist(artistId)
 }

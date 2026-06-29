@@ -5,7 +5,7 @@ import com.github.enteraname74.cloudy.domain.repository.CoverRepository
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import java.io.File
-import java.util.*
+import kotlin.uuid.Uuid
 
 class CoverRepositoryImpl(
     private val musicFileMetadataManager: MusicFileMetadataManager,
@@ -14,16 +14,16 @@ class CoverRepositoryImpl(
     override suspend fun getMusicFileCover(musicFile: File): ByteArray? =
         musicFileMetadataManager.getMusicFileCover(musicFile)
 
-    override suspend fun getCover(id: UUID, username: String): ByteArray? =
-        coverFileManager.getById(
-            id = id,
+    override suspend fun getCover(name: String, username: String): ByteArray? =
+        coverFileManager.getByName(
+            name = name,
             username = username,
         )?.readBytes()
 
     override suspend fun save(
         username: String,
         coverData: FileData,
-    ): UUID =
+    ): Uuid =
         coverFileManager.save(
             username = username,
             fileData = coverData,

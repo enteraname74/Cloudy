@@ -1,16 +1,12 @@
 package com.github.enteraname74.cloudy.controller.util
 
-import com.github.enteraname74.cloudy.controller.routing.artist.model.ModifiedArtist
-import com.github.enteraname74.cloudy.controller.routing.music.model.ModifiedMusic
 import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.FileUtils
-import io.ktor.http.content.MultiPartData
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
-import io.ktor.http.content.streamProvider
+import io.ktor.http.content.*
+import io.ktor.utils.io.*
 
 object MultiPartDataUtils {
     suspend fun retrieveImageData(fileItem: PartData.FileItem): FileData? {
@@ -24,7 +20,7 @@ object MultiPartDataUtils {
             return null
         }
 
-        val fileBytes = fileItem.streamProvider().readBytes()
+        val fileBytes = fileItem.provider().toByteArray()
         if (fileBytes.isEmpty()) return null
 
         return FileData(
@@ -82,7 +78,7 @@ object MultiPartDataUtils {
                         return@forEachPart
                     }
 
-                    val fileBytes = part.streamProvider().readBytes()
+                    val fileBytes = part.provider().toByteArray()
                     if (fileBytes.isEmpty()) return@forEachPart
 
                     fileData = FileData(

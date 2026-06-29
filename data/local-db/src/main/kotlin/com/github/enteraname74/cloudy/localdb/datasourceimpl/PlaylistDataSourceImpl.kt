@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.localdb.table.PlaylistEntity
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.addedDate
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.coverPath
@@ -11,122 +12,112 @@ import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.lastUpdateAt
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.name
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.nbPlayed
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.userId
-import com.github.enteraname74.cloudy.localdb.table.toPlaylist
 import com.github.enteraname74.cloudy.localdb.util.paginated
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
+import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
-import java.util.*
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.upsert
+import kotlin.uuid.Uuid
 
 class PlaylistDataSourceImpl: PlaylistDataSource {
-    override suspend fun getFromId(playlistId: UUID): Playlist? =
-        suspendedTransaction {
-            PlaylistTable
-                .selectAll()
-                .where {
-                    PlaylistTable.id eq playlistId
-                }.firstOrNull()
-                ?.toPlaylist()
+    override suspend fun getFromId(playlistId: Uuid): Playlist? =
+        workTransaction {
+            PlaylistEntity.findById(playlistId)?.toPlaylist()
         }
 
     override suspend fun getFromCoverPath(coverPath: String): Playlist? =
-        suspendedTransaction {
-            PlaylistTable
-                .selectAll()
-                .where {
-                    PlaylistTable.coverPath eq coverPath
-                }.firstOrNull()
+        workTransaction {
+            PlaylistEntity
+                .find { PlaylistTable.coverPath eq coverPath }
+                .firstOrNull()
                 ?.toPlaylist()
         }
 
-    override suspend fun getFromInformation(name: String, userId: UUID): Playlist? =
-        suspendedTransaction {
-            PlaylistTable
-                .selectAll()
-                .where {
+    override suspend fun getFromInformation(name: String, userId: Uuid): Playlist? =
+        workTransaction {
+            PlaylistEntity
+                .find {
                     (PlaylistTable.name eq name) and (PlaylistTable.userId eq userId)
-                }.firstOrNull()
+                }
+                .firstOrNull()
                 ?.toPlaylist()
         }
 
     override suspend fun upsert(playlist: Playlist): Playlist =
-        suspendedTransaction {
+        workTransaction {
             PlaylistTable.upsert {
                 it[id] = playlist.id
                 it[userId] = playlist.userId
                 it[name] = playlist.name
                 it[coverPath] = playlist.coverPath
                 it[isFavorite] = playlist.isFavorite
-                it[addedDate] = playlist.addedDate
+                it[addedDate] = playlist.addedDateMillis
                 it[nbPlayed] = playlist.nbPlayed
                 it[isInQuickAccess] = playlist.isInQuickAccess
-                it[lastUpdateAt] = playlist.lastUpdateAt
+                it[lastUpdateAt] = playlist.lastUpdateAtMillis
             }
 
-            PlaylistTable
-                .selectAll()
-                .where { PlaylistTable.id eq playlist.id }
-                .first()
-                .toPlaylist()!!
+            PlaylistEntity
+                .findById(playlist.id)
+                ?.toPlaylist()!!
         }
 
     override suspend fun upsertAll(playlists: List<Playlist>): List<Playlist> =
-        suspendedTransaction {
+        workTransaction {
             PlaylistTable.batchUpsert(playlists) { playlist ->
                 this[PlaylistTable.id] = playlist.id
                 this[userId] = playlist.userId
                 this[name] = playlist.name
                 this[coverPath] = playlist.coverPath
                 this[isFavorite] = playlist.isFavorite
-                this[addedDate] = playlist.addedDate
+                this[addedDate] = playlist.addedDateMillis
                 this[nbPlayed] = playlist.nbPlayed
                 this[isInQuickAccess] = playlist.isInQuickAccess
-                this[lastUpdateAt] = playlist.lastUpdateAt
+                this[lastUpdateAt] = playlist.lastUpdateAtMillis
             }
 
             val playlistIds = playlists.map { it.id }
 
-            PlaylistTable
-                .selectAll()
-                .where { PlaylistTable.id inList playlistIds }
-                .mapNotNull { it.toPlaylist() }
+            PlaylistEntity
+                .find { PlaylistTable.id inList playlistIds }
+                .map { it.toPlaylist() }
         }
 
-    override suspend fun deleteById(playlistId: UUID): Boolean =
-        suspendedTransaction {
+    override suspend fun deleteById(playlistId: Uuid): Boolean =
+        workTransaction {
             PlaylistTable.deleteWhere {
                 id eq playlistId
             } > 0
         }
 
-    override suspend fun deleteAll(playlistIds: List<UUID>) {
-        suspendedTransaction {
+    override suspend fun deleteAll(playlistIds: List<Uuid>) {
+        workTransaction {
             PlaylistTable.deleteWhere {
                 id inList playlistIds
             }
         }
     }
 
-    override suspend fun allOfUser(userId: UUID, paginatedRequest: PaginatedRequest): List<Playlist> =
-        suspendedTransaction {
-            PlaylistTable
-                .selectAll()
-                .where {
+    override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<Playlist> =
+        workTransaction {
+            PlaylistEntity
+                .find {
                     (PlaylistTable.userId eq userId) and
-                            (lastUpdateAt updatedAfter paginatedRequest.lastUpdateAt)
+                            (lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
-                .mapNotNull { it.toPlaylist() }
+                .map { it.toPlaylist() }
         }
 
-    override suspend fun isPlaylistPossessedByUser(userId: UUID, playlistId: UUID): Boolean =
-        suspendedTransaction {
-            PlaylistTable
-                .selectAll()
-                .where {
+    override suspend fun isPlaylistPossessedByUser(userId: Uuid, playlistId: Uuid): Boolean =
+        workTransaction {
+            PlaylistEntity
+                .find {
                     (PlaylistTable.id eq playlistId) and (PlaylistTable.userId eq userId)
                 }.count() > 0
         }

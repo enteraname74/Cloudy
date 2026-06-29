@@ -2,17 +2,17 @@ package com.github.enteraname74.cloudy.controller.routing.playlist.model
 
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import kotlinx.serialization.Serializable
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 @Serializable
 data class PlaylistCreation(
     val name: String
 ) {
     fun toNewPlaylist(
-        userId: UUID,
+        userId: Uuid,
     ): Playlist =
         Playlist(
-            id = UUID.randomUUID(),
+            id = Uuid.random(),
             name = name,
             userId = userId,
             coverPath = null,

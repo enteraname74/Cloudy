@@ -1,19 +1,13 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.Music
-import com.github.enteraname74.cloudy.domain.model.MusicArtist
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.*
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.GetArtistNameForMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import kotlin.uuid.Uuid
 
 class ArtistService(
     private val artistRepository: ArtistRepository,
@@ -21,10 +15,9 @@ class ArtistService(
     private val musicArtistRepository: MusicArtistRepository,
     private val albumRepository: AlbumRepository,
     private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
-    private val getArtistNameForMusicUseCase: GetArtistNameForMusicUseCase,
 ) {
     suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Artist> =
         artistRepository.getAllOfUser(
@@ -58,7 +51,7 @@ class ArtistService(
             musicArtistRepository.upsertAll(
                 musicArtists = songsOfArtist.map {
                     MusicArtist(
-                        musicId = it.id,
+                        musicId = it.fingerprint,
                         artistId = alreadyExistingArtist.id,
                         userId = user.id,
                     )
@@ -80,9 +73,11 @@ class ArtistService(
             )
         }
 
-        val updatedSongs = songsOfArtist.map {
-            it.copy(artist = getArtistNameForMusicUseCase(it.id))
-        }
+        // TODO: Do better
+        val updatedSongs = songsOfArtist
+//        val updatedSongs = songsOfArtist.map {
+//            it.copy(artist = getArtistNameForMusicUseCase(it.id))
+//        }
         musicRepository.upsertAll(
             musicIds = updatedSongs,
             username = user.username,
@@ -91,8 +86,7 @@ class ArtistService(
         // We update/redirect albums of the artist with the new information
         val updatedAlbums = albumsOfArtist.map {
             it.copy(
-                artistId = savedArtist.id,
-                artistName = savedArtist.name,
+                artist = savedArtist,
             )
         }
         albumRepository.upsertAll(updatedAlbums)
@@ -100,15 +94,15 @@ class ArtistService(
         return savedArtist
     }
 
-    suspend fun getFromId(artistId: UUID): Artist? =
+    suspend fun getFromId(artistId: Uuid): Artist? =
         artistRepository.getFromId(artistId = artistId)
 
     suspend fun getFromCoverPath(coverPath: String): Artist? =
         artistRepository.getFromCoverPath(coverPath)
 
     suspend fun isArtistPossessedByUser(
-        artistId: UUID,
-        userId: UUID,
+        artistId: Uuid,
+        userId: Uuid,
     ): Boolean =
         artistRepository.isArtistPossessedByUser(
             userId = userId,
@@ -116,7 +110,7 @@ class ArtistService(
         )
 
     suspend fun deleteAll(
-        artistIds: List<UUID>,
+        artistIds: List<Uuid>,
         username: String,
     ) {
         val musicsToDelete: List<Music> = buildList {
@@ -129,14 +123,12 @@ class ArtistService(
             }
         }.distinct()
 
-        val relatedArtists: List<Artist> = buildList {
-            musicsToDelete.forEach {
-                addAll(artistRepository.getArtistsOfMusic(it.id))
-            }
-        }.distinct()
+        val relatedArtists: List<Artist> = musicsToDelete
+            .flatMap { it.artists }
+            .distinct()
 
         musicRepository.deleteAll(
-            ids = musicsToDelete.map { it.id },
+            ids = musicsToDelete.map { it.fingerprint },
             username = username,
         )
         artistRepository.deleteAll(artistIds = artistIds)
@@ -153,10 +145,10 @@ class ArtistService(
      * in the db.
      */
     suspend fun getDeletedArtistIds(
-        idsToCheck: List<UUID>,
-        userId: UUID
-    ): List<UUID> {
-        val allArtistsOfUser: List<UUID> = artistRepository
+        idsToCheck: List<Uuid>,
+        userId: Uuid
+    ): List<Uuid> {
+        val allArtistsOfUser: List<Uuid> = artistRepository
             .getAllOfUser(
                 userId = userId,
             ).map { it.id }

@@ -47,8 +47,8 @@ class MusicFileMetadataManager {
             val tag = audioFile.tag
 
             tag.setField(FieldKey.TITLE, music.name)
-            tag.setField(FieldKey.ALBUM, music.album)
-            tag.setField(FieldKey.ARTIST, music.artist)
+            tag.setField(FieldKey.ALBUM, music.album.name)
+            tag.setField(FieldKey.ARTIST, music.artists.joinToString { it.name })
 
             cover?.let { currentArtwork ->
                 try {

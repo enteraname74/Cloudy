@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.ktor)
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
@@ -10,7 +10,7 @@ version = "0.0.1"
 ktor {
     docker {
         localImageName.set("cloudy-docker-image")
-        imageTag.set("0.0.14")
+        imageTag.set("0.0.1")
         jreVersion.set(JavaVersion.VERSION_17)
     }
 }
@@ -38,6 +38,12 @@ dependencies {
     testImplementation(libs.kotlin.test.junit)
 
     implementation(libs.bundles.koin)
+}
+
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
 }
 
 tasks.test {

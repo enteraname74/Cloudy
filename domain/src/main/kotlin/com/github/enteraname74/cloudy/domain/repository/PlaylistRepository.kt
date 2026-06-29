@@ -3,18 +3,18 @@ package com.github.enteraname74.cloudy.domain.repository
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.Playlist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import kotlin.uuid.Uuid
 
 interface PlaylistRepository {
     suspend fun getFromId(
-        playlistId: UUID
+        playlistId: Uuid
     ): Playlist?
     suspend fun getFromCoverPath(
         coverPath: String
     ): Playlist?
     suspend fun getFromInformation(
         name: String,
-        userId: UUID,
+        userId: Uuid,
     ): Playlist?
     suspend fun upsert(
         playlist: Playlist,
@@ -22,11 +22,11 @@ interface PlaylistRepository {
         username: String,
     ): Playlist
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>
-    suspend fun deleteById(playlistId: UUID): Boolean
-    suspend fun deleteAll(playlistIds: List<UUID>)
+    suspend fun deleteById(playlistId: Uuid): Boolean
+    suspend fun deleteAll(playlistIds: List<Uuid>)
     suspend fun allOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Playlist>
-    suspend fun isPlaylistPossessedByUser(userId: UUID, playlistId: UUID): Boolean
+    suspend fun isPlaylistPossessedByUser(userId: Uuid, playlistId: Uuid): Boolean
 }

@@ -1,35 +1,30 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.localdb.table.UserEntity
 import com.github.enteraname74.cloudy.localdb.table.UserTable
-import com.github.enteraname74.cloudy.localdb.table.toUser
-import com.github.enteraname74.cloudy.localdb.util.suspendedTransaction
+import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
-import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.upsert
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import java.util.UUID
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.jdbc.upsert
+import kotlin.uuid.Uuid
 
 class UserDataSourceImpl: UserDataSource {
     override suspend fun getFromUsername(username: String): User? =
-        suspendedTransaction {
-            UserTable
-                .selectAll()
-                .where { UserTable.username eq username }
-                .firstOrNull()?.toUser()
+        workTransaction {
+            UserEntity.find {
+                UserTable.username eq username
+            }.firstOrNull()?.toUser()
         }
 
-    override suspend fun getFromId(userId: UUID): User? =
-        suspendedTransaction {
-            UserTable
-                .selectAll()
-                .where { UserTable.id eq userId }
-                .firstOrNull()?.toUser()
+    override suspend fun getFromId(userId: Uuid): User? =
+        workTransaction {
+            UserEntity.findById(userId)?.toUser()
         }
 
+    // TODO DB: Maybe not returning the user in the upsert function
     override suspend fun upsert(user: User): User =
-        suspendedTransaction {
+        workTransaction {
             UserTable.upsert {
                 it[id] = user.id
                 it[username] = user.username
@@ -38,24 +33,17 @@ class UserDataSourceImpl: UserDataSource {
                 it[isAdmin] = user.isAdmin
             }
 
-            UserTable
-                .selectAll()
-                .where { UserTable.id eq user.id }
-                .first()
-                .toUser()!!
+            UserEntity.findById(user.id)!!.toUser()
         }
 
-    override suspend fun delete(id: UUID) {
-        suspendedTransaction {
-            UserTable
-                .deleteWhere { UserTable.id eq id }
+    override suspend fun delete(id: Uuid) {
+        workTransaction {
+            UserEntity.findById(id)?.delete()
         }
     }
 
     override suspend fun getAll(): List<User> =
-        suspendedTransaction {
-            UserTable
-                .selectAll()
-                .mapNotNull { it.toUser() }
+        workTransaction {
+            UserEntity.all().map { it.toUser() }
         }
 }

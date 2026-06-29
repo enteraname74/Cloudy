@@ -1,21 +1,15 @@
 package com.github.enteraname74.cloudy.domain.model
 
-import com.github.enteraname74.cloudy.domain.serializer.LocalDateTimeSerializer
-import com.github.enteraname74.cloudy.domain.serializer.UUIDSerializer
+import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
-import java.time.LocalDateTime
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 @Serializable
 data class MusicArtist(
-    @Serializable(with = UUIDSerializer::class)
-    val musicId: UUID,
-    @Serializable(with = UUIDSerializer::class)
-    val artistId: UUID,
-    @Serializable(with = UUIDSerializer::class)
-    val userId: UUID,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    override val lastUpdateAt: LocalDateTime = LocalDateTime.now(),
+    val musicId: String,
+    val artistId: Uuid,
+    val userId: Uuid,
+    override val lastUpdateAtMillis: Long = DateUtils.now(),
 ): UpdatableElement {
     val id: String
         get() = "$musicId$artistId"
