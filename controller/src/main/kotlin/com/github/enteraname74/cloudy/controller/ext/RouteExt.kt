@@ -37,14 +37,17 @@ fun ApplicationContext.getPaginatedRequestFromQueryParam(): PaginatedRequest =
         limitPerPage = getIntegerFromQueryParam(key = ServerUtil.Keys.MAX_PER_PAGE),
     )
 
-@Deprecated("User resources plugin instead")
+@Deprecated("Use request validation plugin")
 suspend inline fun <reified T: Any> ApplicationCall.safeReceive(): T? =
     runCatching { receive<T>() }.getOrNull()
 
-fun ApplicationContext.getRoutingMessages(): RoutingMessages {
-    val language: String? = call.request.header(ACCEPT_LANGUAGE_HEADER)
+fun ApplicationContext.getRoutingMessages(): RoutingMessages =
+    call.getRoutingMessages()
+
+fun ApplicationCall.getRoutingMessages(): RoutingMessages {
+    val language: String? = request.header(ACCEPT_LANGUAGE_HEADER)
     val locale: AppLocale = AppLocale.fromValue(language)
-    
+
     return RoutingMessages.fromLocale(locale)
 }
 

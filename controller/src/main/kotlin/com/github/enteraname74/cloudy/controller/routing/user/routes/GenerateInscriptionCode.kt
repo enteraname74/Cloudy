@@ -7,9 +7,11 @@ import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.routing.user.model.GeneratedCode
+import com.github.enteraname74.cloudy.controller.routing.user.resource.UserResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -18,7 +20,7 @@ import kotlin.uuid.Uuid
 fun Route.generateInscriptionCode() {
     val userService: UserService by inject()
 
-    get("/generateCode") {
+    get<UserResource.GenerateCode> {
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()

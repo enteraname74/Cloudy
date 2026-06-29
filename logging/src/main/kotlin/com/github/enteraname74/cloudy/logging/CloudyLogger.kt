@@ -19,6 +19,11 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
         return "$functionName$formattedFeature$this"
     }
 
+    fun debug(
+        message: String,
+        feature: String? = null
+    ) = logger.debug(message.format(feature))
+
     fun trace(
         message: String,
         feature: String? = null
@@ -32,7 +37,7 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
     fun warn(
         message: String,
         feature: String? = null
-    ) = logger.error(message.format(feature = feature))
+    ) = logger.warn(message.format(feature = feature))
 
     fun error(
         message: String,

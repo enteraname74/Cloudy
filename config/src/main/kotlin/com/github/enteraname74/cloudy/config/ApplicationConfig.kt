@@ -16,7 +16,6 @@ fun Application.configureApplication() {
     configureSerialization()
     configureHTTP()
 //    configureSockets()
-    configureStatusPage()
     upsertAdmin()
 }
 

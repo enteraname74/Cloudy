@@ -29,9 +29,6 @@ dependencies {
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
 
-    // Status page
-    implementation(libs.ktor.server.status.page)
-
     api(libs.logback.classic)
 }
 

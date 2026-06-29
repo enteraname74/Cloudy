@@ -54,4 +54,10 @@ object FrRoutingMessages: RoutingMessages {
 
     override val WRONG_ID: String = "L'identifiant fournis est incorrect."
     override val WRONG_BODY_DATA: String = "Les données fournis sont incorrectes."
+
+    override fun internalServerError(error: String): String =
+        """
+            Une erreur interne est survenue.
+            Cause : $error
+        """.trimIndent()
 }

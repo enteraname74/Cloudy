@@ -7,10 +7,12 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
+import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
 import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.User
 import com.github.enteraname74.cloudy.domain.service.UserService
 import io.ktor.http.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -18,7 +20,7 @@ import org.koin.ktor.ext.inject
 fun Route.refreshTokens() {
     val userService by inject<UserService>()
 
-    get("/refreshTokens") {
+    get<AuthResource.RefreshTokens> {
 
         if (!isTokenARefreshOne()) {
             val routingMessages: RoutingMessages = getRoutingMessages()
