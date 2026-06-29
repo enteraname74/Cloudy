@@ -1,5 +1,5 @@
-# Use Amazon Corretto 17 with Alpine as the base image
-FROM amazoncorretto:17-alpine-jdk
+# Use Amazon Corretto 21 with Alpine as the base image
+FROM amazoncorretto:21-alpine-jdk
 
 # Install necessary packages (ffmpeg and chromaprint)
 RUN apk update && \
