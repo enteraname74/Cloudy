@@ -94,7 +94,7 @@ class PlayerService(
             }
             // We will need to register the user as connected again
             PlayerUser.Status.Disconnected -> {
-                playerRepository.setUserStatus(
+                setUserStatus(
                     userId = userId,
                     listId = playedList.id,
                     deviceId = deviceId,
@@ -132,6 +132,34 @@ class PlayerService(
         deviceId: String,
         status: PlayerUser.Status,
     ) {
+        val playedList = playerRepository.getPlayedList(listId = listId) ?: return
+        val oldestUser = playedList.users.minByOrNull { it.joinedAt } ?: return
+        val isCurrentOwner = playerRepository.isOwnerOfPlayedList(
+            userId = userId,
+            listId = listId,
+            deviceId = deviceId,
+        )
+        val isCurrentOwnerChangingStatus = isCurrentOwner && status != oldestUser.status
+        val isOriginalOwner = oldestUser.id == userId && deviceId == oldestUser.deviceId
+        val isOriginalOwnerChangingStatus = isOriginalOwner && status != oldestUser.status
+
+        /*
+        If he user is the oldest one (initial admin) or the admin, we have the following possibilities:
+        - he is disconnecting: if he is the admin, we must pause the played list,
+          as we do not want the playback to continue directly on someone else phone when switching admin.
+        - he is connecting back: he will regain his admin status.
+          Like for the previous statement, we want to pause the list to avoid having the playback suddenly starting on
+          his phone.
+         */
+        if (isCurrentOwnerChangingStatus || isOriginalOwnerChangingStatus) {
+            playerRepository.update(
+                playedListUpdate = PlayedListUpdate(
+                    listId = listId,
+                    state = PlayedList.State.Paused,
+                )
+            )
+        }
+
         playerRepository.setUserStatus(
             userId = userId,
             listId = listId,
@@ -230,26 +258,7 @@ class PlayerService(
         Else, if the user is removed from the host, we will delete him.
          */
         if (userQuitting) {
-            /*
-            We must check if the user was the admin.
-            If so, we must pause the played list,
-            ad we do not want the playback to continue directly on someone else phone.
-             */
-            val userQuittingIsOwner = playerRepository.isOwnerOfPlayedList(
-                userId = userIdToRemove,
-                listId = listId,
-                deviceId = deviceIdToRemove,
-            )
-            if (userQuittingIsOwner) {
-                playerRepository.update(
-                    playedListUpdate = PlayedListUpdate(
-                        listId = listId,
-                        state = PlayedList.State.Paused,
-                    )
-                )
-            }
-
-            playerRepository.setUserStatus(
+            setUserStatus(
                 userId = userIdToRemove,
                 listId = listId,
                 deviceId = deviceIdToRemove,
