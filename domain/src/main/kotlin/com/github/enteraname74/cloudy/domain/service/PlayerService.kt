@@ -85,12 +85,14 @@ class PlayerService(
             listId = playedList.id,
             deviceId = deviceId,
         )
-        // Nothing to do, user is already in the played list and connected
 
         when (user?.status) {
-            // Nothing to do, user is already in the played list and connected
+            /*
+            Nothing to do, user is already in the played list and connected,
+            we will send an error to avoid socket reconnection though.
+             */
             PlayerUser.Status.Connected -> {
-                return CloudyResult.Success(playedList)
+                return CloudyResult.Error(routingMessages.USER_ALREADY_IN_PLAYED_LIST)
             }
             // We will need to register the user as connected again
             PlayerUser.Status.Disconnected -> {

@@ -47,7 +47,7 @@ fun Route.playerSocket() {
             return@webSocket
         }
 
-        /**
+        /*
          * When a user quit the app and relaunch it,
          * we may only connect back to the socket without explicitly joining. So we may be disconnected even if we are back.
          *

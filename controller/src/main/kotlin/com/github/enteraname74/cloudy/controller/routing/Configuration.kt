@@ -1,7 +1,5 @@
 package com.github.enteraname74.cloudy.controller.routing
 
-import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
-import com.github.enteraname74.cloudy.config.plugin.isAdmin
 import com.github.enteraname74.cloudy.controller.routing.album.albumRouting
 import com.github.enteraname74.cloudy.controller.routing.artist.artistRouting
 import com.github.enteraname74.cloudy.controller.routing.auth.authRouting
@@ -9,10 +7,9 @@ import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
 import com.github.enteraname74.cloudy.controller.routing.player.playerRouting
 import com.github.enteraname74.cloudy.controller.routing.playlist.playlistRouting
 import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
-import io.ktor.server.application.Application
-import io.ktor.server.response.respondText
-import io.ktor.server.routing.get
-import io.ktor.server.routing.routing
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 fun Application.configureRouting() {
     routing {
@@ -25,15 +22,6 @@ fun Application.configureRouting() {
         playerRouting()
         get("/hello") {
             call.respondText("Hello Ktor My Beloved!")
-        }
-        authenticatedRoutes("/admin") {
-            get("/admin") {
-                if (isAdmin()) {
-                    call.respondText("Hello admin!")
-                } else {
-                    call.respondText("Not an admin!")
-                }
-            }
         }
     }
 }
