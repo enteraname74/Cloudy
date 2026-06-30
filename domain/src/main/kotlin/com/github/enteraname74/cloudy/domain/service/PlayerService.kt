@@ -230,6 +230,25 @@ class PlayerService(
         Else, if the user is removed from the host, we will delete him.
          */
         if (userQuitting) {
+            /*
+            We must check if the user was the admin.
+            If so, we must pause the played list,
+            ad we do not want the playback to continue directly on someone else phone.
+             */
+            val userQuittingIsOwner = playerRepository.isOwnerOfPlayedList(
+                userId = userIdToRemove,
+                listId = listId,
+                deviceId = deviceIdToRemove,
+            )
+            if (userQuittingIsOwner) {
+                playerRepository.update(
+                    playedListUpdate = PlayedListUpdate(
+                        listId = listId,
+                        state = PlayedList.State.Paused,
+                    )
+                )
+            }
+
             playerRepository.setUserStatus(
                 userId = userIdToRemove,
                 listId = listId,
@@ -341,7 +360,8 @@ class PlayerService(
         playerRepository.removeMusics(
             musicIds = musicRepository.getExistingIds(musicIds),
             listIds = listOf(listId),
-            socketDeviceIdToIgnore = deviceId
+            // Broadcast will be sent to all users (for playlist deletion or update event)
+            socketDeviceIdToIgnore = null,
         )
         return CloudyResult.Success(Unit)
     }
