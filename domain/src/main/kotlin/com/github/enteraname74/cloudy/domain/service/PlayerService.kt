@@ -92,7 +92,7 @@ class PlayerService(
             we will send an error to avoid socket reconnection though.
              */
             PlayerUser.Status.Connected -> {
-                return CloudyResult.Error(routingMessages.USER_ALREADY_IN_PLAYED_LIST)
+                return CloudyResult.Success(playedList)
             }
             // We will need to register the user as connected again
             PlayerUser.Status.Disconnected -> {
