@@ -252,8 +252,6 @@ class PlayerService(
         }
         playerUserCommunication.broadcastEvent(
             listId = listId,
-            // Broadcast to all if deleted played list event
-            exceptDeviceId = deviceId.takeIf { !playedListDeleted },
             event = if (playedListDeleted) {
                 PlayerUserCommunication.Event.PlayedListDeleted
             } else {

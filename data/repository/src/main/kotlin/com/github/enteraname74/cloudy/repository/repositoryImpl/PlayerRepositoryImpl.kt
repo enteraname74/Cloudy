@@ -254,7 +254,6 @@ class PlayerRepositoryImpl(
         musicIds: List<String>,
         socketDeviceIdToIgnore: String?,
     ) {
-
         for (listId in listIds) {
             val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: continue
             val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)

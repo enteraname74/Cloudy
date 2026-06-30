@@ -93,7 +93,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListMusicEntity.find {
                 (PlayedListMusicTable.listId eq listId)
-            }.filter { it.music.userId == userId }
+            }.filter { it.music.userId.value == userId }
                 .map { it.music.id.value }
         }
 
