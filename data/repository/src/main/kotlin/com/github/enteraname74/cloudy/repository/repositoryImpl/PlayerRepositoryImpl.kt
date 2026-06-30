@@ -80,6 +80,10 @@ class PlayerRepositoryImpl(
     override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
         playerDataSource.deleteIfEmpty(listId)
 
+    override suspend fun deleteAllIfEmpty() {
+        playerDataSource.deleteAllIfEmpty()
+    }
+
     override suspend fun delete(listId: Uuid) {
         playerDataSource.delete(listId)
     }

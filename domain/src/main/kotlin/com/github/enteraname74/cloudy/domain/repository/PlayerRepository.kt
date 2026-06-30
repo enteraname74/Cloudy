@@ -52,7 +52,12 @@ interface PlayerRepository {
      * - no songs
      * - no users
      */
-    suspend fun deleteIfEmpty(listId: Uuid) : Boolean
+    suspend fun deleteIfEmpty(listId: Uuid): Boolean
+
+    /**
+     * Same logic as deleteIfEmpty but for all played lists
+     */
+    suspend fun deleteAllIfEmpty()
 
     suspend fun delete(listId: Uuid)
 

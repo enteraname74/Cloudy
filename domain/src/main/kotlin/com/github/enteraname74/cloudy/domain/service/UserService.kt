@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
 import com.github.enteraname74.cloudy.domain.model.user.UserType
+import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
@@ -16,7 +17,8 @@ import kotlin.uuid.Uuid
 class UserService(
     private val userRepository: UserRepository,
     private val userInscriptionCodeRepository: UserInscriptionCodeRepository,
-    private val hashedPasswordManager: HashedPasswordManager
+    private val hashedPasswordManager: HashedPasswordManager,
+    private val playerRepository: PlayerRepository,
 ) {
     suspend fun isUsernameUsed(username: String): Boolean =
         userRepository.getFromUsername(username = username) != null
@@ -67,9 +69,10 @@ class UserService(
         return userRepository.getAll()
     }
 
-    // TODO PLAYER: check and delete empty played list
     suspend fun deleteUser(userId: Uuid) {
         userRepository.delete(id = userId)
+        // TODO: broadcast deleted played lists or updated played lists because of user deletion
+        playerRepository.deleteAllIfEmpty()
     }
 
     suspend fun isUserDirectoryFull(
