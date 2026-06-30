@@ -38,6 +38,10 @@ interface PlayerDataSource {
         userId: Uuid
     )
 
+    suspend fun getAllWhereUserIsIn(
+        userId: Uuid,
+    ): List<PlayedList>
+
     suspend fun getMusicIdsOfUser(
         userId: Uuid,
         listId: Uuid,

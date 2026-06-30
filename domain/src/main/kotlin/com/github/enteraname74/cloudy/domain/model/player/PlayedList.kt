@@ -10,6 +10,7 @@ data class PlayedList(
     val state: State,
     val owner: PlayerUser?,
     val users: List<PlayerUser>,
+    val createdAt: Long,
 ) {
     fun isEmpty(): Boolean =
         users.isEmpty()

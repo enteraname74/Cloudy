@@ -23,7 +23,6 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             val entity = PlayedListEntity.findById(playedListUpdate.listId)!!
             entity.state = playedListUpdate.state.value
-            entity.lastUpdateAt = DateUtils.now()
 
             entity.toPlayedList()
         }
@@ -86,6 +85,17 @@ class PlayerDataSourceImpl : PlayerDataSource {
         }
     }
 
+    override suspend fun getAllWhereUserIsIn(userId: Uuid): List<PlayedList> =
+        workTransaction {
+            val listIds: List<Uuid> = PlayedListUserEntity
+                .find { PlayedListUserTable.userId eq userId }
+                .map { it.listId.value }
+
+            PlayedListEntity.find {
+                PlayedListTable.id inList listIds
+            }.map { it.toPlayedList() }
+        }
+
     override suspend fun getMusicIdsOfUser(
         userId: Uuid,
         listId: Uuid
@@ -132,7 +142,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
             }
                 .orderBy(
                     PlayedListUserTable.status to SortOrder.ASC,
-                            PlayedListUserTable.joinedAt to SortOrder.ASC
+                    PlayedListUserTable.joinedAt to SortOrder.ASC
                 )
                 .limit(1)
                 .firstOrNull()

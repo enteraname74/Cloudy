@@ -230,7 +230,6 @@ class PlayerService(
         playerRepository.delete(listId)
         playerUserCommunication.broadcastEvent(
             listId = listId,
-            exceptDeviceId = deviceId,
             event = PlayerUserCommunication.Event.PlayedListDeleted,
         )
 
@@ -422,7 +421,17 @@ class PlayerService(
             musicId = musicId,
             userId = userId,
         )
+        playerUserCommunication.broadcastEvent(
+            listId = listId,
+            event = PlayerUserCommunication.Event.SyncMusics,
+            exceptDeviceId = deviceId,
+        )
 
         return CloudyResult.Success(Unit)
     }
+
+    suspend fun getAllWhereUserIsIn(
+        userId: Uuid,
+    ): List<PlayedList> =
+        playerRepository.getAllWhereUserIsIn(userId)
 }

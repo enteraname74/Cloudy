@@ -73,6 +73,10 @@ class PlayerRepositoryImpl(
         )
     }
 
+
+    override suspend fun getAllWhereUserIsIn(userId: Uuid): List<PlayedList> =
+        playerDataSource.getAllWhereUserIsIn(userId = userId)
+
     override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
         playerDataSource.deleteIfEmpty(listId)
 

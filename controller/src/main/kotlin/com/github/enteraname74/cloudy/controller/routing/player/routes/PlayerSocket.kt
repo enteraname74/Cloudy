@@ -53,11 +53,11 @@ fun Route.playerSocket() {
          *
          * We will ensure that the user is connected at this stage
          */
-        playerService.setUserStatus(
+        playerService.join(
             userId = userId,
-            listId = listId,
+            code = (playedListResult as CloudyResult.Success).data.inviteCode,
             deviceId = deviceId,
-            status = PlayerUser.Status.Connected,
+            routingMessages = routingMessages,
         )
         playerUserCommunication.add(
             connection = PlayerSocketUser(

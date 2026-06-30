@@ -11,14 +11,14 @@ import kotlin.uuid.Uuid
 internal object PlayedListTable : UuidTable() {
     val inviteCode = text("inviteCode")
     val state = text("state")
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val createdAt = long("createdAt").default(DateUtils.now())
 }
 
 internal class PlayedListEntity(id: EntityID<Uuid>) : UuidEntity(id) {
     companion object : UuidEntityClass<PlayedListEntity>(PlayedListTable)
 
     var inviteCode by PlayedListTable.inviteCode
-    var lastUpdateAt by PlayedListTable.lastUpdateAt
+    var createdAt by PlayedListTable.createdAt
     var state by PlayedListTable.state
     val users by PlayedListUserEntity referrersOn PlayedListUserTable.listId
 
@@ -33,6 +33,7 @@ internal class PlayedListEntity(id: EntityID<Uuid>) : UuidEntity(id) {
             state = PlayedList.State.fromValueOrPaused(state),
             owner = simpleUsers.firstOrNull(),
             users = simpleUsers,
+            createdAt = createdAt,
         )
     }
 }

@@ -30,7 +30,7 @@ class MusicRepositoryImpl(
         data: FileSavingData,
         shouldSearchForMetadata: Boolean,
         musicUpload: MusicUpload?,
-    ): UploadProcessState {
+    ): UploadProcessState = runCatching {
         // We save the file
         val temporarySavedFileId: Uuid? = musicFileManager.save(
             data = data,
@@ -83,7 +83,7 @@ class MusicRepositoryImpl(
             fingerprint = fingerprint,
             musicUpload = finalMusicUpload,
         )
-    }
+    }.getOrElse { UploadProcessState.Error }
 
     override suspend fun saveMusicFileToDbAfterUploadProcess(music: Music): Music =
         musicDataSource.upsert(

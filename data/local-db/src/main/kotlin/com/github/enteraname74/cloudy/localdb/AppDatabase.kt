@@ -15,24 +15,26 @@ import com.github.enteraname74.cloudy.logging.CloudyLogger
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
 
 object AppDatabase {
     private val logger = CloudyLogger(this::class)
     private fun initTables() {
         transaction {
             logger.info("Will create missing tables and columns")
+            val migrationStatements = MigrationUtils.statementsRequiredForDatabaseMigration(
+                *TABLES.toTypedArray()
+            )
+            if (migrationStatements.isNotEmpty()) {
+                logger.info("Database migration required")
+                migrationStatements.forEach {
+                    exec(it)
+                }
+                logger.info("Database migration done")
+            }
+
             SchemaUtils.create(
-                MusicTable,
-                ArtistTable,
-                AlbumTable,
-                UserTable,
-                PlaylistTable,
-                MusicArtistTable,
-                MusicPlaylistTable,
-                PlayedListTable,
-                PlayedListUserTable,
-                PlayedListMusicTable,
-                UserInscriptionCodeTable,
+                *TABLES.toTypedArray()
             )
         }
     }
@@ -51,5 +53,19 @@ object AppDatabase {
         )
         initTables()
     }
+
+    private val TABLES = listOf(
+        MusicTable,
+        ArtistTable,
+        AlbumTable,
+        UserTable,
+        PlaylistTable,
+        MusicArtistTable,
+        MusicPlaylistTable,
+        PlayedListTable,
+        PlayedListUserTable,
+        PlayedListMusicTable,
+        UserInscriptionCodeTable,
+    )
 }
 

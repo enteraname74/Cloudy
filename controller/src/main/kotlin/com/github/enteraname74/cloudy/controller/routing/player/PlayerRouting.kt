@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.routes.addMusics
 import com.github.enteraname74.cloudy.controller.routing.player.routes.checkPlayerMusicIds
 import com.github.enteraname74.cloudy.controller.routing.player.routes.createPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.deletePlayedList
+import com.github.enteraname74.cloudy.controller.routing.player.routes.getAllOfUser
 import com.github.enteraname74.cloudy.controller.routing.player.routes.getPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.getPlayedListMusics
 import com.github.enteraname74.cloudy.controller.routing.player.routes.joinPlayedList
@@ -14,6 +15,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.routes.removeMus
 import com.github.enteraname74.cloudy.controller.routing.player.routes.removeUserFromPlayedList
 import com.github.enteraname74.cloudy.controller.routing.player.routes.updateCurrentMusic
 import com.github.enteraname74.cloudy.controller.routing.player.routes.updatePlayedList
+import com.github.enteraname74.cloudy.controller.routing.user.routes.allCodesOfUser
 import io.ktor.server.routing.Routing
 
 fun Routing.playerRouting() {
@@ -30,6 +32,7 @@ fun Routing.playerRouting() {
         removeMusicsFromPlayedList()
         checkPlayerMusicIds()
         updateCurrentMusic()
+        getAllOfUser()
     }
     playerSocket()
 }

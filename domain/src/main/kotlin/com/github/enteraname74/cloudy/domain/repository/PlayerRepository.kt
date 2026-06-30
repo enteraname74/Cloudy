@@ -43,6 +43,10 @@ interface PlayerRepository {
         userId: Uuid
     )
 
+    suspend fun getAllWhereUserIsIn(
+        userId: Uuid,
+    ): List<PlayedList>
+
     /**
      * Delete the played list if one of the condition is met:
      * - no songs
