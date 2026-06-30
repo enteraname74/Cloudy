@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.ktor.server.request.validation)
     implementation(libs.ktor.server.status.page)
     implementation(libs.ktor.server.partial.content)
+    implementation(libs.ktor.server.swagger)
 
     implementation(libs.ktor.simple.cache)
     implementation(libs.ktor.server.netty)
