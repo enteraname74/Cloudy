@@ -71,7 +71,7 @@ class MusicFileMetadataManager {
                     artwork.binaryData = currentArtwork
                     tag.setField(artwork)
                 } catch (e: Exception) {
-                    logger.error("Exception while writing cover: ${e.localizedMessage}")
+                    logger.error("Exception while writing cover: $e")
                 }
             }
 
@@ -79,7 +79,7 @@ class MusicFileMetadataManager {
 
             CloudyResult.Success(Unit)
         } catch (e: Exception) {
-            logger.error("Failed to save metadata of file ${musicFile.name} with error ${e.localizedMessage}")
+            logger.error("Failed to save metadata of file ${musicFile.name} (${music.name}) with error $e")
             CloudyResult.Error()
         }
 }
