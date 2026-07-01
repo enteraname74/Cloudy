@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 5
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data:z
+      - postgres_data:/var/lib/postgresql/data:z
     networks:
       - backend
 
@@ -70,3 +70,6 @@ networks:
   proxy:
   backend:
     internal: true
+
+volumes:
+  postgres_data:
