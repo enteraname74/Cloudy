@@ -136,6 +136,6 @@ abstract class FileManager {
     }
 
     companion object {
-        const val APP_FOLDER = "app"
+        const val APP_FOLDER = "/cloudy_data"
     }
 }

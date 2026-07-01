@@ -57,7 +57,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
     volumes:
-      - ./cloudy_data:/app:z
+      - cloudy_data:/cloudy_data:z
     networks:
       - proxy
       - backend
@@ -73,3 +73,4 @@ networks:
 
 volumes:
   postgres_data:
+  cloudy_data:
