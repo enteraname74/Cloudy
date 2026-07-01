@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.dao.UuidEntityClass
 import kotlin.uuid.Uuid
 
 internal object UserTable : UuidTable() {
-    val username = text("pseudo").uniqueIndex()
+    val username = text("username").uniqueIndex()
     val hashedPassword = text("hashedPassword")
     val type = enumeration<UserType>("type")
 }

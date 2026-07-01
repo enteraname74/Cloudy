@@ -32,10 +32,6 @@ object AppDatabase {
                 }
                 logger.info("Database migration done")
             }
-
-            SchemaUtils.create(
-                *TABLES.toTypedArray()
-            )
         }
     }
 

@@ -2,23 +2,27 @@ services:
   traefik:
     image: traefik:v3.7
     container_name: cloudy_traefik
+    restart: unless-stopped
     command:
-      - "--api.dashboard=true"
-      - "--api.insecure=true"
+      - "--api.dashboard=false"
       - "--providers.file.filename=/etc/traefik/dynamic.yml"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
       - "443:443"
-      - "8081:8080"
     volumes:
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro,z
       - ./traefik/certs:/certs:ro,z
+    networks:
+      - proxy
+    security_opt:
+      - no-new-privileges:true
 
   postgres:
     image: postgres:17
     container_name: cloudy_postgres_db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -28,10 +32,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    ports:
-      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./postgres_data:/var/lib/postgresql/data:z
+    networks:
+      - backend
 
   ktor:
     build:
@@ -53,7 +57,16 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
     volumes:
-      - ./app_docker_data:/app:z
+      - ./cloudy_data:/app:z
+    networks:
+      - proxy
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
 
-volumes:
-  postgres_data:
+networks:
+  proxy:
+  backend:
+    internal: true

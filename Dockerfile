@@ -16,7 +16,12 @@ RUN curl -L \
  && chmod +x /usr/local/bin/yt-dlp \
  && yt-dlp --version
 
+
 # Copy the fat jar from the build output into the container
+RUN addgroup -S cloudy && adduser -S cloudy -G cloudy
+
 ARG JAR_FILE=./controller/build/libs/*.jar
-COPY ${JAR_FILE} application.jar
+COPY --chown=cloudy:cloudy ${JAR_FILE} application.jar
+
+USER cloudy
 ENTRYPOINT ["java", "-jar", "application.jar"]
