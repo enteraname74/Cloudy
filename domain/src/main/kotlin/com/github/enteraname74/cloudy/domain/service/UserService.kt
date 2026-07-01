@@ -11,7 +11,6 @@ import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepos
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import io.ktor.http.HttpMessage
 import kotlin.uuid.Uuid
 
 class UserService(
@@ -48,6 +47,31 @@ class UserService(
         val savedUser: User = userRepository.upsert(user = user)
 
         return CloudyResult.Success(data = savedUser)
+    }
+
+    suspend fun createUserWithInscriptionCode(
+        username: String,
+        password: String,
+        type: UserType,
+        inscriptionCode: Uuid,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<User> {
+        val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
+            password = password,
+        ) ?: return CloudyResult.Error(routingMessages.CANNOT_CREATE_USER)
+
+        val user = User(
+            username = username,
+            hashedPassword = hashedPassword,
+            id = Uuid.random(),
+            type = type,
+        )
+
+        return userRepository.createWithInscriptionCode(
+            user = user,
+            inscriptionCode = inscriptionCode,
+            routingMessages = routingMessages,
+        )
     }
 
     suspend fun logUser(username: String, password: String): CloudyResult<User> {
@@ -110,9 +134,6 @@ class UserService(
         )
     }
 
-    suspend fun getCode(code: Uuid): UserInscriptionCode? =
-        userInscriptionCodeRepository.getFromCode(code)
-
     suspend fun getAllCodesOfUser(
         userId: Uuid,
     ): List<UserInscriptionCode> =
@@ -129,10 +150,6 @@ class UserService(
         userInscriptionCodeRepository.delete(code = code.code)
 
         return CloudyResult.Success(Unit)
-    }
-
-    suspend fun deleteUsedCode(code: Uuid,) {
-        userInscriptionCodeRepository.delete(code)
     }
 
     companion object {

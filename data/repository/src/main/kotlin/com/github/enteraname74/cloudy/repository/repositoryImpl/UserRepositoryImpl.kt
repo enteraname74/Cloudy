@@ -1,8 +1,9 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.user.User
-import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
 import kotlin.uuid.Uuid
@@ -19,6 +20,17 @@ class UserRepositoryImpl(
 
     override suspend fun upsert(user: User): User =
         userDataSource.upsert(user = user)
+
+    override suspend fun createWithInscriptionCode(
+        user: User,
+        inscriptionCode: Uuid,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<User> =
+        userDataSource.createWithInscriptionCode(
+            user = user,
+            inscriptionCode = inscriptionCode,
+            routingMessages = routingMessages,
+        )
 
     override suspend fun delete(id: Uuid) {
         userDataSource.delete(id = id)

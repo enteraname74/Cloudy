@@ -26,31 +26,22 @@ fun Route.signIn() {
 
         val routingMessages: RoutingMessages = getRoutingMessages()
 
-        if (userService.isUsernameUsed(user.username)) {
-            return@post badRequest(message = routingMessages.USERNAME_TAKEN)
-        }
-
-        if (userService.getCode(code = user.inscriptionCode) == null) {
-            return@post badRequest(message = routingMessages.INVALID_INSCRIPTION_CODE)
-        }
-
-        val cloudyResult: CloudyResult<User> = userService.createUser(
+        val cloudyResult: CloudyResult<User> = userService.createUserWithInscriptionCode(
             username = user.username,
             password = user.password,
             type = UserType.User,
+            inscriptionCode = user.inscriptionCode,
+            routingMessages = routingMessages,
         )
 
         when (cloudyResult) {
             is CloudyResult.Error -> {
-                badRequest(message = routingMessages.CANNOT_CREATE_USER)
+                badRequest(message = cloudyResult.message ?: routingMessages.CANNOT_CREATE_USER)
             }
 
             is CloudyResult.Success -> {
                 val savedUser: User = cloudyResult.data
                 val tokens = buildUserTokens(user = savedUser)
-                // We delete the inscription code used by the user to create its account
-                // TODO: Use a socket to inform owner of code that his code was used and to fetch the update codes
-                userService.deleteUsedCode(code = user.inscriptionCode)
                 call.respond(
                     UserAuth(
                         user = savedUser.toSimpleUser(),
