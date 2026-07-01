@@ -12,7 +12,7 @@ import kotlin.uuid.Uuid
 
 internal object ArtistTable: UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val name = varchar("name", 128)
+    val name = text("name")
     val coverPath = text("coverPath").nullable()
     val addedDate = long("addedDate")
     val nbPlayed = integer("nbPlayed")
