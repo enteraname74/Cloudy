@@ -31,7 +31,7 @@ internal fun Application.configureStatusPage() {
         exception<Throwable> { call, cause ->
             call.respond(
                 status = HttpStatusCode.InternalServerError,
-                // TODO: This could leak data like sql details, db paths?
+                // TODO: This could leak data like SQL details, db paths?
                 message = call.getRoutingMessages().internalServerError(
                     error = cause.message.orEmpty()
                 ),
