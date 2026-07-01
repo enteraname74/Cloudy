@@ -73,7 +73,6 @@ class PlayerRepositoryImpl(
         )
     }
 
-
     override suspend fun getAllWhereUserIsIn(userId: Uuid): List<PlayedList> =
         playerDataSource.getAllWhereUserIsIn(userId = userId)
 
@@ -171,7 +170,6 @@ class PlayerRepositoryImpl(
             deviceId = deviceId,
         ) != null
 
-
     override suspend fun addMusics(
         listId: Uuid,
         musics: List<Music>
@@ -201,7 +199,6 @@ class PlayerRepositoryImpl(
                     lastPlayedMillis = null,
                 )
             }
-
 
         // We merge the existing list and the new musics to add into a temporary list.
         val temporaryList: List<PlayerMusic> = musicsAfterCurrent + temporaryPlayerMusics

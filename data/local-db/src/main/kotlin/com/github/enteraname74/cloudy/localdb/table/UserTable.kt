@@ -11,8 +11,7 @@ import kotlin.uuid.Uuid
 
 internal object UserTable : UuidTable() {
     val username = varchar("pseudo", 128)
-    val hashedPassword = binary("hashedPassword")
-    val salt = binary("salt")
+    val hashedPassword = text("hashedPassword")
     val type = enumeration<UserType>("type")
 }
 
@@ -21,7 +20,6 @@ internal class UserEntity(id: EntityID<Uuid>) : UuidEntity(id) {
 
     val username by UserTable.username
     val hashedPassword by UserTable.hashedPassword
-    val salt by UserTable.salt
     val type by UserTable.type
 
     fun toUser(): User =
@@ -29,7 +27,6 @@ internal class UserEntity(id: EntityID<Uuid>) : UuidEntity(id) {
             id = id.value,
             username = username,
             hashedPassword = HashedPassword(
-                salt = salt,
                 hash = hashedPassword,
             ),
             type = type,

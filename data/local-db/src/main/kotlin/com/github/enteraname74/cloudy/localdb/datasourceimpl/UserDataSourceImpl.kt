@@ -29,7 +29,6 @@ class UserDataSourceImpl : UserDataSource {
                 it[id] = user.id
                 it[username] = user.username
                 it[hashedPassword] = user.hashedPassword.hash
-                it[salt] = user.hashedPassword.salt
                 it[type] = user.type
             }
 
