@@ -13,6 +13,7 @@ import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import java.io.File
@@ -83,7 +84,12 @@ class MusicRepositoryImpl(
             fingerprint = fingerprint,
             musicUpload = finalMusicUpload,
         )
-    }.getOrElse { UploadProcessState.Error }
+    }.getOrElse {
+        CloudyLogger.global(this::class).error(
+            "Error while downloading uploaded song: $it"
+        )
+        UploadProcessState.Error
+    }
 
     override suspend fun saveMusicFileToDbAfterUploadProcess(music: Music): Music =
         musicDataSource.upsert(

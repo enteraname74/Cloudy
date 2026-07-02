@@ -45,6 +45,11 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
         message: String,
         feature: String? = null
     ) = logger.error(message.format(feature = feature))
+
+    companion object {
+        fun <T : Any> global(kClass: KClass<T>): CloudyLogger<T> =
+            CloudyLogger(kClass = kClass)
+    }
 }
 
 val Route.cloudyLogger: CloudyLogger<*>

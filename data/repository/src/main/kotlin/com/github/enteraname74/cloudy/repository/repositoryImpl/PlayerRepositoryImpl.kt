@@ -195,7 +195,7 @@ class PlayerRepositoryImpl(
                 PlayerMusic(
                     playedListId = listId,
                     music = it,
-                    order = Double.MAX_VALUE,
+                    order = 0.0,
                     lastPlayedMillis = null,
                 )
             }

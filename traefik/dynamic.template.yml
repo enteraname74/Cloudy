@@ -6,11 +6,17 @@ tls:
 http:
   routers:
     api:
-      rule: "Host(`cloudy.localhost`) || Host(`192.168.1.123`)"
+      rule: "Host(`cloudy.localhost`)"
       entryPoints:
         - websecure
       service: api-service
       tls: {}
+
+    api-http:
+      rule: "Host(`cloudy.localhost`)"
+      entryPoints:
+        - web
+      service: api-service
 
   services:
     api-service:

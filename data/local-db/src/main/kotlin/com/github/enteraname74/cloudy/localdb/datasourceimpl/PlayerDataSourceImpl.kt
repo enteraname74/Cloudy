@@ -306,7 +306,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             val current = PlayedListMusicTable
                 .selectAll()
-                .where { PlayedListMusicTable.listId eq listId }
+                .where { (PlayedListMusicTable.listId eq listId) and PlayedListMusicTable.lastPlayedMillis.isNotNull() }
                 .orderBy(PlayedListMusicTable.lastPlayedMillis to SortOrder.DESC)
                 .limit(1)
                 .firstOrNull()
@@ -324,8 +324,11 @@ class PlayerDataSourceImpl : PlayerDataSource {
     override suspend fun getCurrentMusic(listId: Uuid): PlayerMusic? =
         workTransaction {
             PlayedListMusicEntity
-                .find { (PlayedListMusicTable.listId eq listId) }
-                .orderBy(Pair(PlayedListMusicTable.lastPlayedMillis, SortOrder.DESC_NULLS_LAST))
+                .find {
+                    (PlayedListMusicTable.listId eq listId) and
+                            PlayedListMusicTable.lastPlayedMillis.isNotNull()
+                }
+                .orderBy(PlayedListMusicTable.lastPlayedMillis to SortOrder.DESC)
                 .limit(1)
                 .firstOrNull()
                 ?.toPlayerMusic(buildScope = { Music.Scope.User })
@@ -376,10 +379,14 @@ class PlayerDataSourceImpl : PlayerDataSource {
         idsToSkip: List<String>
     ): PlayerMusic? = workTransaction {
         val current: PlayerMusic = getCurrentMusic(listId) ?: return@workTransaction null
+        val skipCondition =
+            if (idsToSkip.isEmpty()) Op.TRUE
+            else PlayedListMusicTable.musicId notInList idsToSkip
+
         val next: PlayerMusic? = PlayedListMusicEntity
             .find {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.order greater current.order)
+                        (PlayedListMusicTable.order greater current.order) and skipCondition
             }
             .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
             .limit(1)
