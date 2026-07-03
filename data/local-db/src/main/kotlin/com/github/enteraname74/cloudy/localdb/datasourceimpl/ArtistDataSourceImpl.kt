@@ -47,7 +47,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
     override suspend fun getFromCoverPath(coverPath: String): Artist? =
         workTransaction {
             ArtistEntity
-                .find{ ArtistTable.coverPath eq coverPath }
+                .find { ArtistTable.coverPath eq coverPath }
                 .firstOrNull()
                 ?.toArtist()
         }
@@ -55,7 +55,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
     override suspend fun isArtistPossessedByUser(userId: Uuid, artistId: Uuid): Boolean =
         workTransaction {
             ArtistEntity
-                .find{ (ArtistTable.id eq artistId) and (ArtistTable.userId eq userId) }
+                .find { (ArtistTable.id eq artistId) and (ArtistTable.userId eq userId) }
                 .count() > 0
         }
 
@@ -73,7 +73,7 @@ class ArtistDataSourceImpl : ArtistDataSource {
             ArtistEntity
                 .find {
                     (ArtistTable.userId eq userId) and
-                            (ArtistTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
+                        (ArtistTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
                 .map { it.toArtist() }

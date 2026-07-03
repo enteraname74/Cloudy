@@ -1,15 +1,37 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.model.player.*
+import com.github.enteraname74.cloudy.domain.model.player.PlayedList
+import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
+import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
+import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
+import com.github.enteraname74.cloudy.domain.model.player.SimplePlayerMusic
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.localdb.table.player.*
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListEntity
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicEntity
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicTable
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListTable
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListUserEntity
+import com.github.enteraname74.cloudy.localdb.table.player.PlayedListUserTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.PlayerDataSource
-import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.core.JoinType
+import org.jetbrains.exposed.v1.core.Op
+import org.jetbrains.exposed.v1.core.SortOrder
+import org.jetbrains.exposed.v1.core.alias
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.greater
+import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.inSubQuery
+import org.jetbrains.exposed.v1.core.isNotNull
+import org.jetbrains.exposed.v1.core.less
+import org.jetbrains.exposed.v1.core.notExists
+import org.jetbrains.exposed.v1.core.notInList
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
@@ -43,6 +65,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
             val entry = PlayedListEntity.new(listId) {
                 inviteCode = generateInviteCode(listId)
                 state = PlayedList.State.Paused.value
+                createdAt = DateUtils.now()
             }
             PlayedListUserTable.insert(
                 userId = hostId,
@@ -71,12 +94,12 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .select(plu[PlayedListUserTable.listId])
                 .where {
                     (plu[PlayedListUserTable.userId] eq userId) and
-                            notExists(
-                                plu2.selectAll().where {
-                                    (plu2[PlayedListUserTable.listId] eq plu[PlayedListUserTable.listId]) and
-                                            (plu2[PlayedListUserTable.joinedAt] less plu[PlayedListUserTable.joinedAt])
-                                }
-                            )
+                        notExists(
+                            plu2.selectAll().where {
+                                (plu2[PlayedListUserTable.listId] eq plu[PlayedListUserTable.listId]) and
+                                    (plu2[PlayedListUserTable.joinedAt] less plu[PlayedListUserTable.joinedAt])
+                            }
+                        )
                 }
 
             PlayedListTable.deleteWhere {
@@ -111,17 +134,17 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListTable.deleteWhere {
                 (this.id eq listId) and
-                        (
-                                notExists(
-                                    PlayedListUserTable.selectAll().where {
-                                        PlayedListUserTable.listId eq listId
-                                    }
-                                ) or notExists(
-                                    PlayedListMusicTable.selectAll().where {
-                                        PlayedListMusicTable.listId eq listId
-                                    }
-                                )
-                                )
+                    (
+                        notExists(
+                            PlayedListUserTable.selectAll().where {
+                                PlayedListUserTable.listId eq listId
+                            }
+                        ) or notExists(
+                            PlayedListMusicTable.selectAll().where {
+                                PlayedListMusicTable.listId eq listId
+                            }
+                        )
+                        )
             } > 0
         }
 
@@ -174,8 +197,8 @@ class PlayerDataSourceImpl : PlayerDataSource {
     ): PlayedListUserEntity? =
         PlayedListUserEntity.find {
             (PlayedListUserTable.listId eq listId) and
-                    (PlayedListUserTable.userId eq userId) and
-                    (PlayedListUserTable.deviceId eq deviceId)
+                (PlayedListUserTable.userId eq userId) and
+                (PlayedListUserTable.deviceId eq deviceId)
         }.firstOrNull()
 
     override suspend fun isUserInList(
@@ -191,7 +214,6 @@ class PlayerDataSourceImpl : PlayerDataSource {
             ) != null
         }
 
-
     override suspend fun getUser(
         userId: Uuid,
         listId: Uuid,
@@ -204,7 +226,6 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 deviceId = deviceId,
             )?.toPlayerUser()
         }
-
 
     override suspend fun setUserStatus(
         userId: Uuid,
@@ -240,7 +261,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
             PlayedListMusicEntity
                 .find {
                     (PlayedListMusicTable.listId eq listId) and
-                            (PlayedListMusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
+                        (PlayedListMusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC))
                 .paginated(paginatedRequest)
@@ -293,8 +314,8 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .select(PlayedListTable.columns)
                 .where {
                     (PlayedListUserTable.listId eq id) and
-                            (PlayedListUserTable.userId eq userId) and
-                            (PlayedListUserTable.deviceId eq deviceId)
+                        (PlayedListUserTable.userId eq userId) and
+                        (PlayedListUserTable.deviceId eq deviceId)
                 }
                 .limit(1)
                 .firstOrNull()
@@ -315,7 +336,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
 
             PlayedListMusicEntity.find {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.order greater currentOrder)
+                    (PlayedListMusicTable.order greater currentOrder)
             }
                 .orderBy(PlayedListMusicTable.order to SortOrder.ASC)
                 .map { it.toPlayerMusic(buildScope = { Music.Scope.User }) }
@@ -326,7 +347,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
             PlayedListMusicEntity
                 .find {
                     (PlayedListMusicTable.listId eq listId) and
-                            PlayedListMusicTable.lastPlayedMillis.isNotNull()
+                        PlayedListMusicTable.lastPlayedMillis.isNotNull()
                 }
                 .orderBy(PlayedListMusicTable.lastPlayedMillis to SortOrder.DESC)
                 .limit(1)
@@ -342,7 +363,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .select(PlayedListMusicTable.musicId)
             .where {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.musicId inList musicIds)
+                    (PlayedListMusicTable.musicId inList musicIds)
             }.mapNotNull { it.getOrNull(PlayedListMusicTable.musicId)?.value }
     }
 
@@ -386,7 +407,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
         val next: PlayerMusic? = PlayedListMusicEntity
             .find {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.order greater current.order) and skipCondition
+                    (PlayedListMusicTable.order greater current.order) and skipCondition
             }
             .orderBy(Pair(PlayedListMusicTable.order, SortOrder.ASC_NULLS_LAST))
             .limit(1)
@@ -402,7 +423,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListMusicTable.deleteWhere {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.musicId inList musicIds)
+                    (PlayedListMusicTable.musicId inList musicIds)
             }
         }
     }
@@ -419,8 +440,8 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .selectAll()
             .where {
                 (PlayedListMusicTable.listId eq listId) and
-                        (PlayedListMusicTable.order greater currentOrder) and
-                        (PlayedListMusicTable.musicId inList musicIds)
+                    (PlayedListMusicTable.order greater currentOrder) and
+                    (PlayedListMusicTable.musicId inList musicIds)
             }
             .limit(1)
             .firstOrNull() != null
@@ -438,7 +459,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .selectAll()
                 .where {
                     (PlayedListUserTable.userId eq userId) and
-                            (PlayedListMusicTable.musicId eq musicId)
+                        (PlayedListMusicTable.musicId eq musicId)
                 }
                 .limit(1)
                 .firstOrNull() != null
@@ -452,8 +473,8 @@ class PlayerDataSourceImpl : PlayerDataSource {
         workTransaction {
             PlayedListMusicEntity.find {
                 (PlayedListMusicTable.musicId eq musicId) and (
-                        (PlayedListMusicTable.listId eq listId)
-                        )
+                    (PlayedListMusicTable.listId eq listId)
+                    )
             }
                 .firstOrNull()
                 ?.toPlayerMusic(

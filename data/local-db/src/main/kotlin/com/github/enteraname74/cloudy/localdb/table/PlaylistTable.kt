@@ -1,23 +1,36 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
-import com.github.enteraname74.cloudy.domain.util.DateUtils
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.UuidTable
 import org.jetbrains.exposed.v1.dao.UuidEntity
 import org.jetbrains.exposed.v1.dao.UuidEntityClass
+import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import kotlin.uuid.Uuid
 
-internal object PlaylistTable: UuidTable() {
+internal object PlaylistTable : UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val name = text("name")
+    val name = text("name").uniqueIndex()
     val isFavorite = bool("isFavorite")
     val nbPlayed = integer("nbPlayed")
     val coverPath = text("coverPath").nullable()
     val addedDate = long("addedDate")
     val isInQuickAccess = bool("isInQuickAccess")
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
+
+    fun upsertAll(playlists: List<Playlist>) {
+        batchUpsert(playlists) {
+            this[id] = it.id
+            this[userId] = it.userId
+            this[name] = it.name
+            this[nbPlayed] = it.nbPlayed
+            this[coverPath] = it.coverPath
+            this[addedDate] = it.addedDateMillis
+            this[isInQuickAccess] = it.isInQuickAccess
+            this[lastUpdateAt] = it.lastUpdateAtMillis
+        }
+    }
 }
 
 internal class PlaylistEntity(id: EntityID<Uuid>) : UuidEntity(id) {

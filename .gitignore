@@ -44,3 +44,5 @@ postgres_docker_data
 
 traefik/certs
 traefik/dynamic.yml
+
+local.properties

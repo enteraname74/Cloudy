@@ -48,9 +48,9 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 .selectAll()
                 .where {
                     (AlbumTable.name eq albumName) and
-                            (ArtistTable.name eq albumArtist) and
-                            (ArtistTable.userId eq userId) and
-                            (AlbumTable.userId eq userId)
+                        (ArtistTable.name eq albumArtist) and
+                        (ArtistTable.userId eq userId) and
+                        (AlbumTable.userId eq userId)
                 }.withDistinct()
 
             AlbumEntity
@@ -90,7 +90,7 @@ class AlbumDataSourceImpl : AlbumDataSource {
             AlbumEntity
                 .find {
                     (AlbumTable.userId eq userId) and
-                            (AlbumTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
+                        (AlbumTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
                 .map { it.toAlbum() }

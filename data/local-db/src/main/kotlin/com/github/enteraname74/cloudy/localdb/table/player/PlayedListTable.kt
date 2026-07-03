@@ -11,7 +11,7 @@ import kotlin.uuid.Uuid
 internal object PlayedListTable : UuidTable() {
     val inviteCode = text("inviteCode")
     val state = text("state")
-    val createdAt = long("createdAt").default(DateUtils.now())
+    val createdAt = long("createdAt")
 }
 
 internal class PlayedListEntity(id: EntityID<Uuid>) : UuidEntity(id) {

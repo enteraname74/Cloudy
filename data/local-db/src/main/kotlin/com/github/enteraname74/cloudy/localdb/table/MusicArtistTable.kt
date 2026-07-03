@@ -19,7 +19,7 @@ internal object MusicArtistTable: IdTable<String>() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val musicId = reference("musicId", MusicTable.id, onDelete = ReferenceOption.CASCADE)
     val artistId = reference("artistId", ArtistTable.id, onDelete = ReferenceOption.CASCADE)
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
 
     fun upsertAll(musicArtists: List<MusicArtist>) {
         batchUpsert(musicArtists) { musicArtist ->

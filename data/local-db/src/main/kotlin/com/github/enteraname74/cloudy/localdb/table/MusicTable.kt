@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.dao.EntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import kotlin.uuid.Uuid
 
-internal object MusicTable: IdTable<String>() {
+internal object MusicTable : IdTable<String>() {
     override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
@@ -21,7 +21,7 @@ internal object MusicTable: IdTable<String>() {
     val path = text("path")
     val duration = long("duration")
     val addedDate = long("addedDate")
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
     val albumId = reference("albumId", AlbumTable.id, ReferenceOption.CASCADE)

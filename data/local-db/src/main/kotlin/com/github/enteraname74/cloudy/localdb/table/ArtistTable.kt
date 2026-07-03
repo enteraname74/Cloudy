@@ -17,7 +17,7 @@ internal object ArtistTable: UuidTable() {
     val addedDate = long("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
-    val lastUpdateAt = long("lastUpdatedAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdatedAt")
 
     fun upsertAll(artists: List<Artist>) {
         batchUpsert(artists) { artist ->

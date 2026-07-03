@@ -82,7 +82,7 @@ class MusicDataSourceImpl : MusicDataSource {
             MusicEntity
                 .find {
                     (MusicTable.userId eq userId) and
-                            (MusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
+                        (MusicTable.lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
                 .map { it.toMusic(buildScope = { Music.Scope.User }) }
@@ -97,7 +97,7 @@ class MusicDataSourceImpl : MusicDataSource {
                 .select(MusicTable.id)
                 .where {
                     (MusicTable.userId eq userId) and
-                            (MusicTable.id inList ids)
+                        (MusicTable.id inList ids)
                 }
                 .map { it[MusicTable.id].toString() }
         }

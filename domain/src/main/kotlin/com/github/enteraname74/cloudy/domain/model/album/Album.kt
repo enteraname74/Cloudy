@@ -22,7 +22,7 @@ data class Album(
     fun merge(
         albumUpload: AlbumUpload,
         artist: Artist,
-    ) : Album =
+    ): Album =
         copy(
             name = albumUpload.name,
             isInQuickAccess = albumUpload.isInQuickAccess,

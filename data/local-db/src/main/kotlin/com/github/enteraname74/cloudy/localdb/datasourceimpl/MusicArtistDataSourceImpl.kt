@@ -13,19 +13,14 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
-import org.jetbrains.exposed.v1.jdbc.upsert
 import kotlin.uuid.Uuid
 
 class MusicArtistDataSourceImpl : MusicArtistDataSource {
     override suspend fun upsert(musicArtist: MusicArtist) {
         workTransaction {
-            MusicArtistTable.upsert {
-                it[id] = musicArtist.id
-                it[musicId] = musicArtist.musicId
-                it[artistId] = musicArtist.artistId
-                it[userId] = musicArtist.userId
-                it[lastUpdateAt] = musicArtist.lastUpdateAtMillis
-            }
+            MusicArtistTable.upsertAll(
+                musicArtists = listOf(musicArtist),
+            )
         }
     }
 
@@ -72,7 +67,7 @@ class MusicArtistDataSourceImpl : MusicArtistDataSource {
             MusicArtistEntity
                 .find {
                     (MusicArtistTable.userId eq userId) and
-                            (lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
+                        (lastUpdateAt updatedAfter paginatedRequest.lastUpdateAtMillis)
                 }
                 .paginated(paginatedRequest)
                 .map { it.toMusicArtist() }
