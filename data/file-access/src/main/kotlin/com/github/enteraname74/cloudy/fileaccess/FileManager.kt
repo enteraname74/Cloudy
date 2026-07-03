@@ -81,7 +81,7 @@ abstract class FileManager {
 
     private fun saveUserData(
         data: FileSavingData.UserFile,
-    ): Uuid {
+    ): Uuid ? = try {
         val fileId = Uuid.random()
         val filename = "$fileId.${data.fileData.extension}"
         val filepath = "${getFileDirectory(data.username)}/$filename"
@@ -92,6 +92,9 @@ abstract class FileManager {
         fileToSave.writeBytes(data.fileData.data)
 
         return fileId
+    } catch (e: Exception) {
+        logger.error("Failed to save temporary file to user storage: $e")
+        null
     }
 
     /**

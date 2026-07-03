@@ -26,7 +26,6 @@ class MusicService(
     private val playerRepository: PlayerRepository,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
-
     suspend fun getFromId(musicId: String): Music? =
         musicRepository.getFromId(musicId = musicId)
 

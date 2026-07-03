@@ -26,6 +26,8 @@ class MusicRepositoryImpl(
     private val musicFileMetadataManager: MusicFileMetadataManager,
     private val playerRepository: PlayerRepository,
 ) : MusicRepository {
+    private val logger = CloudyLogger(this::class)
+
     override suspend fun startUploadProcess(
         user: User,
         data: FileSavingData,
@@ -40,10 +42,15 @@ class MusicRepositoryImpl(
         if (temporarySavedFileId == null) return UploadProcessState.Error
 
         // We retrieve the saved file to analyze its fingerprint for metadata
-        val temporarySavedFile: File = musicFileManager.getByName(
+        val temporarySavedFile: File? = musicFileManager.getByName(
             username = user.username,
             name = temporarySavedFileId.toString(),
-        ) ?: return UploadProcessState.Error
+        )
+
+        if (temporarySavedFile == null) {
+            logger.error("Temporary saved file couldn't be found")
+            return@runCatching UploadProcessState.Error
+        }
 
 //        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
 //            musicFile = temporarySavedFile,
@@ -51,8 +58,12 @@ class MusicRepositoryImpl(
 //            shouldSearchForMetadata = shouldSearchForMetadata,
 //        )
 
-        val fingerprint: String =
-            musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile) ?: return UploadProcessState.Error
+        val fingerprint: String? = musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile)
+        if (fingerprint == null) {
+            logger.error("Fingerprint not found for music file")
+            return@runCatching UploadProcessState.Error
+        }
+
         val finalMusicUpload: MusicUpload = musicUpload ?: musicFileMetadataManager
             .getMetadataOfFile(musicFile = temporarySavedFile)
             .toMusicUpload()
@@ -85,7 +96,7 @@ class MusicRepositoryImpl(
             musicUpload = finalMusicUpload,
         )
     }.getOrElse {
-        CloudyLogger.global(this::class).error(
+        logger.error(
             "Error while downloading uploaded song: $it"
         )
         UploadProcessState.Error

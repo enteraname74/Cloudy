@@ -12,6 +12,7 @@ import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 
 class UploadMusicUseCase(
     private val uploadArtistUseCase: UploadArtistUseCase,
@@ -20,6 +21,8 @@ class UploadMusicUseCase(
     private val setArtistsOfMusicUseCase: SetArtistsOfMusicUseCase,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
+    private val logger = CloudyLogger(this::class)
+
     suspend operator fun invoke(
         musicUpload: MusicUpload,
         fingerprint: String,
@@ -66,7 +69,10 @@ class UploadMusicUseCase(
         }
 
         return when (result) {
-            is CloudyResult.Error -> result
+            is CloudyResult.Error -> {
+                logger.error("Failed to persist music information (music name: ${musicUpload.name})")
+                result
+            }
             is CloudyResult.Success -> {
                 setArtistsOfMusicUseCase(
                     musicId = fingerprint,

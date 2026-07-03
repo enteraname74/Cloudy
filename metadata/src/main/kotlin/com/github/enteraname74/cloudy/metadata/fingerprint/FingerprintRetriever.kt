@@ -34,6 +34,7 @@ internal class FingerprintRetriever {
                     fingerprint = fingerprint,
                 )
             } else {
+                logger.error("Fingerprint process exited with an error")
                 null
             }
 
