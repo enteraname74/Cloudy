@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.auth.TOKEN_ROLE_CLAIM_KEY
 import com.github.enteraname74.cloudy.config.auth.TOKEN_USERNAME_CLAIM_KEY
+import com.github.enteraname74.cloudy.config.auth.TokenType
 import com.github.enteraname74.cloudy.config.util.Messages
 import io.ktor.http.*
 import io.ktor.server.application.*

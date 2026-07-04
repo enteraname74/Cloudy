@@ -5,7 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.github.enteraname74.cloudy.config.ApplicationContext
 import com.github.enteraname74.cloudy.domain.ext.toUuid
 import com.github.enteraname74.cloudy.domain.model.user.User
-import com.github.enteraname74.cloudy.domain.model.user.UserType
+import io.ktor.server.auth.jwt.JWTCredential
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
 import java.util.*
@@ -20,17 +20,11 @@ fun ApplicationContext.generateToken(
     val secret = environment.config.property("jwt.secret").getString()
     val issuer = environment.config.property("jwt.issuer").getString()
 
-    val userType: UserType = if (user.isAdmin) {
-        UserType.Admin
-    } else {
-        UserType.User
-    }
-
     return JWT.create()
         .withIssuer(issuer)
         .withClaim(TOKEN_USERNAME_CLAIM_KEY, user.username)
         .withClaim(TOKEN_USER_ID_CLAIM_KEY, user.id.toString())
-        .withClaim(TOKEN_ROLE_CLAIM_KEY, userType.value)
+        .withClaim(TOKEN_ROLE_CLAIM_KEY, user.type.value)
         .withClaim(TOKEN_TYPE_CLAIM_KEY, type.value)
         .withExpiresAt(expireDate)
         .sign(Algorithm.HMAC256(secret))
@@ -57,6 +51,34 @@ fun ApplicationContext.isTokenARefreshOne(): Boolean {
         } == TokenType.Refresh
 }
 
+fun ApplicationContext.getUserIdFromPlayerToken(
+    token: String,
+): Uuid? {
+    if (token.isBlank()) return null
+
+    val environment = call.application.environment
+    val secret = environment.config.property("jwt.secret").getString()
+    val issuer = environment.config.property("jwt.issuer").getString()
+
+    val verifier = JWT
+        .require(Algorithm.HMAC256(secret))
+        .withIssuer(issuer)
+        .build()
+
+    val credential = runCatching {
+        JWTCredential(verifier.verify(token))
+    }.getOrNull() ?: return null
+
+    val isPlayerToken = TokenType
+        .fromString(
+            credential.payload.getClaim(TOKEN_TYPE_CLAIM_KEY).asString(),
+        ) == TokenType.Player
+
+    if (!isPlayerToken) return null
+
+    return credential.payload.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUuid()
+}
+
 internal const val TOKEN_USERNAME_CLAIM_KEY = "username"
 internal const val TOKEN_ROLE_CLAIM_KEY = "role"
 internal const val TOKEN_USER_ID_CLAIM_KEY = "userId"
@@ -64,7 +86,8 @@ internal const val TOKEN_TYPE_CLAIM_KEY = "tokenType"
 
 enum class TokenType(val value: String) {
     Access("Access"),
-    Refresh("Refresh");
+    Refresh("Refresh"),
+    Player("Player");
 
     companion object{
         fun fromString(token: String): TokenType? =

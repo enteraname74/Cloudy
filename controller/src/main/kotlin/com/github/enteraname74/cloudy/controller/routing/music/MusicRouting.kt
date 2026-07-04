@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.routing.music.routes.deleteSong
 import com.github.enteraname74.cloudy.controller.routing.music.routes.fetchFromUrl
 import com.github.enteraname74.cloudy.controller.routing.music.routes.getMusicCover
 import com.github.enteraname74.cloudy.controller.routing.music.routes.getMusicFile
+import com.github.enteraname74.cloudy.controller.routing.music.routes.getMusicFileFromToken
 import com.github.enteraname74.cloudy.controller.routing.music.routes.songsOfUser
 import com.github.enteraname74.cloudy.controller.routing.music.routes.updateMusics
 import com.github.enteraname74.cloudy.controller.routing.music.routes.uploadMusic
@@ -22,4 +23,5 @@ fun Routing.musicRouting() {
         checkMusicIdsValidity()
         getMusicCover()
     }
+    getMusicFileFromToken()
 }

@@ -41,6 +41,13 @@ class MusicResource {
         val id: String,
     )
 
+    @Resource("token")
+    data class FileFromToken(
+        val parent: MusicResource,
+        val token: String,
+        val musicId: String,
+    )
+
     @Resource("cover/{coverId}")
     data class Cover(
         val parent: MusicResource = MusicResource(),
