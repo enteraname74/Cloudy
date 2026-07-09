@@ -5,26 +5,38 @@ import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSource
+import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
 import kotlin.uuid.Uuid
 
 class MusicPlaylistRepositoryImpl(
     private val musicPlaylistDataSource: MusicPlaylistDataSource,
-): MusicPlaylistRepository {
+    private val playlistDataSource: PlaylistDataSource,
+) : MusicPlaylistRepository {
     override suspend fun upsert(musicPlaylist: MusicPlaylist) {
+        val updatedAt = DateUtils.now()
         musicPlaylistDataSource.upsert(
             musicPlaylist.copy(
-                lastUpdateAtMillis = DateUtils.now(),
+                lastUpdateAtMillis = updatedAt,
             )
+        )
+        playlistDataSource.updateLastUpdatedField(
+            playlistIds = listOf(musicPlaylist.playlistId),
+            updatedAt = updatedAt,
         )
     }
 
     override suspend fun upsertAll(musicPlaylists: List<MusicPlaylist>) {
+        val updatedAt = DateUtils.now()
         musicPlaylistDataSource.upsertAll(
             musicPlaylists = musicPlaylists.map {
                 it.copy(
-                    lastUpdateAtMillis = DateUtils.now(),
+                    lastUpdateAtMillis = updatedAt,
                 )
             }
+        )
+        playlistDataSource.updateLastUpdatedField(
+            playlistIds = musicPlaylists.map { it.playlistId },
+            updatedAt = updatedAt,
         )
     }
 
@@ -33,10 +45,18 @@ class MusicPlaylistRepositoryImpl(
 
     override suspend fun delete(musicPlaylist: MusicPlaylist) {
         musicPlaylistDataSource.delete(musicPlaylist)
+        playlistDataSource.updateLastUpdatedField(
+            playlistIds = listOf(musicPlaylist.playlistId),
+            updatedAt = DateUtils.now(),
+        )
     }
 
-    override suspend fun deleteAll(ids: List<String>) {
-        musicPlaylistDataSource.deleteAll(ids)
+    override suspend fun deleteAll(musicPlaylists: List<MusicPlaylist>) {
+        musicPlaylistDataSource.deleteAll(musicPlaylists.map { it.id })
+        playlistDataSource.updateLastUpdatedField(
+            playlistIds = musicPlaylists.map { it.playlistId },
+            updatedAt = DateUtils.now(),
+        )
     }
 
     override suspend fun deleteAllOfPlaylist(playlistId: Uuid) {

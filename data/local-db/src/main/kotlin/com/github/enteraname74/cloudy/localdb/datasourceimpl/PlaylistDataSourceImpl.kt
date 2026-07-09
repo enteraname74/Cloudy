@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.uuid.Uuid
 
 class PlaylistDataSourceImpl(
@@ -84,6 +85,17 @@ class PlaylistDataSourceImpl(
                 .find { PlaylistTable.id inList playlistIds }
                 .map { it.toPlaylist() }
         }
+
+    override suspend fun updateLastUpdatedField(
+        playlistIds: List<Uuid>,
+        updatedAt: Long,
+    ) {
+        workTransaction {
+            PlaylistTable.update({ PlaylistTable.id inList playlistIds }) {
+                it[PlaylistTable.lastUpdateAt] = updatedAt
+            }
+        }
+    }
 
     override suspend fun deleteById(playlistId: Uuid): Boolean =
         workTransaction {

@@ -14,6 +14,7 @@ data class PlaylistUpload(
 
     fun isValid(): Boolean =
         name.isNotBlank() && nbPlayed >= 0 && musicIds.all { it.isNotBlank() }
+
     fun toNewPlaylist(
         userId: Uuid,
     ): Playlist =

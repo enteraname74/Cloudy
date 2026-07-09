@@ -9,7 +9,7 @@ interface MusicPlaylistRepository {
     suspend fun getAllOfPlaylist(playlistId: Uuid): List<MusicPlaylist>
     suspend fun upsertAll(musicPlaylists: List<MusicPlaylist>)
     suspend fun delete(musicPlaylist: MusicPlaylist)
-    suspend fun deleteAll(ids: List<String>)
+    suspend fun deleteAll(musicPlaylists: List<MusicPlaylist>)
     suspend fun deleteAllOfPlaylist(playlistId: Uuid)
     suspend fun getAllOfUser(
         userId: Uuid,

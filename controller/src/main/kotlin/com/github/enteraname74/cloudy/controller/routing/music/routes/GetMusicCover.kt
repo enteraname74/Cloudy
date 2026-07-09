@@ -7,8 +7,8 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
-import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.HttpStatusCode
@@ -16,7 +16,6 @@ import io.ktor.server.resources.get
 import io.ktor.server.response.respondBytes
 import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
-import java.io.File
 import kotlin.uuid.Uuid
 
 fun Route.getMusicCover() {
@@ -36,14 +35,6 @@ fun Route.getMusicCover() {
             message = routingMessages.WRONG_ID,
         )
 
-        val musicFile: File = musicService.getMusicFile(
-            musicId = correspondingMusic.fingerprint,
-            userId = userId,
-        ) ?: return@get response(
-            status = HttpStatusCode.NotFound,
-            message = routingMessages.FILE_NOT_FOUND,
-        )
-
         /*
         We first try to retrieve a custom cover for the file, else, we fetch it from its file.
          */
@@ -52,9 +43,14 @@ fun Route.getMusicCover() {
             username = username,
         )
 
-        val finalCover: ByteArray = foundCover ?: coverService.getMusicFileCover(
-            file = musicFile
-        ) ?: return@get badRequest(routingMessages.IMAGE_NOT_FOUND)
+        val finalCover: ByteArray = foundCover ?: musicService.getMusicFile(
+            musicId = correspondingMusic.fingerprint,
+            userId = userId,
+        )?.let {
+            coverService.getMusicFileCover(
+                file = it
+            )
+        } ?: return@get badRequest(routingMessages.IMAGE_NOT_FOUND)
 
         call.respondBytes(finalCover)
     }

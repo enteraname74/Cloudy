@@ -35,6 +35,7 @@ class MusicResource {
                 limitPerPage = maxPerPage,
             )
     }
+
     @Resource("{id}")
     data class File(
         val parent: MusicResource = MusicResource(),

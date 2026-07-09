@@ -5,19 +5,20 @@ import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.routing.playlist.resource.PlaylistResource
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.routing.Route
-import io.ktor.server.routing.delete
+import io.ktor.server.resources.delete
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
 fun Route.deletePlaylist() {
     val playlistService by inject<PlaylistService>()
 
-    delete {
+    delete<PlaylistResource> {
         val playlistIds: List<String> = call.receive()
         val uuids: List<Uuid> = playlistIds.mapNotNull { Uuid.parseOrNull(it) }
 

@@ -16,8 +16,8 @@ data class MusicUpdate(
 ) {
     fun isValid(): Boolean =
         name.isNotBlank()
-                && nbPlayed >= 0
-                && (albumPosition?.let { it >= 0 } ?: true)
-                && album.isValid()
-                && artists.all { it.isValid() }
+            && nbPlayed >= 0
+            && (albumPosition?.let { it >= 0 } ?: true)
+            && album.isValid()
+            && artists.all { it.isValid() }
 }
