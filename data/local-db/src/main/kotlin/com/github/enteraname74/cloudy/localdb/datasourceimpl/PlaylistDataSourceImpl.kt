@@ -86,7 +86,7 @@ class PlaylistDataSourceImpl(
                 .map { it.toPlaylist() }
         }
 
-    override suspend fun updateLastUpdatedField(
+    override suspend fun updateLastUpdatedAtField(
         playlistIds: List<Uuid>,
         updatedAt: Long,
     ) {

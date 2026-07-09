@@ -19,7 +19,7 @@ class MusicPlaylistRepositoryImpl(
                 lastUpdateAtMillis = updatedAt,
             )
         )
-        playlistDataSource.updateLastUpdatedField(
+        playlistDataSource.updateLastUpdatedAtField(
             playlistIds = listOf(musicPlaylist.playlistId),
             updatedAt = updatedAt,
         )
@@ -34,7 +34,7 @@ class MusicPlaylistRepositoryImpl(
                 )
             }
         )
-        playlistDataSource.updateLastUpdatedField(
+        playlistDataSource.updateLastUpdatedAtField(
             playlistIds = musicPlaylists.map { it.playlistId },
             updatedAt = updatedAt,
         )
@@ -45,7 +45,7 @@ class MusicPlaylistRepositoryImpl(
 
     override suspend fun delete(musicPlaylist: MusicPlaylist) {
         musicPlaylistDataSource.delete(musicPlaylist)
-        playlistDataSource.updateLastUpdatedField(
+        playlistDataSource.updateLastUpdatedAtField(
             playlistIds = listOf(musicPlaylist.playlistId),
             updatedAt = DateUtils.now(),
         )
@@ -53,7 +53,7 @@ class MusicPlaylistRepositoryImpl(
 
     override suspend fun deleteAll(musicPlaylists: List<MusicPlaylist>) {
         musicPlaylistDataSource.deleteAll(musicPlaylists.map { it.id })
-        playlistDataSource.updateLastUpdatedField(
+        playlistDataSource.updateLastUpdatedAtField(
             playlistIds = musicPlaylists.map { it.playlistId },
             updatedAt = DateUtils.now(),
         )

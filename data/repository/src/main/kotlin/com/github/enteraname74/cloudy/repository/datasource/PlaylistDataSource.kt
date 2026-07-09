@@ -30,7 +30,7 @@ interface PlaylistDataSource {
     suspend fun upsert(playlist: Playlist): Playlist
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>
 
-    suspend fun updateLastUpdatedField(
+    suspend fun updateLastUpdatedAtField(
         playlistIds: List<Uuid>,
         updatedAt: Long,
     )

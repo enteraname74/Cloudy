@@ -18,7 +18,7 @@ import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
-fun Route.uploadPlaylists() {
+fun Route.uploadPlaylist() {
     val playlistService by inject<PlaylistService>()
     val userService by inject<UserService>()
 
