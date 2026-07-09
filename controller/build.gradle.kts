@@ -39,6 +39,7 @@ dependencies {
 
     implementation(libs.ktor.simple.cache)
     implementation(libs.ktor.server.netty)
+    implementation("io.ktor:ktor-server-default-headers:3.4.1")
 
     testImplementation(libs.kotlin.test.junit)
 

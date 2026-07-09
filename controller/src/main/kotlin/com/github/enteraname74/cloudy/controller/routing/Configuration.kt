@@ -10,6 +10,8 @@ import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
 import io.ktor.http.ContentType
 import io.ktor.openapi.OpenApiInfo
 import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
 import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
@@ -19,6 +21,9 @@ import io.ktor.server.routing.routing
 import io.ktor.server.routing.routingRoot
 
 fun Application.configureRouting() {
+    install(DefaultHeaders) {
+        header("Cross-Origin-Resource-Policy", "cross-origin")
+    }
     routing {
         configureSwagger()
         userRoutes()

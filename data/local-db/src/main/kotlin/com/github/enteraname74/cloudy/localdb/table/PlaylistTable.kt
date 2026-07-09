@@ -11,7 +11,7 @@ import kotlin.uuid.Uuid
 
 internal object PlaylistTable : UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val name = text("name").uniqueIndex()
+    val name = text("name")
     val isFavorite = bool("isFavorite")
     val nbPlayed = integer("nbPlayed")
     val coverPath = text("coverPath").nullable()
@@ -22,6 +22,7 @@ internal object PlaylistTable : UuidTable() {
     fun upsertAll(playlists: List<Playlist>) {
         batchUpsert(playlists) {
             this[id] = it.id
+            this[isFavorite] = it.isFavorite
             this[userId] = it.userId
             this[name] = it.name
             this[nbPlayed] = it.nbPlayed

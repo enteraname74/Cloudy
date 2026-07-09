@@ -11,6 +11,7 @@ import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.http.content.MultiPartData
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.resources.post
@@ -23,16 +24,19 @@ fun Route.uploadPlaylist() {
     val userService by inject<UserService>()
 
     post<PlaylistResource> {
+        cloudyLogger.debug("PLAYLIST PROCESS")
 
         val userId: Uuid = getUserIdFromToken() ?: return@post missingTokenInformation()
         val user: User = userService.getUserFromId(userId) ?: return@post cannotFindUser()
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)
-
-        when (uploadData) {
-            is CloudyResult.Error -> respond(uploadData)
+        when (val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)) {
+            is CloudyResult.Error -> {
+                cloudyLogger.debug("ERROR: $uploadData")
+                respond(uploadData)
+            }
             is CloudyResult.Success -> {
+                cloudyLogger.debug("PLAYLIST PROCESS CONTINUED")
                 respond(
                     playlistService.upload(
                         playlistUpload = uploadData.data.second,

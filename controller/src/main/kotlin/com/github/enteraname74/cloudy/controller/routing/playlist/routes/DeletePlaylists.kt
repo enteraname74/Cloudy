@@ -15,7 +15,7 @@ import io.ktor.server.resources.delete
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
-fun Route.deletePlaylist() {
+fun Route.deletePlaylists() {
     val playlistService by inject<PlaylistService>()
 
     delete<PlaylistResource> {
