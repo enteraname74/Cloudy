@@ -46,3 +46,4 @@ traefik/certs
 traefik/dynamic.yml
 
 local.properties
+cookies.txt

@@ -5,6 +5,9 @@ import com.github.enteraname74.cloudy.logging.CloudyLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import kotlin.uuid.Uuid
 
 abstract class FileManager {
@@ -110,9 +113,21 @@ abstract class FileManager {
         val filename = "$fileId.m4a"
         val filepath = "${getFileDirectory(data.username)}/$filename"
 
+        val sourceCookies = Path.of("cookies.txt")
+        val writableCookies = Path.of("/tmp/cookies.txt")
+
+        Files.copy(
+            sourceCookies,
+            writableCookies,
+            StandardCopyOption.REPLACE_EXISTING,
+        )
+
         try {
             val process = ProcessBuilder(
                 "yt-dlp",
+                "--cookies", "/tmp/cookies.txt",
+                "--js-runtimes", "node",
+                "--remote-components", "ejs:github",
                 "-f", "bestaudio[ext=m4a]/bestaudio",
                 "-x",
                 "--audio-format", "m4a",
@@ -135,6 +150,8 @@ abstract class FileManager {
         } catch (e: Exception) {
             logger.error("Failed to download music from yt: ${data.url}, got exception: ${e.message}")
             null
+        } finally {
+            Files.deleteIfExists(writableCookies)
         }
     }
 

@@ -28,7 +28,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-#    image: ghcr.io/enteraname74/cloudy:0.0.1
+    #    image: ghcr.io/enteraname74/cloudy:0.0.1
     restart: unless-stopped
     depends_on:
       postgres:
@@ -66,6 +66,7 @@ services:
       JAUDIOTAGGER_LOG_LEVEL: ${JAUDIOTAGGER_LOG_LEVEL}
     volumes:
       - cloudy_data:/cloudy_data:z
+      - ./cookies.txt:/app/cookies.txt:ro,z
     networks:
       - proxy
       - backend
