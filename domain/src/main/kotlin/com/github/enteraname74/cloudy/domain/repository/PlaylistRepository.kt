@@ -35,7 +35,6 @@ interface PlaylistRepository {
     ): Playlist
 
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>
-    suspend fun deleteById(playlistId: Uuid): Boolean
     suspend fun deleteAll(playlistIds: List<Uuid>)
     suspend fun allOfUser(
         userId: Uuid,

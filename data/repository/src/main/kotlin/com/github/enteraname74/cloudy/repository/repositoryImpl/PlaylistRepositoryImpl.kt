@@ -86,11 +86,6 @@ class PlaylistRepositoryImpl(
             },
         )
 
-    override suspend fun deleteById(playlistId: Uuid) =
-        playlistDataSource.deleteById(
-            playlistId = playlistId,
-        )
-
     override suspend fun deleteAll(playlistIds: List<Uuid>) {
         playlistDataSource.deleteAll(playlistIds)
     }

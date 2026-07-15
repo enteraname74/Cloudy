@@ -81,7 +81,9 @@ class UploadPlaylistUseCase(
             )
         } else {
             playlistRepository.upsert(
-                playlist = playlistUpload.toNewPlaylist(user.id),
+                playlist = playlistUpload.toNewPlaylist(user.id).copy(
+                    isFavorite = true,
+                ),
                 coverData = coverData,
                 username = user.username,
             )

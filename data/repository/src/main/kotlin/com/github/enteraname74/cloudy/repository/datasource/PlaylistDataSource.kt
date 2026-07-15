@@ -34,8 +34,6 @@ interface PlaylistDataSource {
         playlistIds: List<Uuid>,
         updatedAt: Long,
     )
-
-    suspend fun deleteById(playlistId: Uuid): Boolean
     suspend fun deleteAll(playlistIds: List<Uuid>)
     suspend fun allOfUser(
         userId: Uuid,

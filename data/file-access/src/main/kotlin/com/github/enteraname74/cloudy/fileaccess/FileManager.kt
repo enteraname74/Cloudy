@@ -12,6 +12,10 @@ import kotlin.uuid.Uuid
 
 abstract class FileManager {
     protected val logger = CloudyLogger(this::class)
+
+    private val initialCookiesFile = Path.of("cookies.txt")
+    private val writableCookiesFile = Path.of("$APP_FOLDER/cookies.txt")
+
     protected abstract fun getFileDirectory(username: String): String
 
     // Retrieve file by its name (without extension)
@@ -108,24 +112,31 @@ abstract class FileManager {
     private suspend fun saveFromUrl(
         data: FileSavingData.MusicUrl,
     ): Uuid? = withContext(Dispatchers.IO) {
+
+        // First, check for cookies file
+        if (Files.notExists(initialCookiesFile)) {
+            logger.error("No initial cookies file found")
+            return@withContext null
+        }
+
+        if (Files.notExists(writableCookiesFile)) {
+            Files.createDirectories(writableCookiesFile.parent)
+            Files.copy(
+                initialCookiesFile,
+                writableCookiesFile,
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+        }
+
         val fileId = Uuid.random()
         // TODO YT: In future, let user choose the format
         val filename = "$fileId.m4a"
         val filepath = "${getFileDirectory(data.username)}/$filename"
 
-        val sourceCookies = Path.of("cookies.txt")
-        val writableCookies = Path.of("/tmp/cookies.txt")
-
-        Files.copy(
-            sourceCookies,
-            writableCookies,
-            StandardCopyOption.REPLACE_EXISTING,
-        )
-
         try {
             val process = ProcessBuilder(
                 "yt-dlp",
-                "--cookies", "/tmp/cookies.txt",
+                "--cookies", writableCookiesFile.toString(),
                 "--js-runtimes", "node",
                 "--remote-components", "ejs:github",
                 "-f", "bestaudio[ext=m4a]/bestaudio",
@@ -150,8 +161,6 @@ abstract class FileManager {
         } catch (e: Exception) {
             logger.error("Failed to download music from yt: ${data.url}, got exception: ${e.message}")
             null
-        } finally {
-            Files.deleteIfExists(writableCookies)
         }
     }
 

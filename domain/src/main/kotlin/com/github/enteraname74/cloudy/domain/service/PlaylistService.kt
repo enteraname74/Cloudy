@@ -39,17 +39,6 @@ class PlaylistService(
             playlistId = playlistId,
         )
 
-    suspend fun upsert(
-        playlist: Playlist,
-        coverData: FileData?,
-        username: String,
-    ): Playlist =
-        playlistRepository.upsert(
-            playlist = playlist,
-            coverData = coverData,
-            username = username,
-        )
-
     suspend fun upload(
         playlistUpload: PlaylistUpload,
         coverData: FileData?,

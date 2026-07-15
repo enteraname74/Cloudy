@@ -97,13 +97,6 @@ class PlaylistDataSourceImpl(
         }
     }
 
-    override suspend fun deleteById(playlistId: Uuid): Boolean =
-        workTransaction {
-            PlaylistTable.deleteWhere {
-                id eq playlistId
-            } > 0
-        }
-
     override suspend fun deleteAll(playlistIds: List<Uuid>) {
         workTransaction {
             PlaylistTable.deleteWhere {

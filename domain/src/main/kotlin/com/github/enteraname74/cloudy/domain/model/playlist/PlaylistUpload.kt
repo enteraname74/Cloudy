@@ -22,5 +22,6 @@ data class PlaylistUpload(
             userId = userId,
             name = name,
             coverPath = null,
+            isInQuickAccess = isInQuickAccess,
         )
 }
