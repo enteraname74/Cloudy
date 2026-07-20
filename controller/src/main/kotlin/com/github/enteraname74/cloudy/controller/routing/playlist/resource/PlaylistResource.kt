@@ -27,4 +27,9 @@ class PlaylistResource {
         val parent: MusicResource = MusicResource(),
         val coverId: String,
     )
+
+    @Resource("check")
+    data class Check(
+        val parent: PlaylistResource = PlaylistResource()
+    )
 }

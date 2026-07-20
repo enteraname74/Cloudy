@@ -49,7 +49,6 @@ class MusicService(
         )
     }
 
-
     suspend fun getFromCoverPath(coverPath: String): Music? =
         musicRepository.getFromCoverPath(coverPath = coverPath)
 
@@ -149,7 +148,6 @@ class MusicService(
             userId = userId,
             musicId = musicId,
         )
-
 
     /**
      * Given a list of music ids to check,

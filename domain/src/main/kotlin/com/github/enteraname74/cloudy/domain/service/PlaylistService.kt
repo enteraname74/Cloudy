@@ -53,5 +53,14 @@ class PlaylistService(
     suspend fun deleteAll(playlistIds: List<Uuid>) {
         playlistRepository.deleteAll(playlistIds)
     }
+
+    suspend fun getDeletedPlaylistIds(
+        idsToCheck: List<Uuid>,
+        userId: Uuid,
+    ): List<Uuid> =
+        playlistRepository.getDeletedPlaylistIds(
+            idsToCheck = idsToCheck,
+            userId = userId,
+        )
 }
 

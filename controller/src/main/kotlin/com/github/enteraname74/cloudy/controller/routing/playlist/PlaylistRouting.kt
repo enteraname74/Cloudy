@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist
 
 import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
+import com.github.enteraname74.cloudy.controller.routing.playlist.routes.checkPlaylistIdsValidity
 import com.github.enteraname74.cloudy.controller.routing.playlist.routes.deletePlaylists
 import com.github.enteraname74.cloudy.controller.routing.playlist.routes.getPlaylistCover
 import com.github.enteraname74.cloudy.controller.routing.playlist.routes.playlistsOfUser
@@ -13,5 +14,6 @@ fun Routing.playlistRouting() {
         playlistsOfUser()
         uploadPlaylist()
         getPlaylistCover()
+        checkPlaylistIdsValidity()
     }
 }

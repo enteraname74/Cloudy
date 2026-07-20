@@ -37,12 +37,14 @@ interface MusicRepository {
         username: String,
         cover: FileData?,
     ): CloudyResult<Music>
+
     suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit>
     suspend fun getFromId(musicId: String): Music?
     suspend fun getFromUser(
         musicId: String,
         userId: Uuid,
     ): Music?
+
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(musicId: String, username: String): File?
     suspend fun getAll(ids: List<String>): List<Music>
@@ -82,6 +84,6 @@ interface MusicRepository {
         data class ContinueProcess(
             val fingerprint: String,
             val musicUpload: MusicUpload,
-        ): UploadProcessState
+        ) : UploadProcessState
     }
 }

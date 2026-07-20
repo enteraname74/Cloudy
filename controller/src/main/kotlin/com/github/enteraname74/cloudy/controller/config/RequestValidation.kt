@@ -6,16 +6,19 @@ import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusics
 import com.github.enteraname74.cloudy.controller.routing.music.model.FetchFromUrlBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.AddMusicUrlToPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.CheckPlayerMusicIdsBody
-import com.github.enteraname74.cloudy.controller.routing.player.model.MusicsOperationOnPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.JoinPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.MusicsOperationOnPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.NewPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.RemoveUserFromPlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.UpdateCurrentMusicBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.UpdatePlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
-import io.ktor.server.application.*
-import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.requestvalidation.RequestValidation
+import io.ktor.server.plugins.requestvalidation.RequestValidationException
+import io.ktor.server.plugins.requestvalidation.ValidationResult
 
 fun Application.configureRequestValidation() {
     install(RequestValidation) {

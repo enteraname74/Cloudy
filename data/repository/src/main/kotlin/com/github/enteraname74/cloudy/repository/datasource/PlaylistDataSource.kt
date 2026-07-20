@@ -41,4 +41,9 @@ interface PlaylistDataSource {
     ): List<PlaylistWithMusics>
 
     suspend fun isPlaylistPossessedByUser(userId: Uuid, playlistId: Uuid): Boolean
+
+    suspend fun getDeletedPlaylistIds(
+        idsToCheck: List<Uuid>,
+        userId: Uuid,
+    ): List<Uuid>
 }

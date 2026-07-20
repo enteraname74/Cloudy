@@ -17,6 +17,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
 import kotlin.uuid.Uuid
 
@@ -129,4 +130,18 @@ class PlaylistDataSourceImpl(
                     (PlaylistTable.id eq playlistId) and (PlaylistTable.userId eq userId)
                 }.count() > 0
         }
+
+    override suspend fun getDeletedPlaylistIds(
+        idsToCheck: List<Uuid>,
+        userId: Uuid,
+    ): List<Uuid> = workTransaction {
+        val existingIds: List<Uuid> = PlaylistTable
+            .select(PlaylistTable.id)
+            .where { (PlaylistTable.userId eq userId) and (PlaylistTable.id inList idsToCheck) }
+            .mapNotNull { result ->
+                result.getOrNull(PlaylistTable.id)?.value
+            }
+
+        idsToCheck - existingIds.toSet()
+    }
 }
