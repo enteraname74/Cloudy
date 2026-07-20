@@ -32,9 +32,4 @@ interface MusicDataSource {
     suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music?
     suspend fun allFromAlbum(albumId: Uuid): List<Music>
     suspend fun allFromArtist(artistId: Uuid): List<Music>
-
-    suspend fun getDeletedMusicsIds(
-        idsToCheck: List<String>,
-        userId: Uuid
-    ): List<String>
 }
