@@ -9,7 +9,7 @@ Cloud server for the multiplatform music player application [***Soul Searching**
 
 ## Set up the server
 
-> The app best work with docker and docker compose. Be sure to have these installed on your system.
+> The app works best with docker and docker compose. Be sure to have these installed on your system.
 
 You need to provide a `.env` file with all the environment variable that the server needs.
 With this, you can customize the settings of the server.
@@ -26,6 +26,25 @@ You can use the existing `compose.yaml` file of this project.
 
 Cloudy can be deployed on a VPS with HTTPS support using [Traefik](https://traefik.io/traefik).
 To make it work properly, you will need to add a `dynamic.yml` file in a `traefik` folder. This will contain some setup for the backend service.
+Template of a `dynamic.yml` file:
+```
+http:
+  routers:
+    api:
+      # Here, replace with your domain name
+      rule: "Host(`my.domain.com`)"
+      entryPoints:
+        - websecure
+      service: api-service
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://ktor:8080"
+```
 
 ## Development mode
 ### Launch locally with docker
