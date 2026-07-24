@@ -14,6 +14,7 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudySuccess
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import kotlin.uuid.Uuid
 
 class PlayerService(
@@ -37,13 +38,14 @@ class PlayerService(
             userId = hostId,
             ids = initialMusicIds,
         )
+        val orderedMusicIds = initialMusicIds.mapNotNull { id -> existingMusicIds.find { it == id } }
 
-        if (existingMusicIds.isEmpty()) return CloudyResult.Error(routingMessages.SONG_NOT_POSSESSED_BY_USER)
+        if (orderedMusicIds.isEmpty()) return CloudyResult.Error(routingMessages.SONG_NOT_POSSESSED_BY_USER)
 
         return playerRepository.create(
             hostId = hostId,
             deviceId = deviceId,
-            initialMusicIds = existingMusicIds,
+            initialMusicIds = orderedMusicIds,
         ).toCloudyResult()
     }
 
@@ -368,7 +370,7 @@ class PlayerService(
         if (availableMusicIds.isEmpty()) return CloudyResult.Success(Unit)
 
         playerRepository.removeMusics(
-            musicIds = musicRepository.getExistingIds(musicIds),
+            musicIds = availableMusicIds,
             listIds = listOf(listId),
             // Broadcast will be sent to all users (for playlist deletion or update event)
             socketDeviceIdToIgnore = null,
