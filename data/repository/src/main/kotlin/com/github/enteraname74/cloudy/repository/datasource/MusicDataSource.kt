@@ -12,6 +12,7 @@ interface MusicDataSource {
         musicId: String,
         userId: Uuid,
     ): Music?
+
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getAll(ids: List<String>): List<Music>
     suspend fun deleteAll(ids: List<String>)
@@ -19,6 +20,7 @@ interface MusicDataSource {
         userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Music>
+
     suspend fun getExistingIdsOfUser(
         userId: Uuid,
         ids: List<String>,

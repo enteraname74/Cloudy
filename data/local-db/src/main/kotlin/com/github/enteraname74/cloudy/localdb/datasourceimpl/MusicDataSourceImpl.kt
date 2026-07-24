@@ -61,9 +61,13 @@ class MusicDataSourceImpl : MusicDataSource {
 
     override suspend fun getAll(ids: List<String>): List<Music> =
         workTransaction {
-            MusicEntity
+            val musics = MusicEntity
                 .find { MusicTable.id inList ids }
                 .map { it.toMusic(buildScope = { Music.Scope.User }) }
+
+            val byIds = musics.associateBy { it.fingerprint }
+
+            ids.mapNotNull { byIds[it] }
         }
 
     override suspend fun deleteAll(ids: List<String>) {
