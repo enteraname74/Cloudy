@@ -10,15 +10,15 @@ import org.jetbrains.exposed.v1.dao.UuidEntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import kotlin.uuid.Uuid
 
-internal object AlbumTable: UuidTable() {
+internal object AlbumTable : UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
-    val name = varchar("name", 128)
+    val name = text("name")
     val coverPath = text("coverPath").nullable()
     val addedDate = long("addedDate")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
     val artistId = reference("artistId", ArtistTable.id, ReferenceOption.CASCADE)
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
 
     fun upsertAll(albums: List<Album>) {
         batchUpsert(albums) { album ->
@@ -35,7 +35,7 @@ internal object AlbumTable: UuidTable() {
     }
 }
 
-internal class AlbumEntity(id: EntityID<Uuid>): UuidEntity(id) {
+internal class AlbumEntity(id: EntityID<Uuid>) : UuidEntity(id) {
     companion object : UuidEntityClass<AlbumEntity>(AlbumTable)
 
     var userId by AlbumTable.userId

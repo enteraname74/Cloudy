@@ -35,5 +35,6 @@ data class MusicUpload(
             albumPosition = albumPosition,
             duration = duration,
             addedDateMillis = DateUtils.now(),
+            scope = Music.Scope.User,
         )
 }

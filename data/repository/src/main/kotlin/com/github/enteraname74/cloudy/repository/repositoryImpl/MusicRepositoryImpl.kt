@@ -2,14 +2,18 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import java.io.File
@@ -20,22 +24,33 @@ class MusicRepositoryImpl(
     private val musicFileManager: MusicFileManager,
     private val musicInformationRetriever: MusicInformationRetriever,
     private val musicFileMetadataManager: MusicFileMetadataManager,
+    private val playerRepository: PlayerRepository,
 ) : MusicRepository {
+    private val logger = CloudyLogger(this::class)
+
     override suspend fun startUploadProcess(
         user: User,
-        fileData: FileData,
-        shouldSearchForMetadata: Boolean
-    ): UploadProcessState {
+        data: FileSavingData,
+        shouldSearchForMetadata: Boolean,
+        musicUpload: MusicUpload?,
+    ): UploadProcessState = runCatching {
         // We save the file
-        val temporarySavedFileId: Uuid = musicFileManager.save(
-            username = user.username,
-            fileData = fileData,
+        val temporarySavedFileId: Uuid? = musicFileManager.save(
+            data = data,
         )
+
+        if (temporarySavedFileId == null) return UploadProcessState.Error
+
         // We retrieve the saved file to analyze its fingerprint for metadata
-        val temporarySavedFile: File = musicFileManager.getByName(
+        val temporarySavedFile: File? = musicFileManager.getByName(
             username = user.username,
             name = temporarySavedFileId.toString(),
-        ) ?: return UploadProcessState.Error
+        )
+
+        if (temporarySavedFile == null) {
+            logger.error("Temporary saved file couldn't be found")
+            return@runCatching UploadProcessState.Error
+        }
 
 //        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
 //            musicFile = temporarySavedFile,
@@ -43,8 +58,15 @@ class MusicRepositoryImpl(
 //            shouldSearchForMetadata = shouldSearchForMetadata,
 //        )
 
-        val fingerprint: String =
-            musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile) ?: return UploadProcessState.Error
+        val fingerprint: String? = musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile)
+        if (fingerprint == null) {
+            logger.error("Fingerprint not found for music file")
+            return@runCatching UploadProcessState.Error
+        }
+
+        val finalMusicUpload: MusicUpload = musicUpload ?: musicFileMetadataManager
+            .getMetadataOfFile(musicFile = temporarySavedFile)
+            .toMusicUpload()
 
         /*
         We check if a music with the same fingerprint has already been saved.
@@ -65,13 +87,19 @@ class MusicRepositoryImpl(
             musicFileManager.rename(
                 from = temporarySavedFileId.toString(),
                 username = user.username,
-                to = "$fingerprint.${fileData.extension}"
+                to = "$fingerprint.${data.extension}"
             )
         }
 
         return UploadProcessState.ContinueProcess(
             fingerprint = fingerprint,
+            musicUpload = finalMusicUpload,
         )
+    }.getOrElse {
+        logger.error(
+            "Error while downloading uploaded song: $it"
+        )
+        UploadProcessState.Error
     }
 
     override suspend fun saveMusicFileToDbAfterUploadProcess(music: Music): Music =
@@ -159,6 +187,13 @@ class MusicRepositoryImpl(
         musicDataSource.getAll(ids)
 
     override suspend fun deleteAll(ids: List<String>, username: String) {
+        // We must ensure that played lists are reorderd correctly if a music was in it.
+        playerRepository.removeMusics(
+            listIds = playerRepository.getPlayedListIdsOfMusics(ids),
+            musicIds = ids,
+            socketDeviceIdToIgnore = null,
+        )
+
         ids.forEach { id ->
             musicFileManager.delete(
                 name = id,
@@ -178,14 +213,17 @@ class MusicRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun getExistingIds(
+    override suspend fun getExistingIdsOfUser(
         userId: Uuid,
         ids: List<String>
     ): List<String> =
-        musicDataSource.getExistingIds(
+        musicDataSource.getExistingIdsOfUser(
             userId = userId,
             ids = ids,
         )
+
+    override suspend fun getExistingIds(ids: List<String>): List<String> =
+        musicDataSource.getExistingIds(ids)
 
     override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
         musicDataSource.isMusicPossessedByUser(userId, musicId)

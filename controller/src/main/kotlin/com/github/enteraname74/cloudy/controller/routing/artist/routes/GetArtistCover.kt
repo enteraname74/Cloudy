@@ -8,7 +8,7 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.artist.resource.ArtistResource
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import com.github.enteraname74.cloudy.domain.service.CoverService

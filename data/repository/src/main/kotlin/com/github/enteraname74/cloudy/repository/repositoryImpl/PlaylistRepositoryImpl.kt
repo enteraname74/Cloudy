@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
@@ -13,7 +14,7 @@ import kotlin.uuid.Uuid
 class PlaylistRepositoryImpl(
     private val playlistDataSource: PlaylistDataSource,
     private val coverFileManager: CoverFileManager,
-): PlaylistRepository {
+) : PlaylistRepository {
     override suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistDataSource.getFromId(
             playlistId = playlistId,
@@ -57,8 +58,10 @@ class PlaylistRepositoryImpl(
             }
 
             coverFileManager.save(
-                username = username,
-                fileData = cover,
+                data = FileSavingData.UserFile(
+                    username = username,
+                    fileData = cover,
+                )
             )
         }
 
@@ -83,11 +86,6 @@ class PlaylistRepositoryImpl(
             },
         )
 
-    override suspend fun deleteById(playlistId: Uuid) =
-        playlistDataSource.deleteById(
-            playlistId = playlistId,
-        )
-
     override suspend fun deleteAll(playlistIds: List<Uuid>) {
         playlistDataSource.deleteAll(playlistIds)
     }
@@ -102,5 +100,14 @@ class PlaylistRepositoryImpl(
         playlistDataSource.isPlaylistPossessedByUser(
             userId = userId,
             playlistId = playlistId,
+        )
+
+    override suspend fun getDeletedPlaylistIds(
+        idsToCheck: List<Uuid>,
+        userId: Uuid,
+    ): List<Uuid> =
+        playlistDataSource.getDeletedPlaylistIds(
+            idsToCheck = idsToCheck,
+            userId = userId,
         )
 }

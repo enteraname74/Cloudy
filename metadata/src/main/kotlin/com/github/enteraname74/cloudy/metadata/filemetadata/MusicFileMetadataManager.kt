@@ -26,11 +26,25 @@ class MusicFileMetadataManager {
             val audioFile = AudioFileIO.read(musicFile)
             val tag = audioFile.tag
 
+            val albumArtist = tag.getFirst(FieldKey.ALBUM_ARTIST)?.takeIf { it.isNotBlank() }
+            val artist = tag.getFirst(FieldKey.ARTIST)
+
+            val artists: List<MusicMetadata.Artist> = buildList {
+                if (albumArtist != null && albumArtist != artist) {
+                    add(MusicMetadata.Artist(name = albumArtist))
+                }
+                add(MusicMetadata.Artist(name = artist))
+            }
+
             MusicMetadata(
                 name = tag.getFirst(FieldKey.TITLE),
-                artist = tag.getFirst(FieldKey.ARTIST),
-                album = tag.getFirst(FieldKey.ALBUM),
-                duration = audioFile.audioHeader.trackLength.toLong(),
+                artists = artists,
+                album = MusicMetadata.Album(
+                    name = tag.getFirst(FieldKey.ALBUM),
+                    artist = artists.firstOrNull() ?: MusicMetadata.unknownArtist(),
+                ),
+                duration = (audioFile.audioHeader.trackLength * 1_000).toLong(),
+                albumPosition = tag.getFirst(FieldKey.TRACK)?.toIntOrNull(),
             ).replaceBlank()
         } catch (e: Exception) {
             logger.error("Failed to retrieve metadata of file ${musicFile.name} with error ${e.message}")
@@ -57,7 +71,7 @@ class MusicFileMetadataManager {
                     artwork.binaryData = currentArtwork
                     tag.setField(artwork)
                 } catch (e: Exception) {
-                    logger.error("Exception while writing cover: ${e.localizedMessage}")
+                    logger.error("Exception while writing cover: $e")
                 }
             }
 
@@ -65,7 +79,7 @@ class MusicFileMetadataManager {
 
             CloudyResult.Success(Unit)
         } catch (e: Exception) {
-            logger.error("Failed to save metadata of file ${musicFile.name} with error ${e.localizedMessage}")
+            logger.error("Failed to save metadata of file ${musicFile.name} (${music.name}) with error $e")
             CloudyResult.Error()
         }
 }

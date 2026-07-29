@@ -14,8 +14,8 @@ internal data class AcoustidRecording(
     fun isMatchingMetadata(musicMetadata: MusicMetadata): Boolean {
         if (!hasUsefulInformation()) return false
 
-        val isMatchingWithArtist = artists!!.any { artist -> artist.name == musicMetadata.artist }
-        val isMatchingWithAlbum = releaseGroups!!.any { release -> release.title == musicMetadata.album }
+        val isMatchingWithArtist = artists!!.any { artist -> artist.name in musicMetadata.artists.map { it.name } }
+        val isMatchingWithAlbum = releaseGroups!!.any { release -> release.title == musicMetadata.album.name }
 
         return isMatchingWithAlbum && isMatchingWithArtist
     }

@@ -37,8 +37,8 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
         return if (!shouldSearchForMetadata || fingerprintData == null) {
             MusicInformationRetriever.Metadata(
                 name = customMetadata?.name ?: fileMetadata.name,
-                artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: listOf(fileMetadata.artist),
-                album = customMetadata?.album ?: fileMetadata.album,
+                artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: fileMetadata.artists.map { it.name },
+                album = customMetadata?.album ?: fileMetadata.album.name,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
                 coverPath = Music.buildLocalCoverPath(),
                 duration = customMetadata?.duration ?: fileMetadata.duration,
@@ -52,13 +52,13 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
 
             val coverPath: String? = remoteMusicCoverRetriever.getCoverURL(
                 musicName = finalMetadata.name,
-                musicArtist = finalMetadata.artist,
+                musicArtist = finalMetadata.getMainArtistOrUnknown().name,
             )
 
             MusicInformationRetriever.Metadata(
                 name = finalMetadata.name,
-                artists = listOf(finalMetadata.artist),
-                album = finalMetadata.album,
+                artists = finalMetadata.artists.map { it.name },
+                album = finalMetadata.album.name,
                 fingerprint = fingerprintData.fingerprint.hashed(),
                 coverPath = coverPath ?: Music.buildLocalCoverPath(),
                 duration = finalMetadata.duration,

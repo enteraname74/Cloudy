@@ -13,13 +13,13 @@ import org.jetbrains.exposed.v1.jdbc.batchUpsert
  * Table for storing MusicArtists.
  */
 internal object MusicArtistTable: IdTable<String>() {
-    override val id = varchar("id", 256).entityId()
+    override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val musicId = reference("musicId", MusicTable.id, onDelete = ReferenceOption.CASCADE)
     val artistId = reference("artistId", ArtistTable.id, onDelete = ReferenceOption.CASCADE)
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
 
     fun upsertAll(musicArtists: List<MusicArtist>) {
         batchUpsert(musicArtists) { musicArtist ->

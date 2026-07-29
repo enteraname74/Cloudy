@@ -1,26 +1,51 @@
 services:
+  traefik:
+    image: traefik:v3.7
+    container_name: cloudy_traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=false"
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro,z
+      - ./traefik/certs:/certs:ro,z
+    networks:
+      - proxy
+    security_opt:
+      - no-new-privileges:true
+
   postgres:
-    image: postgres:latest
+    image: postgres:17
     container_name: cloudy_postgres_db
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    ports:
-      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     volumes:
-      - ./postgres_docker_data:/var/lib/postgresql/data:z
+      - postgres_data:/var/lib/postgresql/data:z
+    networks:
+      - backend
 
   ktor:
     build:
       context: .
       dockerfile: Dockerfile
-    restart: no
+    #    image: ghcr.io/enteraname74/cloudy:0.0.1
+    restart: unless-stopped
     depends_on:
       postgres:
-	  condition: service_healthy
-    ports:
-      - "8080:8080"
+        condition: service_healthy
     environment:
       ACOUSTID_API_KEY: ${ACOUSTID_API_KEY}
       AUTH_SECRET: ${AUTH_SECRET}
@@ -32,5 +57,29 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
+      ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
+      CLOUDY_LOG_LEVEL: ${CLOUDY_LOG_LEVEL}
+      KTOR_LOG_LEVEL: ${KTOR_LOG_LEVEL}
+      NETTY_LOG_LEVEL: ${NETTY_LOG_LEVEL}
+      JETTY_LOG_LEVEL: ${JETTY_LOG_LEVEL}
+      EXPOSED_LOG_LEVEL: ${EXPOSED_LOG_LEVEL}
+      JAUDIOTAGGER_LOG_LEVEL: ${JAUDIOTAGGER_LOG_LEVEL}
     volumes:
-      - ./app_docker_data:/app:z
+      - cloudy_data:/cloudy_data:z
+      - ./cookies.txt:/app/cookies.txt:ro,z
+    networks:
+      - proxy
+      - backend
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+networks:
+  proxy:
+  backend:
+    internal: true
+
+volumes:
+  postgres_data:
+  cloudy_data:

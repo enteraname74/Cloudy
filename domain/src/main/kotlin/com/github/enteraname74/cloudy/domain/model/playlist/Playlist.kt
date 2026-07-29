@@ -17,7 +17,7 @@ data class Playlist(
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
     override val lastUpdateAtMillis: Long = DateUtils.now(),
-): UpdatableElement {
+) : UpdatableElement {
 
     fun merge(
         playlistUpload: PlaylistUpload,

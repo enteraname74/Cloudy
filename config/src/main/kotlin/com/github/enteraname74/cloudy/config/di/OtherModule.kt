@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.config.di
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManagerImpl
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
+import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
 import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
@@ -17,4 +18,6 @@ internal val otherModule = module {
     singleOf(::MusicFileMetadataManager)
     singleOf(::MusicInformationRetrieverImpl) bind MusicInformationRetriever::class
     singleOf(::HashedPasswordManagerImpl) bind HashedPasswordManager::class
+
+    singleOf(::PlayerUserCommunication)
 }

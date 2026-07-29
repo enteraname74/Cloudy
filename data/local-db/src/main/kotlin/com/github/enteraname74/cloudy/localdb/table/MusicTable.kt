@@ -8,19 +8,20 @@ import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.dao.Entity
 import org.jetbrains.exposed.v1.dao.EntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
+import kotlin.uuid.Uuid
 
-internal object MusicTable: IdTable<String>() {
-    override val id = varchar("id", 128).entityId()
+internal object MusicTable : IdTable<String>() {
+    override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
-    val name = varchar("name", 128)
+    val name = text("name")
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val coverPath = text("coverPath")
     val albumPosition = integer("albumPosition").nullable()
-    val path = varchar("path", 255)
+    val path = text("path")
     val duration = long("duration")
     val addedDate = long("addedDate")
-    val lastUpdateAt = long("lastUpdateAt").default(DateUtils.now())
+    val lastUpdateAt = long("lastUpdateAt")
     val nbPlayed = integer("nbPlayed")
     val isInQuickAccess = bool("isInQuickAccess")
     val albumId = reference("albumId", AlbumTable.id, ReferenceOption.CASCADE)
@@ -59,7 +60,9 @@ internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
     val album by AlbumEntity referencedOn MusicTable.albumId
     var artists by ArtistEntity via MusicArtistTable
 
-    fun toMusic(): Music =
+    fun toMusic(
+        buildScope: (musicUserId: Uuid) -> Music.Scope
+    ): Music =
         Music(
             fingerprint = id.value,
             userId = userId.value,
@@ -74,5 +77,6 @@ internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
             lastUpdateAtMillis = lastUpdateAt,
             nbPlayed = nbPlayed,
             isInQuickAccess = isInQuickAccess,
+            scope = buildScope(userId.value),
         )
 }

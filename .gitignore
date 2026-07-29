@@ -39,5 +39,11 @@ cloudyDB.db
 
 *.db
 .env
-app_docker_data
+cloudy_data
 postgres_docker_data
+
+traefik/certs
+traefik/dynamic.yml
+
+local.properties
+cookies.txt

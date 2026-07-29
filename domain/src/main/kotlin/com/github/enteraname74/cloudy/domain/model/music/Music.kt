@@ -23,7 +23,13 @@ data class Music(
     override val lastUpdateAtMillis: Long = DateUtils.now(),
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
+    val scope: Scope,
 ): UpdatableElement {
+
+    enum class Scope {
+        User,
+        SharedPlayedList
+    }
 
     fun merge(
         musicUpload: MusicUpload,

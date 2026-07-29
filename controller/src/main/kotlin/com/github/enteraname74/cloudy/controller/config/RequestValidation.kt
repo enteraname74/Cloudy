@@ -3,10 +3,22 @@ package com.github.enteraname74.cloudy.controller.config
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserSignIn
 import com.github.enteraname74.cloudy.controller.routing.music.model.CheckMusicsBody
+import com.github.enteraname74.cloudy.controller.routing.music.model.FetchFromUrlBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.AddMusicUrlToPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.CheckPlayerMusicIdsBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.JoinPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.MusicsOperationOnPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.NewPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.RemoveUserFromPlayedListBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.UpdateCurrentMusicBody
+import com.github.enteraname74.cloudy.controller.routing.player.model.UpdatePlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
-import io.ktor.server.application.*
-import io.ktor.server.plugins.requestvalidation.*
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.requestvalidation.RequestValidation
+import io.ktor.server.plugins.requestvalidation.RequestValidationException
+import io.ktor.server.plugins.requestvalidation.ValidationResult
 
 fun Application.configureRequestValidation() {
     install(RequestValidation) {
@@ -38,8 +50,71 @@ fun Application.configureRequestValidation() {
                 ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
             }
         }
+        validate<FetchFromUrlBody> { fetch ->
+            if (fetch.url.isNotBlank()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
         validate<UploadPlaylistBody> { body ->
             if (body.playlists.all { it.isValid() }) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<NewPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<JoinPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<RemoveUserFromPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<UpdatePlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<MusicsOperationOnPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<AddMusicUrlToPlayedListBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<CheckPlayerMusicIdsBody> { body ->
+            if (body.isValid()) {
+                ValidationResult.Valid
+            } else {
+                ValidationResult.Invalid(InvalidRequestType.InvalidData.name)
+            }
+        }
+        validate<UpdateCurrentMusicBody> { body ->
+            if (body.isValid()) {
                 ValidationResult.Valid
             } else {
                 ValidationResult.Invalid(InvalidRequestType.InvalidData.name)

@@ -1,15 +1,23 @@
 package com.github.enteraname74.cloudy.domain.util
 
-import io.ktor.http.content.PartData
+import com.github.enteraname74.cloudy.logging.CloudyLogger
+import io.ktor.http.content.*
+import io.ktor.http.websocket.websocketServerAccept
 
 object FileUtils {
+    private val logger = CloudyLogger(this::class)
     fun getFileExtension(fileName: String): String? =
         fileName
             .substringAfterLast('.', "")
             .takeIf { it.isNotEmpty() }
 
     fun isMusicFile(part: PartData.FileItem): Boolean {
-        val type: String = part.contentType?.toString() ?: return false
+        val type: String? = part.contentType?.toString()
+        if (type == null) {
+            logger.warn("Couldn't found file content type from file part")
+            return false
+        }
+        logger.debug("Got music part type: $type")
         val authorizedMimeTypes =
             listOf(
                 "audio/mpeg",        // MP3 files

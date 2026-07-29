@@ -14,7 +14,7 @@ class AddMusicsToPlaylistUseCase(
         playlistId: Uuid,
         userId: Uuid,
     ) {
-        val safeMusics: List<String> = musicRepository.getExistingIds(
+        val safeMusics: List<String> = musicRepository.getExistingIdsOfUser(
             userId = userId,
             ids = musicIds,
         )

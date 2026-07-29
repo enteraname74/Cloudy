@@ -3,14 +3,21 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.ext.toGb
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
+import com.github.enteraname74.cloudy.domain.model.user.UserType
+import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
+import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import kotlin.uuid.Uuid
 
 class UserService(
     private val userRepository: UserRepository,
-    private val hashedPasswordManager: HashedPasswordManager
+    private val userInscriptionCodeRepository: UserInscriptionCodeRepository,
+    private val hashedPasswordManager: HashedPasswordManager,
+    private val playerRepository: PlayerRepository,
 ) {
     suspend fun isUsernameUsed(username: String): Boolean =
         userRepository.getFromUsername(username = username) != null
@@ -24,7 +31,7 @@ class UserService(
     suspend fun createUser(
         username: String,
         password: String,
-        isAdmin: Boolean = false,
+        type: UserType,
     ): CloudyResult<User> {
         val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
             password = password,
@@ -33,13 +40,38 @@ class UserService(
         val user = User(
             username = username,
             hashedPassword = hashedPassword,
-            isAdmin = isAdmin,
             id = Uuid.random(),
+            type = type,
         )
 
         val savedUser: User = userRepository.upsert(user = user)
 
         return CloudyResult.Success(data = savedUser)
+    }
+
+    suspend fun createUserWithInscriptionCode(
+        username: String,
+        password: String,
+        type: UserType,
+        inscriptionCode: Uuid,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<User> {
+        val hashedPassword: HashedPassword = hashedPasswordManager.buildHashedPassword(
+            password = password,
+        ) ?: return CloudyResult.Error(routingMessages.CANNOT_CREATE_USER)
+
+        val user = User(
+            username = username,
+            hashedPassword = hashedPassword,
+            id = Uuid.random(),
+            type = type,
+        )
+
+        return userRepository.createWithInscriptionCode(
+            user = user,
+            inscriptionCode = inscriptionCode,
+            routingMessages = routingMessages,
+        )
     }
 
     suspend fun logUser(username: String, password: String): CloudyResult<User> {
@@ -63,6 +95,8 @@ class UserService(
 
     suspend fun deleteUser(userId: Uuid) {
         userRepository.delete(id = userId)
+        // TODO: broadcast deleted played lists or updated played lists because of user deletion
+        playerRepository.deleteAllIfEmpty()
     }
 
     suspend fun isUserDirectoryFull(
@@ -83,6 +117,39 @@ class UserService(
         val userToDelete: User = userRepository.getFromId(userId = userIdToDelete) ?: return false
 
         return (requester == userIdToDelete) || (userRequester.isAdmin && !userToDelete.isAdmin)
+    }
+
+    suspend fun generateCode(
+        userId: Uuid,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<UserInscriptionCode> {
+        val user: User = userRepository.getFromId(userId) ?: return CloudyResult.Error(routingMessages.CANNOT_FIND_USER)
+
+        if (!user.isAdmin) {
+            return CloudyResult.Error(routingMessages.NOT_AN_ADMIN)
+        }
+
+        return CloudyResult.Success(
+            data = userInscriptionCodeRepository.generate(userId = userId)
+        )
+    }
+
+    suspend fun getAllCodesOfUser(
+        userId: Uuid,
+    ): List<UserInscriptionCode> =
+        userInscriptionCodeRepository.allOfUser(userId = userId)
+
+    suspend fun deleteCode(
+        userId: Uuid,
+        code: Uuid,
+        routingMessages: RoutingMessages,
+    ): CloudyResult<Unit> {
+        val code: UserInscriptionCode = userInscriptionCodeRepository.getFromCode(code = code)
+            ?.takeIf { it.ownerId == userId } ?: return CloudyResult.Error(routingMessages.INSCRIPTION_CODE_NOT_FOUND)
+
+        userInscriptionCodeRepository.delete(code = code.code)
+
+        return CloudyResult.Success(Unit)
     }
 
     companion object {

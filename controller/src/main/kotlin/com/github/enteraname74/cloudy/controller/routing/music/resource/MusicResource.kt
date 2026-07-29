@@ -11,6 +11,11 @@ class MusicResource {
         val parent: MusicResource = MusicResource()
     )
 
+    @Resource("fetch")
+    data class FetchFromUrl(
+        val parent: MusicResource = MusicResource(),
+    )
+
     @Resource("check")
     data class Check(
         val parent: MusicResource = MusicResource()
@@ -30,10 +35,18 @@ class MusicResource {
                 limitPerPage = maxPerPage,
             )
     }
+
     @Resource("{id}")
     data class File(
         val parent: MusicResource = MusicResource(),
         val id: String,
+    )
+
+    @Resource("token")
+    data class FileFromToken(
+        val parent: MusicResource,
+        val token: String,
+        val musicId: String,
     )
 
     @Resource("cover/{coverId}")

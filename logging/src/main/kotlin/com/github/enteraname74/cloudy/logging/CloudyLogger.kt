@@ -24,27 +24,42 @@ class CloudyLogger<T : Any>(kClass: KClass<T>) {
     fun debug(
         message: String,
         feature: String? = null
-    ) = logger.debug(message.format(feature))
+    ) {
+        logger.debug(message.format(feature))
+    }
 
     fun trace(
         message: String,
         feature: String? = null
-    ) = logger.trace(message.format(feature = feature))
+    ) {
+        logger.trace(message.format(feature = feature))
+    }
 
     fun info(
         message: String,
         feature: String? = null
-    ) = logger.info(message.format(feature = feature))
+    ) {
+        logger.info(message.format(feature = feature))
+    }
 
     fun warn(
         message: String,
         feature: String? = null
-    ) = logger.warn(message.format(feature = feature))
+    ) {
+        logger.warn(message.format(feature = feature))
+    }
 
     fun error(
         message: String,
         feature: String? = null
-    ) = logger.error(message.format(feature = feature))
+    ) {
+        logger.error(message.format(feature = feature))
+    }
+
+    companion object {
+        fun <T : Any> global(kClass: KClass<T>): CloudyLogger<T> =
+            CloudyLogger(kClass = kClass)
+    }
 }
 
 val Route.cloudyLogger: CloudyLogger<*>

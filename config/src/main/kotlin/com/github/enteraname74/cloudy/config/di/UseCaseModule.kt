@@ -2,11 +2,9 @@ package com.github.enteraname74.cloudy.config.di
 
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
@@ -21,12 +19,10 @@ import org.koin.dsl.module
 internal val useCaseModule = module {
     // Album
     factoryOf(::DeleteAlbumIfEmptyUseCase)
-    factoryOf(::GetOrCreateAlbumUseCase)
     factoryOf(::UploadAlbumUseCase)
     factoryOf(::UpdateAlbumUseCase)
 
     // Artist
-    factoryOf(::GetOrCreateArtistUseCase)
     factoryOf(::DeleteArtistIfEmptyUseCase)
     factoryOf(::UploadArtistUseCase)
     factoryOf(::UpdateArtistUseCase)

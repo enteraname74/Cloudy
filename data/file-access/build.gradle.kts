@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":logging"))
     implementation(project(":domain"))
     testImplementation(kotlin("test"))
+    implementation(libs.kotlinx.coroutines)
 }
 
 tasks.test {

@@ -1,8 +1,10 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.FileSavingData
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
@@ -20,8 +22,9 @@ interface MusicRepository {
      */
     suspend fun startUploadProcess(
         user: User,
-        fileData: FileData,
+        data: FileSavingData,
         shouldSearchForMetadata: Boolean,
+        musicUpload: MusicUpload?,
     ): UploadProcessState
 
     /**
@@ -34,12 +37,14 @@ interface MusicRepository {
         username: String,
         cover: FileData?,
     ): CloudyResult<Music>
+
     suspend fun upsertAll(musicIds: List<Music>, username: String): CloudyResult<Unit>
     suspend fun getFromId(musicId: String): Music?
     suspend fun getFromUser(
         musicId: String,
         userId: Uuid,
     ): Music?
+
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(musicId: String, username: String): File?
     suspend fun getAll(ids: List<String>): List<Music>
@@ -53,8 +58,12 @@ interface MusicRepository {
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Music>
 
-    suspend fun getExistingIds(
+    suspend fun getExistingIdsOfUser(
         userId: Uuid,
+        ids: List<String>,
+    ): List<String>
+
+    suspend fun getExistingIds(
         ids: List<String>,
     ): List<String>
 
@@ -74,6 +83,7 @@ interface MusicRepository {
          */
         data class ContinueProcess(
             val fingerprint: String,
-        ): UploadProcessState
+            val musicUpload: MusicUpload,
+        ) : UploadProcessState
     }
 }

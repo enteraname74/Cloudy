@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.controller.config
 
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
-import com.github.enteraname74.cloudy.controller.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -31,6 +31,7 @@ internal fun Application.configureStatusPage() {
         exception<Throwable> { call, cause ->
             call.respond(
                 status = HttpStatusCode.InternalServerError,
+                // TODO: This could leak data like SQL details, db paths?
                 message = call.getRoutingMessages().internalServerError(
                     error = cause.message.orEmpty()
                 ),
