@@ -14,7 +14,6 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudySuccess
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
-import com.github.enteraname74.cloudy.logging.CloudyLogger
 import kotlin.uuid.Uuid
 
 class PlayerService(

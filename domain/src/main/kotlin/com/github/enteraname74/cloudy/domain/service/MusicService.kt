@@ -97,20 +97,6 @@ class MusicService(
             musicUpload = musicUpload,
         )
 
-    suspend fun saveFromUrl(
-        user: User,
-        url: String,
-    ): CloudyResult<Music> =
-        saveData(
-            user = user,
-            fileSavingData = FileSavingData.MusicUrl(
-                username = user.username,
-                url = url,
-            ),
-            shouldSearchForMetadata = false,
-            musicUpload = null,
-        )
-
     suspend fun update(
         musicUpdate: MusicUpdate,
         user: User,
