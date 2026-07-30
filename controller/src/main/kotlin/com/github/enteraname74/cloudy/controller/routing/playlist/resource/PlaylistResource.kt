@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.controller.routing.playlist.resource
 
-import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import io.ktor.resources.Resource
 
@@ -24,7 +23,7 @@ class PlaylistResource {
 
     @Resource("cover/{coverId}")
     data class Cover(
-        val parent: MusicResource = MusicResource(),
+        val parent: PlaylistResource = PlaylistResource(),
         val coverId: String,
     )
 
