@@ -24,7 +24,6 @@ fun Route.uploadPlaylist() {
     val userService by inject<UserService>()
 
     post<PlaylistResource> {
-        cloudyLogger.debug("PLAYLIST PROCESS")
 
         val userId: Uuid = getUserIdFromToken() ?: return@post missingTokenInformation()
         val user: User = userService.getUserFromId(userId) ?: return@post cannotFindUser()
@@ -32,11 +31,10 @@ fun Route.uploadPlaylist() {
         val multipartData: MultiPartData = call.receiveMultipart()
         when (val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)) {
             is CloudyResult.Error -> {
-                cloudyLogger.debug("ERROR: $uploadData")
+                cloudyLogger.error("ERROR: $uploadData")
                 respond(uploadData)
             }
             is CloudyResult.Success -> {
-                cloudyLogger.debug("PLAYLIST PROCESS CONTINUED")
                 respond(
                     playlistService.upload(
                         playlistUpload = uploadData.data.second,

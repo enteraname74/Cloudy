@@ -2,9 +2,9 @@ package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
@@ -17,7 +17,7 @@ interface MusicRepository {
      * It will handle the file part of it (saving the file, retrieving its metadata...)
      *
      * @param user the user that possess the music
-     * @param fileData the file data of the music
+     * @param data the file data of the music
      * @param shouldSearchForMetadata if the system should search music metadata from remote sources
      */
     suspend fun startUploadProcess(

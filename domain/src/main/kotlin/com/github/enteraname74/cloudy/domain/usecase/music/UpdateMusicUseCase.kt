@@ -1,10 +1,10 @@
 package com.github.enteraname74.cloudy.domain.usecase.music
 
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase

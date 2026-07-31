@@ -48,7 +48,9 @@ class UploadPlaylistUseCase(
         coverData: FileData?,
         user: User,
     ): Playlist {
-        val existingPlaylist: Playlist? = playlistRepository.getFromInformation(
+        val existingPlaylist: Playlist? = playlistUpload.id?.let {
+            playlistRepository.getFromId(it)
+        } ?: playlistRepository.getFromInformation(
             name = playlistUpload.name,
             userId = user.id,
         )

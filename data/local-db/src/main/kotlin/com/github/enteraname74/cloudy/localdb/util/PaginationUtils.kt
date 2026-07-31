@@ -3,7 +3,7 @@ package com.github.enteraname74.cloudy.localdb.util
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Op
-import org.jetbrains.exposed.v1.core.greaterEq
+import org.jetbrains.exposed.v1.core.greater
 import org.jetbrains.exposed.v1.jdbc.SizedIterable
 
 internal fun <T> SizedIterable<T>.paginated(
@@ -19,5 +19,5 @@ internal fun <T> SizedIterable<T>.paginated(
 
 internal infix fun Column<Long>.updatedAfter(other: Long?): Op<Boolean> =
     (other?.let { lastUpdateAt ->
-        this greaterEq lastUpdateAt
+        this greater lastUpdateAt
     } ?: Op.TRUE)

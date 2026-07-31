@@ -5,6 +5,7 @@ import kotlin.uuid.Uuid
 
 @Serializable
 data class PlaylistUpload(
+    val id: Uuid?,
     val name: String,
     val isFavorite: Boolean,
     val nbPlayed: Int,

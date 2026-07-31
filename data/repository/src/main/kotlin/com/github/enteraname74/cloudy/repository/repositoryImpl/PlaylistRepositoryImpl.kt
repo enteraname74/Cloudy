@@ -69,9 +69,10 @@ class PlaylistRepositoryImpl(
             "${Playlist.COVER_PATH}$it"
         }
 
+        val now = DateUtils.now()
         return playlistDataSource.upsert(
             playlist = playlist.copy(
-                lastUpdateAtMillis = DateUtils.now(),
+                lastUpdateAtMillis = now,
                 coverPath = newCoverPath ?: playlist.coverPath,
             ),
         )
