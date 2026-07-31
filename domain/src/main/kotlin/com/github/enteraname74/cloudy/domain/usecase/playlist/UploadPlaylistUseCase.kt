@@ -11,7 +11,7 @@ import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 
 class UploadPlaylistUseCase(
     private val playlistRepository: PlaylistRepository,
-    private val addMusicsToPlaylistUseCase: AddMusicsToPlaylistUseCase,
+    private val setPlaylistMusicsUseCase: SetPlaylistMusicsUseCase,
 ) {
     suspend operator fun invoke(
         playlistUpload: PlaylistUpload,
@@ -32,7 +32,7 @@ class UploadPlaylistUseCase(
             )
         }
 
-        addMusicsToPlaylistUseCase(
+        setPlaylistMusicsUseCase(
             musicIds = playlistUpload.musicIds,
             playlistId = savedPlaylist.id,
             userId = user.id,

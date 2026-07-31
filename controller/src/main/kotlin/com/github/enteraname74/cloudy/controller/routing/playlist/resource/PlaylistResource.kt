@@ -31,4 +31,9 @@ class PlaylistResource {
     data class Check(
         val parent: PlaylistResource = PlaylistResource()
     )
+
+    @Resource("musics")
+    data class DeleteMusics(
+        val parent: PlaylistResource = PlaylistResource(),
+    )
 }
