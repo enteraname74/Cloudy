@@ -88,7 +88,7 @@ abstract class FileManager {
 
     private fun saveUserData(
         data: FileSavingData.UserFile,
-    ): Uuid ? = try {
+    ): Uuid? = try {
         val fileId = Uuid.random()
         val filename = "$fileId.${data.fileData.extension}"
         val filepath = "${getFileDirectory(data.username)}/$filename"

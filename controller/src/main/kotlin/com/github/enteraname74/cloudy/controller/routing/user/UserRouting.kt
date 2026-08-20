@@ -11,5 +11,6 @@ fun Routing.userRoutes() {
         deleteUser()
         allCodesOfUser()
         deleteCode()
+        getUserStorage()
     }
 }

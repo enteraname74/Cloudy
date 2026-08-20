@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
+import com.github.enteraname74.cloudy.domain.model.user.UserStorage
 import com.github.enteraname74.cloudy.domain.model.user.UserType
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
@@ -108,6 +109,13 @@ class UserService(
 
         return gbSize >= MAX_USER_DIRECTORY_SIZE_IN_GB
     }
+
+    suspend fun getUserStorage(
+        username: String,
+    ): UserStorage = UserStorage(
+        max = MAX_USER_DIRECTORY_SIZE_IN_GB,
+        current = userRepository.getUserDirectorySize(username).toInt()
+    )
 
     suspend fun canDeleteUser(
         requester: Uuid,

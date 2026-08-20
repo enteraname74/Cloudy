@@ -14,6 +14,7 @@ interface UserRepository {
         inscriptionCode: Uuid,
         routingMessages: RoutingMessages,
     ): CloudyResult<User>
+
     suspend fun delete(id: Uuid)
     suspend fun getAll(): List<User>
 
