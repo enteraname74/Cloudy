@@ -15,7 +15,6 @@ data class UserStorage(
 
         fun copyData(total: Double): StorageType
 
-
         @Serializable
         @SerialName("AllAvailable")
         data class AllAvailable(override val total: Double) : StorageType {
