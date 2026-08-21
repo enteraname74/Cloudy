@@ -1,6 +1,8 @@
 package com.github.enteraname74.cloudy.controller.util
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdateSpec
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
@@ -111,6 +113,38 @@ object MultiPartDataUtils {
                     musicFile = musicFile!!,
                     musicCover = cover,
                     spec = musicUploadSpec!!,
+                )
+            )
+        } else {
+            CloudyResult.Error()
+        }
+    }
+
+    suspend fun processMusicUpdateRequest(request: MultiPartData): CloudyResult<MusicUpdatePayload> {
+        var musicUpdateSpec: MusicUpdateSpec? = null
+        var cover: FileData? = null
+        request.forEachPart { part ->
+            when (part) {
+                is PartData.FormItem -> {
+                    musicUpdateSpec = CloudyJson.decodeFromString(part.value)
+                }
+
+                is PartData.FileItem -> {
+                    if (cover == null) {
+                        cover = retrieveImageData(part)
+                    }
+                }
+
+                else -> {}
+            }
+            part.dispose()
+        }
+
+        return if (musicUpdateSpec != null) {
+            CloudyResult.Success(
+                MusicUpdatePayload(
+                    musicCover = cover,
+                    spec = musicUpdateSpec!!,
                 )
             )
         } else {

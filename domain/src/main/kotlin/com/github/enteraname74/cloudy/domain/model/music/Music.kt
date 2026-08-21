@@ -47,17 +47,17 @@ data class Music(
         )
 
     fun merge(
-        musicUpdate: MusicUpdate,
+        musicUpdateSpec: MusicUpdateSpec,
         artists: List<Artist>,
         album: Album,
     ): Music =
         copy(
-            name = musicUpdate.name,
+            name = musicUpdateSpec.name,
             album = album,
             artists = artists,
-            albumPosition = musicUpdate.albumPosition,
-            nbPlayed = musicUpdate.nbPlayed,
-            isInQuickAccess = musicUpdate.isInQuickAccess,
+            albumPosition = musicUpdateSpec.albumPosition,
+            nbPlayed = musicUpdateSpec.nbPlayed,
+            isInQuickAccess = musicUpdateSpec.isInQuickAccess,
         )
 
     companion object {

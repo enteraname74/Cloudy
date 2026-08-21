@@ -31,7 +31,7 @@ fun Route.uploadPlaylist() {
         val multipartData: MultiPartData = call.receiveMultipart()
         when (val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)) {
             is CloudyResult.Error -> {
-                cloudyLogger.error("ERROR: $uploadData")
+                cloudyLogger.error("Error while uploading playlist: $uploadData")
                 respond(uploadData)
             }
             is CloudyResult.Success -> {

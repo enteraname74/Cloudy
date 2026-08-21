@@ -5,7 +5,7 @@ import com.github.enteraname74.cloudy.domain.model.artist.ArtistUpdate
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class MusicUpdate(
+data class MusicUpdateSpec(
     val id: String,
     val name: String,
     val album: AlbumUpdate,

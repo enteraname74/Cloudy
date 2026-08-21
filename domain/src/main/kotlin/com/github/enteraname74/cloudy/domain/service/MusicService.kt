@@ -3,7 +3,7 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.model.user.User
@@ -16,7 +16,6 @@ import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.logging.CloudyLogger
 import java.io.File
 import kotlin.uuid.Uuid
 
@@ -103,11 +102,11 @@ class MusicService(
         )
 
     suspend fun update(
-        musicUpdate: MusicUpdate,
+        payload: MusicUpdatePayload,
         user: User,
     ): CloudyResult<Music> =
         updateMusicUseCase(
-            musicUpdate = musicUpdate,
+            payload = payload,
             user = user,
         )
 

@@ -13,7 +13,7 @@ import com.github.enteraname74.cloudy.controller.routing.player.model.RemoveUser
 import com.github.enteraname74.cloudy.controller.routing.player.model.UpdateCurrentMusicBody
 import com.github.enteraname74.cloudy.controller.routing.player.model.UpdatePlayedListBody
 import com.github.enteraname74.cloudy.controller.routing.playlist.model.UploadPlaylistBody
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdateSpec
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.plugins.requestvalidation.RequestValidation
@@ -36,7 +36,7 @@ fun Application.configureRequestValidation() {
                 ValidationResult.Invalid(InvalidRequestType.UserInformation.name)
             }
         }
-        validate<MusicUpdate> { musicUpdate ->
+        validate<MusicUpdateSpec> { musicUpdate ->
             if (musicUpdate.isValid()) {
                 ValidationResult.Valid
             } else {

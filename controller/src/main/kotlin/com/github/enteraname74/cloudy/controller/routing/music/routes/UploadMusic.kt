@@ -65,6 +65,7 @@ fun Route.uploadMusic() {
 
         when (payload) {
             is CloudyResult.Error -> {
+                cloudyLogger.error("Error while retrieving upload song payload: $payload")
                 return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
             is CloudyResult.Success -> {
@@ -76,6 +77,7 @@ fun Route.uploadMusic() {
 
                 when (uploadedResult) {
                     is CloudyResult.Error -> {
+                        cloudyLogger.error("Error while uploading song: $uploadedResult")
                         return@post badRequest(routingMessages.CANNOT_SAVE_SONG)
                     }
                     is CloudyResult.Success -> {
