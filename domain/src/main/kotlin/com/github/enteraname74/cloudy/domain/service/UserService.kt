@@ -120,15 +120,19 @@ class UserService(
         val userDirectorySize = userRepository.getUserDirectorySize(username)
         val gbSize = (userDirectorySize + addedSize).toGb()
 
-        return gbSize >= MAX_USER_DIRECTORY_SIZE_IN_GB
+        return gbSize >= userRepository.getUserDirectoryMaxSizeInGb(username).total
     }
 
     suspend fun getUserStorage(
         username: String,
-    ): UserStorage = UserStorage(
-        max = MAX_USER_DIRECTORY_SIZE_IN_GB.toDouble(),
-        current = userRepository.getUserDirectorySize(username).toGb().roundToTwoDecimals(),
-    )
+    ): UserStorage {
+        val max = userRepository.getUserDirectoryMaxSizeInGb(username)
+
+        return UserStorage(
+            max = max.copyData(total = max.total.roundToTwoDecimals()),
+            current = userRepository.getUserDirectorySize(username).toGb().roundToTwoDecimals(),
+        )
+    }
 
     suspend fun canDeleteUser(
         requester: Uuid,
@@ -171,10 +175,5 @@ class UserService(
         userInscriptionCodeRepository.delete(code = code.code)
 
         return CloudyResult.Success(Unit)
-    }
-
-    companion object {
-        // TODO Make the total of free space by user dependant on each user.
-        private val MAX_USER_DIRECTORY_SIZE_IN_GB = System.getenv("TOTAL_SPACE_PER_FOLDER")?.toIntOrNull() ?: 10
     }
 }

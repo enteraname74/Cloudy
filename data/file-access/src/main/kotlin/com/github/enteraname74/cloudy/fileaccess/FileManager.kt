@@ -7,6 +7,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import kotlin.uuid.Uuid
 
@@ -34,8 +35,11 @@ abstract class FileManager {
     }
 
     // TODO user directory should be set from the user id instead?
-    protected fun getUserDirectory(username: String): String =
-        "$APP_FOLDER/$username"
+    protected fun getUserDirectory(username: String): String {
+        val path = "$APP_FOLDER/$username"
+        File(path).mkdir()
+        return path
+    }
 
     fun deleteUserDirectory(username: String) {
         File(getUserDirectory(username)).deleteRecursively()
@@ -63,6 +67,16 @@ abstract class FileManager {
             .sumOf { it.length() }
 
         return directorySize
+    }
+
+    /**
+     * Returns the max size usable on the user directory
+     */
+    fun getUserDirectoryMaxSize(username: String): Long {
+        val userDirectory = getUserDirectory(username = username)
+        val directory = File(userDirectory)
+
+        return directory.usableSpace
     }
 
     open fun delete(name: String, username: String) {
@@ -180,6 +194,13 @@ abstract class FileManager {
     }
 
     companion object {
-        const val APP_FOLDER = "cloudy_data"
+        private fun isUsingSQLite(): Boolean =
+            System.getenv("DB_URL")?.contains("sqlite") ?: false
+
+        val APP_FOLDER = if (isUsingSQLite()) {
+            "cloudy_data"
+        } else {
+            "/cloudy_data"
+        }
     }
 }

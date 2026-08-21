@@ -1,6 +1,8 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
+import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.user.UserStorage
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -11,7 +13,7 @@ import kotlin.uuid.Uuid
 class UserRepositoryImpl(
     private val userDataSource: UserDataSource,
     private val musicFileManager: MusicFileManager,
-): UserRepository {
+) : UserRepository {
     override suspend fun getFromUsername(username: String): User? =
         userDataSource.getFromUsername(username = username)
 
@@ -48,4 +50,19 @@ class UserRepositoryImpl(
 
     override suspend fun getUserDirectorySize(username: String): Long =
         musicFileManager.getUserDirectorySize(username)
+
+    override suspend fun getUserDirectoryMaxSizeInGb(username: String): UserStorage.StorageType {
+        val defaultMaxSize = UserStorage.StorageType.Reduced(
+            (System.getenv("TOTAL_SPACE_PER_FOLDER")?.toLongOrNull() ?: 10L).toDouble()
+        )
+        val user = userDataSource.getFromUsername(username) ?: return defaultMaxSize
+
+        return if (user.isAdmin) {
+            UserStorage.StorageType.AllAvailable(
+                total = musicFileManager.getUserDirectoryMaxSize(username = user.username).toGb(),
+            )
+        } else {
+            defaultMaxSize
+        }
+    }
 }
