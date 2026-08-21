@@ -94,6 +94,10 @@ class ArtistRepositoryImpl(
     override suspend fun deleteAll(artistIds: List<Uuid>) =
         artistDataSource.deleteAll(artistIds)
 
+    override suspend fun deleteOfUser(userId: Uuid) {
+        artistDataSource.deleteOfUser(userId = userId)
+    }
+
     override suspend fun deleteAllEmpty() {
         artistDataSource.deleteAllEmpty()
     }

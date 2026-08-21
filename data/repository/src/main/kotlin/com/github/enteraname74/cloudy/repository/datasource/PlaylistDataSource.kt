@@ -35,6 +35,7 @@ interface PlaylistDataSource {
         updatedAt: Long,
     )
     suspend fun deleteAll(playlistIds: List<Uuid>)
+    suspend fun deleteOfUser(userId: Uuid)
     suspend fun allOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest,

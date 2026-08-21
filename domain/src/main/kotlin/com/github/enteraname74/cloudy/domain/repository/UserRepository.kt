@@ -16,6 +16,7 @@ interface UserRepository {
     ): CloudyResult<User>
 
     suspend fun delete(id: Uuid)
+    suspend fun clearUserDirectory(userId: Uuid)
     suspend fun getAll(): List<User>
 
     /**

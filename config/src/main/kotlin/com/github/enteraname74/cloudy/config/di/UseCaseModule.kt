@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.config.di
 
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
+import com.github.enteraname74.cloudy.domain.usecase.DeleteUserDataUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
@@ -39,4 +40,5 @@ internal val useCaseModule = module {
     factoryOf(::UploadPlaylistUseCase)
 
     factoryOf(::DeleteEmptyAlbumsAndArtistsUseCase)
+    factoryOf(::DeleteUserDataUseCase)
 }

@@ -91,6 +91,10 @@ class PlaylistRepositoryImpl(
         playlistDataSource.deleteAll(playlistIds)
     }
 
+    override suspend fun deleteOfUser(userId: Uuid) {
+        playlistDataSource.deleteOfUser(userId)
+    }
+
     override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<PlaylistWithMusics> =
         playlistDataSource.allOfUser(
             userId = userId,

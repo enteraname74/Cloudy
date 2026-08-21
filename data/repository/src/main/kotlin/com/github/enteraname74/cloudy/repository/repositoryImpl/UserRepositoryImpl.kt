@@ -38,6 +38,11 @@ class UserRepositoryImpl(
         musicFileManager.deleteUserDirectory(username = user.username)
     }
 
+    override suspend fun clearUserDirectory(userId: Uuid) {
+        val user = userDataSource.getFromId(userId = userId) ?: return
+        musicFileManager.clearUserDirectory(username = user.username)
+    }
+
     override suspend fun getAll(): List<User> =
         userDataSource.getAll()
 

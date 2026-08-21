@@ -41,6 +41,16 @@ abstract class FileManager {
         File(getUserDirectory(username)).deleteRecursively()
     }
 
+    fun clearUserDirectory(username: String) {
+        val directory = File(getUserDirectory(username))
+
+        if (!directory.exists() || !directory.isDirectory) {
+            return
+        }
+
+        directory.listFiles()?.all { child -> child.deleteRecursively() }
+    }
+
     /**
      * Retrieves the user directory size.
      */

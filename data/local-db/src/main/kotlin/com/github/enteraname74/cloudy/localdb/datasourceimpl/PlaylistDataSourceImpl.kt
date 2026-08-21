@@ -106,6 +106,14 @@ class PlaylistDataSourceImpl(
         }
     }
 
+    override suspend fun deleteOfUser(userId: Uuid) {
+        workTransaction {
+            PlaylistTable.deleteWhere {
+                this.userId eq userId
+            }
+        }
+    }
+
     override suspend fun allOfUser(userId: Uuid, paginatedRequest: PaginatedRequest): List<PlaylistWithMusics> =
         workTransaction {
             PlaylistEntity

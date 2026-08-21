@@ -94,6 +94,14 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
     }
 
+    override suspend fun deleteOfUser(userId: Uuid) {
+        workTransaction {
+            ArtistTable.deleteWhere {
+                this.userId eq userId
+            }
+        }
+    }
+
     override suspend fun deleteAllEmpty() {
         workTransaction {
             ArtistTable.deleteWhere {

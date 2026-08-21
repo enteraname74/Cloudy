@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserStorage(
-    val max: Int,
-    val current: Int,
+    val max: Double,
+    val current: Double,
 )

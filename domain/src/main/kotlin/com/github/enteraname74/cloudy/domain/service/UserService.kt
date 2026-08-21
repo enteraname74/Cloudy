@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
+import com.github.enteraname74.cloudy.domain.ext.roundToTwoDecimals
 import com.github.enteraname74.cloudy.domain.ext.toGb
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
@@ -11,6 +12,7 @@ import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.repository.UserInscriptionCodeRepository
 import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.domain.usecase.DeleteUserDataUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import kotlin.uuid.Uuid
 
@@ -19,6 +21,7 @@ class UserService(
     private val userInscriptionCodeRepository: UserInscriptionCodeRepository,
     private val hashedPasswordManager: HashedPasswordManager,
     private val playerRepository: PlayerRepository,
+    private val deleteUserDataUseCase: DeleteUserDataUseCase,
 ) {
     suspend fun isUsernameUsed(username: String): Boolean =
         userRepository.getFromUsername(username = username) != null
@@ -100,6 +103,16 @@ class UserService(
         playerRepository.deleteAllIfEmpty()
     }
 
+    /**
+     * Deletes user data, without deleting its account.
+     * It will delete its data in the database and clear (without deleting) its folder.
+     */
+    suspend fun clearUserData(
+        userId: Uuid,
+    ) {
+        deleteUserDataUseCase(userId)
+    }
+
     suspend fun isUserDirectoryFull(
         username: String,
         addedSize: Long = 0L,
@@ -113,8 +126,8 @@ class UserService(
     suspend fun getUserStorage(
         username: String,
     ): UserStorage = UserStorage(
-        max = MAX_USER_DIRECTORY_SIZE_IN_GB,
-        current = userRepository.getUserDirectorySize(username).toInt()
+        max = MAX_USER_DIRECTORY_SIZE_IN_GB.toDouble(),
+        current = userRepository.getUserDirectorySize(username).toGb().roundToTwoDecimals(),
     )
 
     suspend fun canDeleteUser(
@@ -161,6 +174,7 @@ class UserService(
     }
 
     companion object {
+        // TODO Make the total of free space by user dependant on each user.
         private val MAX_USER_DIRECTORY_SIZE_IN_GB = System.getenv("TOTAL_SPACE_PER_FOLDER")?.toIntOrNull() ?: 10
     }
 }
