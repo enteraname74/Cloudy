@@ -109,8 +109,13 @@ class UserService(
      */
     suspend fun clearUserData(
         userId: Uuid,
-    ) {
+        routingMessages: RoutingMessages,
+    ): CloudyResult<UserStorage> {
+        val user = userRepository.getFromId(userId = userId) ?: return CloudyResult.Error(
+            message = routingMessages.CANNOT_FIND_USER,
+        )
         deleteUserDataUseCase(userId)
+        return CloudyResult.Success(getUserStorage(user.username))
     }
 
     suspend fun isUserDirectoryFull(

@@ -15,7 +15,6 @@ interface RoutingMessages {
     val INVALID_INSCRIPTION_CODE: String
     val MISSING_PERMISSION_FOR_DELETION: String
     val USER_DELETED: String
-    val USER_DATA_DELETED: String
 
     val INSCRIPTION_CODE_NOT_FOUND: String
 

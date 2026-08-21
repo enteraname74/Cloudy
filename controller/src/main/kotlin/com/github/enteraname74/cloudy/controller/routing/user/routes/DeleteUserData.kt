@@ -4,11 +4,10 @@ import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
-import com.github.enteraname74.cloudy.controller.ext.response
+import com.github.enteraname74.cloudy.controller.ext.respond
 import com.github.enteraname74.cloudy.controller.routing.user.resource.UserResource
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.UserService
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.resources.*
 import io.ktor.server.routing.*
 import org.koin.ktor.ext.inject
@@ -26,10 +25,11 @@ fun Route.deleteUserData() {
             message = routingMessages.CANNOT_FIND_USER,
         )
 
-        userService.clearUserData(userId)
-        response(
-            status = HttpStatusCode.OK,
-            message = routingMessages.USER_DATA_DELETED,
+        respond(
+            userService.clearUserData(
+                userId = userId,
+                routingMessages = routingMessages,
+            )
         )
     }
 }
