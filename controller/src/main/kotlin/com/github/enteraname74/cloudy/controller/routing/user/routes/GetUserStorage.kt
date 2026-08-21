@@ -17,7 +17,7 @@ import kotlin.uuid.Uuid
 fun Route.getUserStorage() {
     val userService by inject<UserService>()
 
-    get<UserResource> {
+    get<UserResource.Storage> {
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()

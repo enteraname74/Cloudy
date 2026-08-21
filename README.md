@@ -47,6 +47,17 @@ http:
 ```
 
 ## Development mode
+### Launch locally without docker
+You can launch the app locally using a premade bash script. Be sure to make the bash script executable on your device:
+```shell
+chmod +x launch_backend.sh
+```
+Then, launch the project using the script. You will need to pass a path to your env file:
+```shell
+# Here, the .env file is located at the same place as the script.
+./launch_backend.sh .env
+```
+
 ### Launch locally with docker
 
 Build the jar of the ktor backend

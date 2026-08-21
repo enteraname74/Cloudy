@@ -33,8 +33,13 @@ abstract class FileManager {
             }
     }
 
+    // TODO user directory should be set from the user id instead?
     protected fun getUserDirectory(username: String): String =
         "$APP_FOLDER/$username"
+
+    fun deleteUserDirectory(username: String) {
+        File(getUserDirectory(username)).deleteRecursively()
+    }
 
     /**
      * Retrieves the user directory size.
@@ -165,6 +170,6 @@ abstract class FileManager {
     }
 
     companion object {
-        const val APP_FOLDER = "/cloudy_data"
+        const val APP_FOLDER = "cloudy_data"
     }
 }

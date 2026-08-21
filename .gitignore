@@ -10,6 +10,7 @@ build/
 .factorypath
 .project
 .settings
+.kotlin
 .springBeans
 .sts4-cache
 bin/
