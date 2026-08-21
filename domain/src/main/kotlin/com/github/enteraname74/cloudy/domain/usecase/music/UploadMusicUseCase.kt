@@ -1,15 +1,16 @@
 package com.github.enteraname74.cloudy.domain.usecase.music
 
-import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.logging.CloudyLogger
@@ -24,19 +25,20 @@ class UploadMusicUseCase(
     private val logger = CloudyLogger(this::class)
 
     suspend operator fun invoke(
-        musicUpload: MusicUpload,
+        musicUploadSpec: MusicUploadSpec,
+        cover: FileData?,
         fingerprint: String,
         user: User,
         musicPath: String,
     ): CloudyResult<Music> {
-        val artistOfMusic: List<Artist> = musicUpload.artists.map { artistUpload ->
+        val artistOfMusic: List<Artist> = musicUploadSpec.artists.map { artistUpload ->
             uploadArtistUseCase(
                 artistUpload = artistUpload,
                 user = user,
             )
         }
         val albumOfMusic: Album = uploadAlbumUseCase(
-            albumUpload = musicUpload.albumUpload,
+            albumUpload = musicUploadSpec.albumUpload,
             user = user,
         )
 
@@ -47,16 +49,16 @@ class UploadMusicUseCase(
         val result = if (existingMusic != null) {
             musicRepository.upsert(
                 music = existingMusic.merge(
-                    musicUpload = musicUpload,
+                    musicUploadSpec = musicUploadSpec,
                     artists = artistOfMusic,
                     album = albumOfMusic,
                 ),
                 username = user.username,
-                cover = null,
+                cover = cover,
             )
         } else {
             musicRepository.upsert(
-                music = musicUpload.toNewMusic(
+                music = musicUploadSpec.toNewMusic(
                     userId = user.id,
                     artists = artistOfMusic,
                     album = albumOfMusic,
@@ -64,13 +66,13 @@ class UploadMusicUseCase(
                     path = musicPath,
                 ),
                 username = user.username,
-                cover = null,
+                cover = cover,
             )
         }
 
         return when (result) {
             is CloudyResult.Error -> {
-                logger.error("Failed to persist music information (music name: ${musicUpload.name})")
+                logger.error("Failed to persist music information (music name: ${musicUploadSpec.name})")
                 result
             }
             is CloudyResult.Success -> {

@@ -8,15 +8,15 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
-import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
-import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
+import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
+import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.content.MultiPartData
@@ -59,23 +59,22 @@ fun Route.uploadMusic() {
         ) ?: return@post cannotFindUser()
 
         val shouldSearchForMetadata: Boolean = call.request.queryParameters["searchMetadata"]?.toBoolean() == true
-        val musicFile: CloudyResult<Pair<FileData, MusicUpload>> = MultiPartDataUtils.processMusicUploadRequest(
-            musicFile = multipartData,
+        val payload: CloudyResult<MusicUploadPayload> = MultiPartDataUtils.processMusicUploadRequest(
+            request = multipartData,
         )
 
-        when (musicFile) {
+        when (payload) {
             is CloudyResult.Error -> {
                 return@post badRequest(routingMessages.GIVEN_FILE_IS_NOT_A_MUSIC_FILE)
             }
             is CloudyResult.Success -> {
                 val uploadedResult: CloudyResult<Music> = musicService.saveUserFile(
                     user = user,
-                    fileData = musicFile.data.first,
-                    musicUpload = musicFile.data.second,
                     shouldSearchForMetadata = shouldSearchForMetadata,
+                    payload = payload.data,
                 )
 
-                when(uploadedResult) {
+                when (uploadedResult) {
                     is CloudyResult.Error -> {
                         return@post badRequest(routingMessages.CANNOT_SAVE_SONG)
                     }

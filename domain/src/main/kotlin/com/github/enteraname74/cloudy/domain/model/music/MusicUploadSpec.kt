@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
 
 @Serializable
-data class MusicUpload(
+data class MusicUploadSpec(
     val name: String,
     val albumUpload: AlbumUpload,
     val artists: List<ArtistUpload>,

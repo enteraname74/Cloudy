@@ -2,7 +2,7 @@ package com.github.enteraname74.cloudy.metadata.model
 
 import com.github.enteraname74.cloudy.domain.model.album.AlbumUpload
 import com.github.enteraname74.cloudy.domain.model.artist.ArtistUpload
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 
 data class MusicMetadata(
     val name: String,
@@ -54,8 +54,8 @@ data class MusicMetadata(
             ),
         )
 
-    fun toMusicUpload(): MusicUpload =
-        MusicUpload(
+    fun toMusicUpload(): MusicUploadSpec =
+        MusicUploadSpec(
             name = name,
             albumUpload = album.toAlbumUpload(),
             artists = artists.map { it.toArtistUpload() },

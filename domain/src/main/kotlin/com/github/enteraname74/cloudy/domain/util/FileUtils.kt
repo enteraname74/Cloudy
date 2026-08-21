@@ -17,7 +17,6 @@ object FileUtils {
             logger.warn("Couldn't found file content type from file part")
             return false
         }
-        logger.debug("Got music part type: $type")
         val authorizedMimeTypes =
             listOf(
                 "audio/mpeg",        // MP3 files

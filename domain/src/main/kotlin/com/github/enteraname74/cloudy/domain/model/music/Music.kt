@@ -32,18 +32,18 @@ data class Music(
     }
 
     fun merge(
-        musicUpload: MusicUpload,
+        musicUploadSpec: MusicUploadSpec,
         artists: List<Artist>,
         album: Album,
     ): Music =
         copy(
-            name = musicUpload.name,
+            name = musicUploadSpec.name,
             album = album,
             artists = artists,
-            albumPosition = musicUpload.albumPosition,
-            duration = musicUpload.duration,
-            nbPlayed = musicUpload.nbPlayed,
-            isInQuickAccess = musicUpload.isInQuickAccess,
+            albumPosition = musicUploadSpec.albumPosition,
+            duration = musicUploadSpec.duration,
+            nbPlayed = musicUploadSpec.nbPlayed,
+            isInQuickAccess = musicUploadSpec.isInQuickAccess,
         )
 
     fun merge(

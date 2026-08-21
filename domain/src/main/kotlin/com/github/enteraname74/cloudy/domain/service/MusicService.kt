@@ -4,7 +4,8 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdate
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
@@ -15,6 +16,7 @@ import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import java.io.File
 import kotlin.uuid.Uuid
 
@@ -56,13 +58,15 @@ class MusicService(
         user: User,
         fileSavingData: FileSavingData,
         shouldSearchForMetadata: Boolean,
-        musicUpload: MusicUpload?,
+        musicUploadSpec: MusicUploadSpec?,
+        cover: FileData?,
     ): CloudyResult<Music> {
         val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
             user = user,
             data = fileSavingData,
             shouldSearchForMetadata = shouldSearchForMetadata,
-            musicUpload = musicUpload,
+            musicUploadSpec = musicUploadSpec,
+            cover = cover,
         )
 
         return when (uploadProcess) {
@@ -72,7 +76,8 @@ class MusicService(
 
             is UploadProcessState.ContinueProcess -> {
                 uploadMusicUseCase(
-                    musicUpload = uploadProcess.musicUpload,
+                    musicUploadSpec = uploadProcess.musicUploadSpec,
+                    cover = cover,
                     fingerprint = uploadProcess.fingerprint,
                     user = user,
                     musicPath = "music/${uploadProcess.fingerprint}",
@@ -83,18 +88,18 @@ class MusicService(
 
     suspend fun saveUserFile(
         user: User,
-        fileData: FileData,
-        musicUpload: MusicUpload,
+        payload: MusicUploadPayload,
         shouldSearchForMetadata: Boolean,
     ): CloudyResult<Music> =
         saveData(
             user = user,
             fileSavingData = FileSavingData.UserFile(
                 username = user.username,
-                fileData = fileData,
+                fileData = payload.musicFile,
             ),
             shouldSearchForMetadata = shouldSearchForMetadata,
-            musicUpload = musicUpload,
+            musicUploadSpec = payload.spec,
+            cover = payload.musicCover,
         )
 
     suspend fun update(

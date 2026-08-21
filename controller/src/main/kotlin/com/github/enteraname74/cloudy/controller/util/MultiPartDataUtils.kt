@@ -1,7 +1,8 @@
 package com.github.enteraname74.cloudy.controller.util
 
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.FileUtils
@@ -17,6 +18,27 @@ object MultiPartDataUtils {
         )
         if (
             !FileUtils.isImageFile(fileItem) ||
+            fileExtension == null
+        ) {
+            return null
+        }
+
+        val fileBytes = fileItem.provider().toByteArray()
+        if (fileBytes.isEmpty()) return null
+
+        return FileData(
+            extension = fileExtension,
+            data = fileBytes,
+        )
+    }
+
+    private suspend fun retrieveMusicData(fileItem: PartData.FileItem): FileData? {
+        val fileExtension = FileUtils.getFileExtension(
+            fileName = fileItem.originalFileName.orEmpty()
+        )
+
+        if (
+            !FileUtils.isMusicFile(part = fileItem) ||
             fileExtension == null
         ) {
             return null
@@ -59,34 +81,23 @@ object MultiPartDataUtils {
         }
     }
 
-    suspend fun processMusicUploadRequest(musicFile: MultiPartData): CloudyResult<Pair<FileData, MusicUpload>> {
-        var fileData: FileData? = null
-        var music: MusicUpload? = null
-        musicFile.forEachPart { part ->
+    suspend fun processMusicUploadRequest(request: MultiPartData): CloudyResult<MusicUploadPayload> {
+        var musicFile: FileData? = null
+        var musicUploadSpec: MusicUploadSpec? = null
+        var cover: FileData? = null
+        request.forEachPart { part ->
             when (part) {
                 is PartData.FormItem -> {
-                    music = CloudyJson.decodeFromString(part.value)
+                    musicUploadSpec = CloudyJson.decodeFromString(part.value)
                 }
 
                 is PartData.FileItem -> {
-                    val fileExtension = FileUtils.getFileExtension(
-                        fileName = part.originalFileName.orEmpty()
-                    )
-
-                    if (
-                        !FileUtils.isMusicFile(part = part) ||
-                        fileExtension == null
-                    ) {
-                        return@forEachPart
+                    if (musicFile == null) {
+                        musicFile = retrieveMusicData(part)
                     }
-
-                    val fileBytes = part.provider().toByteArray()
-                    if (fileBytes.isEmpty()) return@forEachPart
-
-                    fileData = FileData(
-                        extension = fileExtension,
-                        data = fileBytes,
-                    )
+                    if (cover == null) {
+                        cover = retrieveImageData(part)
+                    }
                 }
 
                 else -> {}
@@ -94,9 +105,13 @@ object MultiPartDataUtils {
             part.dispose()
         }
 
-        return if (fileData != null && music != null) {
+        return if (musicFile != null && musicUploadSpec != null) {
             CloudyResult.Success(
-                Pair(fileData, music!!)
+                MusicUploadPayload(
+                    musicFile = musicFile!!,
+                    musicCover = cover,
+                    spec = musicUploadSpec!!,
+                )
             )
         } else {
             CloudyResult.Error()

@@ -10,7 +10,7 @@ import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
-import com.github.enteraname74.cloudy.domain.model.music.MusicUpload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.logging.CloudyLogger
@@ -32,7 +32,8 @@ class MusicRepositoryImpl(
         user: User,
         data: FileSavingData,
         shouldSearchForMetadata: Boolean,
-        musicUpload: MusicUpload?,
+        musicUploadSpec: MusicUploadSpec?,
+        cover: FileData?,
     ): UploadProcessState = runCatching {
         // We save the file
         val temporarySavedFileId: Uuid? = musicFileManager.save(
@@ -52,11 +53,11 @@ class MusicRepositoryImpl(
             return@runCatching UploadProcessState.Error
         }
 
-//        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
-//            musicFile = temporarySavedFile,
-//            customMetadata = customMusicMetadata,
-//            shouldSearchForMetadata = shouldSearchForMetadata,
-//        )
+        //        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
+        //            musicFile = temporarySavedFile,
+        //            customMetadata = customMusicMetadata,
+        //            shouldSearchForMetadata = shouldSearchForMetadata,
+        //        )
 
         val fingerprint: String? = musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile)
         if (fingerprint == null) {
@@ -64,7 +65,7 @@ class MusicRepositoryImpl(
             return@runCatching UploadProcessState.Error
         }
 
-        val finalMusicUpload: MusicUpload = musicUpload ?: musicFileMetadataManager
+        val finalMusicUploadSpec: MusicUploadSpec = musicUploadSpec ?: musicFileMetadataManager
             .getMetadataOfFile(musicFile = temporarySavedFile)
             .toMusicUpload()
 
@@ -93,7 +94,8 @@ class MusicRepositoryImpl(
 
         return UploadProcessState.ContinueProcess(
             fingerprint = fingerprint,
-            musicUpload = finalMusicUpload,
+            musicUploadSpec = finalMusicUploadSpec,
+            cover = cover,
         )
     }.getOrElse {
         logger.error(
@@ -108,7 +110,6 @@ class MusicRepositoryImpl(
                 lastUpdateAtMillis = DateUtils.now()
             )
         )
-
 
     override suspend fun upsert(
         music: Music,
