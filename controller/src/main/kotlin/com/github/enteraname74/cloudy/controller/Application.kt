@@ -6,9 +6,9 @@ import com.github.enteraname74.cloudy.controller.routing.configureRouting
 import io.ktor.server.application.Application
 import io.ktor.server.netty.EngineMain
 
-fun main(args: Array<String>): Unit = EngineMain.main(args)
+suspend fun main(args: Array<String>): Unit = EngineMain.main(args)
 
-fun Application.module() {
+suspend fun Application.module() {
     configureApplication()
     configureController()
     configureRouting()

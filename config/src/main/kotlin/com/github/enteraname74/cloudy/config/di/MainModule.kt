@@ -5,6 +5,7 @@ import org.koin.dsl.module
 internal val mainModule = module {
     includes(
         otherModule,
+        databaseModule,
         datasourceModule,
         repositoryModule,
         useCaseModule,

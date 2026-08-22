@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "com.github.enteraname74.cloudy"
@@ -11,6 +12,7 @@ dependencies {
     implementation(project(":domain"))
     testImplementation(kotlin("test"))
     implementation(libs.kotlinx.coroutines)
+    implementation(libs.ktor.serialization.kotlinx.json)
 }
 
 tasks.test {

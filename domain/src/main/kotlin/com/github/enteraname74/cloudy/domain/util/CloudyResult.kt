@@ -10,7 +10,7 @@ sealed interface CloudyResult<T> {
             is Success<*> -> Success(Unit)
         }
 
-    fun <R>mapSuccess(block: (T) -> R): CloudyResult<R> =
+    fun <R> mapSuccess(block: (T) -> R): CloudyResult<R> =
         when (this) {
             is Error -> Error(message = message)
             is Success -> Success(block(data))

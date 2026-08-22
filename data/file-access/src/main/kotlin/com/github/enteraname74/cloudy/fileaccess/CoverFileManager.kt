@@ -2,7 +2,7 @@ package com.github.enteraname74.cloudy.fileaccess
 
 import com.github.enteraname74.cloudy.fileaccess.MusicFileManager.Companion.MUSIC_FOLDER
 
-class CoverFileManager: FileManager() {
+class CoverFileManager : FileManager() {
 
     override fun getFileDirectory(username: String): String =
         "${getUserDirectory(username)}/$MUSIC_FOLDER/$COVERS_FOLDER"
