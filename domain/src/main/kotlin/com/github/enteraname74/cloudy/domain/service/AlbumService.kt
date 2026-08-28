@@ -66,7 +66,7 @@ class AlbumService(
          we need to ensure that the files will be also deleted.
          */
         musicRepository.deleteAll(
-            ids = musicsToDelete.map { it.fingerprint },
+            ids = musicsToDelete.map { it.id },
             username = username,
         )
 

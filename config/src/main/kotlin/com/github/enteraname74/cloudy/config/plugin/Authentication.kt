@@ -52,5 +52,5 @@ fun Route.authenticatedRoutes(
     }
 }
 
-// TODO Release: move to env
+// TODO RELEASE: move to env
 private const val AUTH_NAME = "auth-jwt"

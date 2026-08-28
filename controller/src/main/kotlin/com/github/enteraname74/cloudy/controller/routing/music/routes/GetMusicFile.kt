@@ -6,11 +6,16 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import io.ktor.http.*
-import io.ktor.server.plugins.partialcontent.*
-import io.ktor.server.resources.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.defaultForFile
+import io.ktor.server.plugins.partialcontent.PartialContent
+import io.ktor.server.resources.get
+import io.ktor.server.response.header
+import io.ktor.server.response.respondFile
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import java.io.File
 import kotlin.uuid.Uuid
@@ -24,7 +29,7 @@ fun Route.getMusicFile() {
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val musicFile: File = musicService.getMusicFile(
-            musicId = musicResource.id,
+            fingerprint = musicResource.fingerprint,
             userId = userId,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,

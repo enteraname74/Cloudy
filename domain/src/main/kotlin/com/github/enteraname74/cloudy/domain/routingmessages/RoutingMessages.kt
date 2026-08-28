@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.routingmessages
 
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.routingmessages.impl.EnRoutingMessages
 import com.github.enteraname74.cloudy.domain.routingmessages.impl.FrRoutingMessages
 import kotlin.uuid.Uuid
@@ -30,7 +31,7 @@ interface RoutingMessages {
     val CANNOT_SAVE_SONG: String
     fun cannotUpdateSong(songId: String): String
 
-    fun songNotPossessedByUser(musicId: String): String
+    fun songNotPossessedByUser(musicId: MusicId): String
 
     val ARTISTS_DELETED: String
     val ARTIST_NOT_POSSESSED_BY_USER: String

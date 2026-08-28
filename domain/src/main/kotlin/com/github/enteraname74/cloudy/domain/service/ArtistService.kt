@@ -56,7 +56,7 @@ class ArtistService(
             .distinct()
 
         musicRepository.deleteAll(
-            ids = musicsToDelete.map { it.fingerprint },
+            ids = musicsToDelete.map { it.id },
             username = username,
         )
         artistRepository.deleteAll(artistIds = artistIds)

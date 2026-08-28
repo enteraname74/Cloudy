@@ -39,12 +39,12 @@ fun Route.getMusicCover() {
         We first try to retrieve a custom cover for the file, else, we fetch it from its file.
          */
         val foundCover: ByteArray? = coverService.getByName(
-            name = correspondingMusic.fingerprint,
+            name = correspondingMusic.id.raw,
             username = username,
         )
 
         val finalCover: ByteArray = foundCover ?: musicService.getMusicFile(
-            musicId = correspondingMusic.fingerprint,
+            fingerprint = correspondingMusic.fingerprint,
             userId = userId,
         )?.let {
             coverService.getMusicFileCover(

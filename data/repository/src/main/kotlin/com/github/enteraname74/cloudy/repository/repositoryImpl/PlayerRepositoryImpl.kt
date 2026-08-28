@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -19,7 +20,7 @@ class PlayerRepositoryImpl(
     override suspend fun create(
         hostId: Uuid,
         deviceId: String,
-        initialMusicIds: List<String>
+        initialMusicIds: List<MusicId>
     ): PlayedList =
         playerDataSource.create(
             hostId = hostId,
@@ -50,7 +51,7 @@ class PlayerRepositoryImpl(
         listId: Uuid,
         deviceId: String,
     ) {
-        val musicIdsOfUser: List<String> = playerDataSource
+        val musicIdsOfUser: List<MusicId> = playerDataSource
             .getMusicIdsOfUser(
                 userId = userId,
                 listId = listId,
@@ -178,9 +179,9 @@ class PlayerRepositoryImpl(
             listId = listId,
         )
 
-        val alreadyExistingMusicIds: List<String> = playerDataSource.getExistingMusicIds(
+        val alreadyExistingMusicIds: List<MusicId> = playerDataSource.getExistingMusicIds(
             listId = listId,
-            musicIds = musics.map { it.fingerprint }
+            musicIds = musics.map { it.id }
         )
 
         /*
@@ -189,7 +190,7 @@ class PlayerRepositoryImpl(
          */
         val temporaryPlayerMusics: List<PlayerMusic> = musics
             .filter { music ->
-                alreadyExistingMusicIds.none { it == music.fingerprint }
+                alreadyExistingMusicIds.none { it == music.id }
             }
             .map {
                 PlayerMusic(
@@ -256,12 +257,12 @@ class PlayerRepositoryImpl(
 
     override suspend fun removeMusics(
         listIds: List<Uuid>,
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         socketDeviceIdToIgnore: String?,
     ) {
         for (listId in listIds) {
             val currentMusic: PlayerMusic = playerDataSource.getCurrentMusic(listId) ?: continue
-            val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.fingerprint)
+            val currentMusicWillBeDeleted: Boolean = musicIds.contains(currentMusic.music.id)
 
             // If the current music will be deleted, we must change the current music.
             if (currentMusicWillBeDeleted) {
@@ -324,7 +325,7 @@ class PlayerRepositoryImpl(
         }
     }
 
-    override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =
+    override suspend fun hasReadPermission(userId: Uuid, musicId: MusicId): Boolean =
         playerDataSource.hasReadPermission(
             userId = userId,
             musicId = musicId,
@@ -332,15 +333,15 @@ class PlayerRepositoryImpl(
 
     override suspend fun getExistingMusicIds(
         listId: Uuid,
-        musicIds: List<String>
-    ): List<String> =
+        musicIds: List<MusicId>
+    ): List<MusicId> =
         playerDataSource.getExistingMusicIds(
             listId = listId,
             musicIds = musicIds,
         )
 
     override suspend fun setCurrentMusic(
-        musicId: String,
+        musicId: MusicId,
         listId: Uuid,
         userId: Uuid
     ) {
@@ -361,6 +362,6 @@ class PlayerRepositoryImpl(
         }
     }
 
-    override suspend fun getPlayedListIdsOfMusics(musicIds: List<String>): List<Uuid> =
+    override suspend fun getPlayedListIdsOfMusics(musicIds: List<MusicId>): List<Uuid> =
         playerDataSource.getPlayedListIdsOfMusics(musicIds)
 }

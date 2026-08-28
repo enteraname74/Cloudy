@@ -33,7 +33,7 @@ abstract class FileManager {
             }
     }
 
-    // TODO user directory should be set from the user id instead?
+    // TODO RELEASE user directory should be set from the user id instead?
     protected fun getUserDirectory(username: String): String {
         val path = "$APP_FOLDER/$username"
         File(path).mkdirs()

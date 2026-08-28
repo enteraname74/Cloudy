@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.domain.service
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
@@ -27,10 +28,18 @@ class MusicService(
     private val playerRepository: PlayerRepository,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
-    suspend fun getFromId(musicId: String): Music? =
-        musicRepository.getFromId(musicId = musicId)
+    suspend fun getFromUser(userId: Uuid, musicId: MusicId): Music? =
+        musicRepository.getFromUser(
+            musicId = musicId,
+            userId = userId,
+        )
 
-    suspend fun getMusicFile(musicId: String, userId: Uuid): File? {
+    suspend fun getMusicFile(fingerprint: String, userId: Uuid): File? {
+        val musicId = MusicId(
+            fingerprint = fingerprint,
+            userId = userId,
+        )
+
         val hasPermission: Boolean = musicRepository.isMusicPossessedByUser(
             userId = userId,
             musicId = musicId,
@@ -41,12 +50,15 @@ class MusicService(
 
         if (!hasPermission) return null
 
-        val music: Music = musicRepository.getFromId(musicId) ?: return null
+        val music: Music = musicRepository.getFromUser(
+            musicId = musicId,
+            userId = userId,
+        ) ?: return null
         val user: User = userRepository.getFromId(music.userId) ?: return null
 
         return musicRepository.getMusicFile(
-            musicId = musicId,
-            username = user.username,
+            fingerprint = music.fingerprint,
+            user = user,
         )
     }
 
@@ -111,7 +123,7 @@ class MusicService(
         )
 
     suspend fun deleteAll(
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         username: String,
     ) {
         musicRepository.deleteAll(
@@ -131,7 +143,7 @@ class MusicService(
         )
 
     suspend fun isMusicPossessedByUser(
-        musicId: String,
+        musicId: MusicId,
         userId: Uuid
     ): Boolean =
         musicRepository.isMusicPossessedByUser(
@@ -146,10 +158,10 @@ class MusicService(
      */
     // TODO OPTIMIZATION: Logic should be at DB layer, avoid fetching all musics for checks.
     suspend fun getDeletedMusicsIds(
-        idsToCheck: List<String>,
+        idsToCheck: List<MusicId>,
         userId: Uuid
-    ): List<String> {
-        val existingIds: List<String> = musicRepository.getExistingIdsOfUser(
+    ): List<MusicId> {
+        val existingIds: List<MusicId> = musicRepository.getExistingIdsOfUser(
             ids = idsToCheck,
             userId = userId,
         )

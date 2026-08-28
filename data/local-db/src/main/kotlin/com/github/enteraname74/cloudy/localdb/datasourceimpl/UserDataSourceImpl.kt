@@ -28,7 +28,6 @@ class UserDataSourceImpl : UserDataSource {
             UserEntity.findById(userId)?.toUser()
         }
 
-    // TODO DB: Maybe not returning the user in the upsert function
     override suspend fun upsert(user: User): User =
         workTransaction {
             UserTable.upsert {

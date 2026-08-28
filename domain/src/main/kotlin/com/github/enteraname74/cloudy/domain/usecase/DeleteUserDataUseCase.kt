@@ -17,7 +17,7 @@ class DeleteUserDataUseCase(
         artistRepository.deleteOfUser(userId)
         playlistRepository.deleteOfUser(userId)
         userRepository.clearUserDirectory(userId)
-        // TODO: broadcast deleted played lists or updated played lists because of user deletion
+        // TODO V2: broadcast deleted played lists or updated played lists because of user deletion
         playerRepository.deleteAllIfEmpty()
     }
 }

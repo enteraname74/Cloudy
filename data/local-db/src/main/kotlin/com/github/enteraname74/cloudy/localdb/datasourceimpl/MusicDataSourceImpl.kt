@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
@@ -22,7 +23,7 @@ class MusicDataSourceImpl : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
         workTransaction {
             MusicTable.upsertAll(listOf(music))
-            MusicEntity.findById(music.fingerprint)!!.toMusic(
+            MusicEntity.findById(music.id.raw)!!.toMusic(
                 buildScope = { Music.Scope.User }
             )
         }
@@ -33,20 +34,13 @@ class MusicDataSourceImpl : MusicDataSource {
         }
     }
 
-    override suspend fun getFromId(musicId: String): Music? =
-        workTransaction {
-            MusicEntity
-                .findById(musicId)
-                ?.toMusic(buildScope = { Music.Scope.User })
-        }
-
     override suspend fun getFromUser(
-        musicId: String,
+        musicId: MusicId,
         userId: Uuid
     ): Music? =
         workTransaction {
             MusicEntity
-                .find { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
+                .find { (MusicTable.id eq musicId.raw) and (MusicTable.userId eq userId) }
                 .firstOrNull()
                 ?.toMusic(buildScope = { Music.Scope.User })
         }
@@ -59,21 +53,21 @@ class MusicDataSourceImpl : MusicDataSource {
                 ?.toMusic(buildScope = { Music.Scope.User })
         }
 
-    override suspend fun getAll(ids: List<String>): List<Music> =
+    override suspend fun getAll(ids: List<MusicId>): List<Music> =
         workTransaction {
             val musics = MusicEntity
-                .find { MusicTable.id inList ids }
+                .find { MusicTable.id inList ids.map { it.raw } }
                 .map { it.toMusic(buildScope = { Music.Scope.User }) }
 
-            val byIds = musics.associateBy { it.fingerprint }
+            val byIds = musics.associateBy { it.id }
 
             ids.mapNotNull { byIds[it] }
         }
 
-    override suspend fun deleteAll(ids: List<String>) {
+    override suspend fun deleteAll(ids: List<MusicId>) {
         workTransaction {
             MusicTable.deleteWhere {
-                id inList ids
+                id inList ids.map { it.raw }
             }
         }
     }
@@ -94,41 +88,35 @@ class MusicDataSourceImpl : MusicDataSource {
 
     override suspend fun getExistingIdsOfUser(
         userId: Uuid,
-        ids: List<String>
-    ): List<String> =
+        ids: List<MusicId>
+    ): List<MusicId> =
         workTransaction {
             MusicTable
                 .select(MusicTable.id)
                 .where {
                     (MusicTable.userId eq userId) and
-                        (MusicTable.id inList ids)
+                        (MusicTable.id inList ids.map { it.raw })
                 }
-                .map { it[MusicTable.id].toString() }
+                .map {
+                    MusicId(raw = it[MusicTable.id].toString())
+                }
         }
 
-    override suspend fun getExistingIds(ids: List<String>): List<String> =
+    override suspend fun getExistingIds(ids: List<MusicId>): List<MusicId> =
         workTransaction {
             MusicTable
                 .select(MusicTable.id)
-                .where { MusicTable.id inList ids }
-                .map { it[MusicTable.id].toString() }
+                .where { MusicTable.id inList ids.map { it.raw } }
+                .map {
+                    MusicId(raw = it[MusicTable.id].toString())
+                }
         }
 
-    override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean =
+    override suspend fun isMusicPossessedByUser(userId: Uuid, musicId: MusicId): Boolean =
         workTransaction {
             MusicEntity
-                .find { (MusicTable.id eq musicId) and (MusicTable.userId eq userId) }
+                .find { (MusicTable.id eq musicId.raw) and (MusicTable.userId eq userId) }
                 .count() > 0
-        }
-
-    override suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music? =
-        workTransaction {
-            MusicEntity
-                .find { (MusicTable.id eq fingerprint) and (MusicTable.userId eq userId) }
-                .firstOrNull()
-                ?.toMusic(
-                    buildScope = { Music.Scope.User }
-                )
         }
 
     override suspend fun allFromAlbum(albumId: Uuid): List<Music> =

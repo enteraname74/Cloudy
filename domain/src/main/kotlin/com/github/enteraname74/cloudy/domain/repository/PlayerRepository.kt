@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -12,7 +13,7 @@ interface PlayerRepository {
     suspend fun create(
         hostId: Uuid,
         deviceId: String,
-        initialMusicIds: List<String>,
+        initialMusicIds: List<MusicId>,
     ): PlayedList
 
     suspend fun update(
@@ -126,22 +127,22 @@ interface PlayerRepository {
      */
     suspend fun removeMusics(
         listIds: List<Uuid>,
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         socketDeviceIdToIgnore: String?,
     )
 
     suspend fun hasReadPermission(
         userId: Uuid,
-        musicId: String
+        musicId: MusicId
     ): Boolean
 
     suspend fun getExistingMusicIds(
         listId: Uuid,
-        musicIds: List<String>
-    ): List<String>
+        musicIds: List<MusicId>
+    ): List<MusicId>
 
     suspend fun setCurrentMusic(
-        musicId: String,
+        musicId: MusicId,
         listId: Uuid,
         userId: Uuid,
     )
@@ -150,6 +151,6 @@ interface PlayerRepository {
      * Retrieves all played list ids containing a given music id.
      */
     suspend fun getPlayedListIdsOfMusics(
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
     ): List<Uuid>
 }

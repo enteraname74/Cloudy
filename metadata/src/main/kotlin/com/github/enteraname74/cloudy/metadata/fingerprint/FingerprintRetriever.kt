@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 internal class FingerprintRetriever {
     private val logger = CloudyLogger(this::class)
 
+    // TODO FINGERPRINT: I think that there is an option to retrieve a JSON instead of manually parsing the data
     fun getFingerprintFromMusic(musicPath: String): FingerprintData? =
         try {
             val command = arrayOf("fpcalc", musicPath)

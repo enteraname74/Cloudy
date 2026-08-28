@@ -18,7 +18,7 @@ interface MusicInformationRetriever {
     ): Metadata
 
     /**
-     * Music metadata from a file our a remote source.
+     * Music metadata from a file or a remote source.
      */
     data class Metadata(
         val name: String,

@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.usecase.artist
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import kotlin.uuid.Uuid
 
@@ -8,7 +9,7 @@ class SetArtistsOfMusicUseCase(
     private val musicArtistRepository: MusicArtistRepository,
 ) {
     suspend operator fun invoke(
-        musicId: String,
+        musicId: MusicId,
         artistIds: List<Uuid>,
         userId: Uuid,
     ) {

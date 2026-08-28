@@ -7,6 +7,7 @@ import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import io.ktor.http.HttpStatusCode
@@ -20,7 +21,7 @@ fun Route.deleteSongs() {
     val musicService by inject<MusicService>()
 
     delete<MusicResource> {
-        val musicIds: List<String> = call.receive()
+        val musicIds: List<MusicId> = call.receive()
 
         val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: Uuid = getUserIdFromToken() ?: return@delete missingTokenInformation()
@@ -28,7 +29,10 @@ fun Route.deleteSongs() {
         val routingMessages: RoutingMessages = getRoutingMessages()
 
         musicIds.forEach { musicId ->
-            val doesExist = musicService.getFromId(musicId) != null
+            val doesExist = musicService.getFromUser(
+                userId = userId,
+                musicId = musicId,
+            ) != null
             if (doesExist) {
                 val isPossessedByUser = musicService.isMusicPossessedByUser(
                     musicId = musicId,

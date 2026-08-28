@@ -99,7 +99,7 @@ class UserService(
 
     suspend fun deleteUser(userId: Uuid) {
         userRepository.delete(id = userId)
-        // TODO: broadcast deleted played lists or updated played lists because of user deletion
+        // TODO V2: broadcast deleted played lists or updated played lists because of user deletion
         playerRepository.deleteAllIfEmpty()
     }
 

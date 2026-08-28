@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
@@ -12,7 +13,6 @@ import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import com.github.enteraname74.cloudy.domain.util.toCloudyResult
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 
 class UploadMusicUseCase(
@@ -42,8 +42,11 @@ class UploadMusicUseCase(
             user = user,
         )
 
-        val existingMusic = musicRepository.getFromFingerprint(
-            fingerprint = fingerprint,
+        val existingMusic = musicRepository.getFromUser(
+            musicId = MusicId(
+                fingerprint = fingerprint,
+                userId = user.id,
+            ),
             userId = user.id,
         )
         val result = if (existingMusic != null) {
@@ -76,14 +79,15 @@ class UploadMusicUseCase(
                 result
             }
             is CloudyResult.Success -> {
+                val music = result.data
                 setArtistsOfMusicUseCase(
-                    musicId = fingerprint,
+                    musicId = music.id,
                     artistIds = artistOfMusic.map { it.id },
                     userId = user.id,
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase()
-                musicRepository.getFromId(fingerprint).toCloudyResult()
+                result
             }
         }
     }

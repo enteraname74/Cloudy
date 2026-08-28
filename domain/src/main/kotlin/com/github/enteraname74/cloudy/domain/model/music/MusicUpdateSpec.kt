@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MusicUpdateSpec(
-    val id: String,
+    val id: MusicId,
     val name: String,
     val album: AlbumUpdate,
     val artists: List<ArtistUpdate>,

@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -57,7 +58,7 @@ class PlayerDataSourceImpl : PlayerDataSource {
     override suspend fun create(
         hostId: Uuid,
         deviceId: String,
-        initialMusicIds: List<String>
+        initialMusicIds: List<MusicId>
     ): PlayedList =
         workTransaction {
             val listId = Uuid.random()
@@ -122,12 +123,12 @@ class PlayerDataSourceImpl : PlayerDataSource {
     override suspend fun getMusicIdsOfUser(
         userId: Uuid,
         listId: Uuid
-    ): List<String> =
+    ): List<MusicId> =
         workTransaction {
             PlayedListMusicEntity.find {
                 (PlayedListMusicTable.listId eq listId)
             }.filter { it.music.userId.value == userId }
-                .map { it.music.id.value }
+                .map { MusicId(it.music.id.value) }
         }
 
     override suspend fun deleteIfEmpty(listId: Uuid): Boolean =
@@ -357,14 +358,14 @@ class PlayerDataSourceImpl : PlayerDataSource {
 
     override suspend fun getExistingMusicIds(
         listId: Uuid,
-        musicIds: List<String>
-    ): List<String> = workTransaction {
+        musicIds: List<MusicId>
+    ): List<MusicId> = workTransaction {
         PlayedListMusicTable
             .select(PlayedListMusicTable.musicId)
             .where {
                 (PlayedListMusicTable.listId eq listId) and
-                    (PlayedListMusicTable.musicId inList musicIds)
-            }.mapNotNull { it.getOrNull(PlayedListMusicTable.musicId)?.value }
+                    (PlayedListMusicTable.musicId inList musicIds.map { it.raw })
+            }.mapNotNull { it.getOrNull(PlayedListMusicTable.musicId)?.value?.let(::MusicId) }
     }
 
     override suspend fun getAllUsersByJoinedAt(listId: Uuid): List<PlayerUser> =
@@ -397,12 +398,12 @@ class PlayerDataSourceImpl : PlayerDataSource {
 
     override suspend fun getNextMusic(
         listId: Uuid,
-        idsToSkip: List<String>
+        idsToSkip: List<MusicId>
     ): PlayerMusic? = workTransaction {
         val current: PlayerMusic = getCurrentMusic(listId) ?: return@workTransaction null
         val skipCondition =
             if (idsToSkip.isEmpty()) Op.TRUE
-            else PlayedListMusicTable.musicId notInList idsToSkip
+            else PlayedListMusicTable.musicId notInList idsToSkip.map { it.raw }
 
         val next: PlayerMusic? = PlayedListMusicEntity
             .find {
@@ -419,18 +420,18 @@ class PlayerDataSourceImpl : PlayerDataSource {
         next ?: getFirstMusic(listId)
     }
 
-    override suspend fun deleteMusics(listId: Uuid, musicIds: List<String>) {
+    override suspend fun deleteMusics(listId: Uuid, musicIds: List<MusicId>) {
         workTransaction {
             PlayedListMusicTable.deleteWhere {
                 (PlayedListMusicTable.listId eq listId) and
-                    (PlayedListMusicTable.musicId inList musicIds)
+                    (PlayedListMusicTable.musicId inList musicIds.map { it.raw })
             }
         }
     }
 
     override suspend fun areAnyMusicAfterCurrentOne(
         listId: Uuid,
-        musicIds: List<String>
+        musicIds: List<MusicId>
     ): Boolean = workTransaction {
         if (musicIds.isEmpty()) return@workTransaction false
 
@@ -441,13 +442,13 @@ class PlayerDataSourceImpl : PlayerDataSource {
             .where {
                 (PlayedListMusicTable.listId eq listId) and
                     (PlayedListMusicTable.order greater currentOrder) and
-                    (PlayedListMusicTable.musicId inList musicIds)
+                    (PlayedListMusicTable.musicId inList musicIds.map { it.raw })
             }
             .limit(1)
             .firstOrNull() != null
     }
 
-    override suspend fun hasReadPermission(userId: Uuid, musicId: String): Boolean =
+    override suspend fun hasReadPermission(userId: Uuid, musicId: MusicId): Boolean =
         workTransaction {
             PlayedListUserTable
                 .join(
@@ -459,20 +460,20 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 .selectAll()
                 .where {
                     (PlayedListUserTable.userId eq userId) and
-                        (PlayedListMusicTable.musicId eq musicId)
+                        (PlayedListMusicTable.musicId eq musicId.raw)
                 }
                 .limit(1)
                 .firstOrNull() != null
         }
 
     override suspend fun getPlayerMusic(
-        musicId: String,
+        musicId: MusicId,
         listId: Uuid,
         userId: Uuid,
     ): PlayerMusic? =
         workTransaction {
             PlayedListMusicEntity.find {
-                (PlayedListMusicTable.musicId eq musicId) and (
+                (PlayedListMusicTable.musicId eq musicId.raw) and (
                     (PlayedListMusicTable.listId eq listId)
                     )
             }
@@ -488,10 +489,10 @@ class PlayerDataSourceImpl : PlayerDataSource {
                 )
         }
 
-    override suspend fun getPlayedListIdsOfMusics(musicIds: List<String>): List<Uuid> =
+    override suspend fun getPlayedListIdsOfMusics(musicIds: List<MusicId>): List<Uuid> =
         workTransaction {
             PlayedListMusicEntity.find {
-                (PlayedListMusicTable.musicId) inList musicIds
+                (PlayedListMusicTable.musicId) inList musicIds.map { it.raw }
             }
                 .distinctBy { it.listId }
                 .map { it.listId.value }

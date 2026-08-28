@@ -12,6 +12,10 @@ import kotlin.uuid.Uuid
 data class Music(
     val fingerprint: String,
     val userId: Uuid,
+    val id: MusicId = MusicId(
+        fingerprint = fingerprint,
+        userId = userId,
+    ),
     val name: String,
     val album: Album,
     val artists: List<Artist>,
@@ -24,7 +28,7 @@ data class Music(
     val nbPlayed: Int = 0,
     val isInQuickAccess: Boolean = false,
     val scope: Scope,
-): UpdatableElement {
+) : UpdatableElement {
 
     enum class Scope {
         User,

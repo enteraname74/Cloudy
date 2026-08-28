@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.routingmessages.impl
 
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import kotlin.uuid.Uuid
 
@@ -30,8 +31,8 @@ object EnRoutingMessages: RoutingMessages {
     override fun cannotUpdateSong(songId: String): String =
         "Couldn't update the song with id: $songId"
 
-    override fun songNotPossessedByUser(musicId: String): String =
-        "The song with id: $musicId is not possessed by the user."
+    override fun songNotPossessedByUser(musicId: MusicId): String =
+        "The song with id: ${musicId.raw} is not possessed by the user."
 
     override val ARTISTS_DELETED: String = "Artists have been deleted."
     override val ARTIST_NOT_POSSESSED_BY_USER: String = "This artist is not possessed by the user."

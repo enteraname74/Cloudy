@@ -29,7 +29,6 @@ internal val useCaseModule = module {
     factoryOf(::UpdateArtistUseCase)
     factoryOf(::SetArtistsOfMusicUseCase)
 
-
     // Music
     factoryOf(::UploadMusicUseCase)
     factoryOf(::UpdateMusicUseCase)
