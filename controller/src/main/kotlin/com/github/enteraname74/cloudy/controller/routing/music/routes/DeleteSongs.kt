@@ -1,7 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
@@ -23,7 +22,6 @@ fun Route.deleteSongs() {
     delete<MusicResource> {
         val musicIds: List<MusicId> = call.receive()
 
-        val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: Uuid = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
@@ -47,7 +45,7 @@ fun Route.deleteSongs() {
 
         musicService.deleteAll(
             musicIds = musicIds,
-            username = username,
+            userId = userId,
         )
 
         response(

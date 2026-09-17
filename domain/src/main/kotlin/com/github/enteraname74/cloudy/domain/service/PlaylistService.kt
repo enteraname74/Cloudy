@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
-import com.github.enteraname74.cloudy.domain.model.user.User
+import com.github.enteraname74.cloudy.domain.repository.CoverRepository
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.usecase.playlist.UploadPlaylistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -14,6 +14,7 @@ import kotlin.uuid.Uuid
 class PlaylistService(
     private val playlistRepository: PlaylistRepository,
     private val uploadPlaylistUseCase: UploadPlaylistUseCase,
+    private val coverRepository: CoverRepository,
 ) {
     suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistRepository.getFromId(playlistId)
@@ -42,16 +43,17 @@ class PlaylistService(
     suspend fun upload(
         playlistUpload: PlaylistUpload,
         coverData: FileData?,
-        user: User,
+        userId: Uuid,
     ): CloudyResult<PlaylistWithMusics> =
         uploadPlaylistUseCase(
             playlistUpload = playlistUpload,
-            user = user,
+            userId = userId,
             coverData = coverData,
         )
 
-    suspend fun deleteAll(playlistIds: List<Uuid>) {
-        playlistRepository.deleteAll(playlistIds)
+    suspend fun deleteAll(playlistIds: List<Uuid>, userId: Uuid) {
+        playlistRepository.deleteAll(playlistIds, userId)
+        coverRepository.deletedUnusedCovers(userId)
     }
 
     suspend fun getDeletedPlaylistIds(

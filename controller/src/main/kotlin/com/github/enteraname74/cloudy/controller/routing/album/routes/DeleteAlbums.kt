@@ -1,7 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.album.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
@@ -23,7 +22,6 @@ fun Route.deleteAlbums() {
         val albumIds: List<String> = call.receive()
         val uuids: List<Uuid> = albumIds.mapNotNull { Uuid.parseOrNull(it) }
 
-        val username: String = getUsernameFromToken() ?: return@delete missingTokenInformation()
         val userId: Uuid = getUserIdFromToken() ?: return@delete missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
@@ -41,7 +39,7 @@ fun Route.deleteAlbums() {
 
         albumService.deleteAll(
             albumIds = uuids,
-            username = username,
+            userId = userId,
         )
 
         response(

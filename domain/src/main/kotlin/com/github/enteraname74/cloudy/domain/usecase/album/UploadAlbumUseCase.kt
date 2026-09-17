@@ -1,10 +1,10 @@
 package com.github.enteraname74.cloudy.domain.usecase.album
 
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.album.AlbumUpload
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
+import kotlin.uuid.Uuid
 
 class UploadAlbumUseCase(
     private val uploadArtistUseCase: UploadArtistUseCase,
@@ -12,16 +12,16 @@ class UploadAlbumUseCase(
 ) {
     suspend operator fun invoke(
         albumUpload: AlbumUpload,
-        user: User,
+        userId: Uuid,
     ): Album {
         val existingAlbum = albumRepository.getFromInformation(
             albumName = albumUpload.name,
             albumArtist = albumUpload.artistUpload.name,
-            userId = user.id,
+            userId = userId,
         )
         val artist = uploadArtistUseCase(
             artistUpload = albumUpload.artistUpload,
-            user = user,
+            userId = userId,
         )
         return if (existingAlbum != null) {
             albumRepository.upsert(
@@ -30,16 +30,14 @@ class UploadAlbumUseCase(
                     artist = artist,
                 ),
                 coverData = null,
-                username = user.username,
             )
         } else {
             albumRepository.upsert(
                 album = albumUpload.toNewAlbum(
                     artist = artist,
-                    userId = user.id,
+                    userId = userId,
                 ),
                 coverData = null,
-                username = user.username,
             )
         }
     }

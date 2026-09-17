@@ -7,7 +7,7 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.util.CloudyJson
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import com.github.enteraname74.cloudy.domain.util.FileUtils
+import com.github.enteraname74.cloudy.domain.util.CommonFileUtils
 import io.ktor.http.content.MultiPartData
 import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
@@ -15,11 +15,11 @@ import io.ktor.utils.io.toByteArray
 
 object MultiPartDataUtils {
     suspend fun retrieveImageData(fileItem: PartData.FileItem): FileData? {
-        val fileExtension = FileUtils.getFileExtension(
+        val fileExtension = CommonFileUtils.getFileExtension(
             fileName = fileItem.originalFileName.orEmpty()
         )
         if (
-            !FileUtils.isImageFile(fileItem) ||
+            !CommonFileUtils.isImageFile(fileItem) ||
             fileExtension == null
         ) {
             return null
@@ -35,12 +35,12 @@ object MultiPartDataUtils {
     }
 
     private suspend fun retrieveMusicData(fileItem: PartData.FileItem): FileData? {
-        val fileExtension = FileUtils.getFileExtension(
+        val fileExtension = CommonFileUtils.getFileExtension(
             fileName = fileItem.originalFileName.orEmpty()
         )
 
         if (
-            !FileUtils.isMusicFile(part = fileItem) ||
+            !CommonFileUtils.isMusicFile(part = fileItem) ||
             fileExtension == null
         ) {
             return null

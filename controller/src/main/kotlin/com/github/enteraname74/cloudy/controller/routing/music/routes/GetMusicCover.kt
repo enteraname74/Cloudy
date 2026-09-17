@@ -1,7 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
@@ -25,7 +24,6 @@ fun Route.getMusicCover() {
     get<MusicResource.Cover> { musicResource ->
         val routingMessages: RoutingMessages = getRoutingMessages()
 
-        val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val correspondingMusic: Music = musicService.getFromCoverPath(
@@ -40,7 +38,7 @@ fun Route.getMusicCover() {
          */
         val foundCover: ByteArray? = coverService.getByName(
             name = correspondingMusic.id.raw,
-            username = username,
+            userId = userId,
         )
 
         val finalCover: ByteArray = foundCover ?: musicService.getMusicFile(

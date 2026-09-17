@@ -25,8 +25,6 @@ include("config")
 include("metadata")
 include("metadata")
 include("logging")
-include("file-access")
 
 project(":repository").projectDir = file("data/repository")
 project(":local-db").projectDir = file("data/local-db")
-project(":file-access").projectDir = file("data/file-access")

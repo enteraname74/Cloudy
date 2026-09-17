@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.domain.usecase.artist
 
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.artist.ArtistUpdate
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
@@ -11,24 +10,22 @@ class UpdateArtistUseCase(
 ) {
     suspend operator fun invoke(
         artistUpdate: ArtistUpdate,
-        user: User,
+        userId: Uuid,
     ): Artist {
         val existingArtist: Artist? = getExistingArtist(
             artistUpdate = artistUpdate,
-            userId = user.id,
+            userId = userId,
         )
 
         return if (existingArtist == null) {
             artistRepository.upsert(
-                artist = artistUpdate.toNewArtist(user.id),
+                artist = artistUpdate.toNewArtist(userId),
                 coverData = null,
-                username = user.username,
             )
         } else {
             artistRepository.upsert(
                 artist = existingArtist.merge(artistUpdate),
                 coverData = null,
-                username = user.username,
             )
         }
     }

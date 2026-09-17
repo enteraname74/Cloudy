@@ -1,18 +1,19 @@
 package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.album.Album
-import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
+import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import com.github.enteraname74.cloudy.domain.repository.CoverRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
-import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
 class AlbumService(
     private val albumRepository: AlbumRepository,
     private val musicRepository: MusicRepository,
-    private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
+    private val artistRepository: ArtistRepository,
+    private val coverRepository: CoverRepository,
 ) {
     suspend fun getFromId(albumId: Uuid): Album? =
         albumRepository.getFromId(
@@ -44,7 +45,7 @@ class AlbumService(
 
     suspend fun deleteAll(
         albumIds: List<Uuid>,
-        username: String,
+        userId: Uuid,
     ) {
         val albumsToDelete: List<Album> = albumRepository.getAll(albumIds)
         val musicsToDelete: List<Music> = buildList {
@@ -57,24 +58,18 @@ class AlbumService(
             }
         }
 
-        val relatedArtists: List<Artist> = musicsToDelete
-            .flatMap { it.artists }
-            .distinct()
-
         /*
         Even if the deletion of albums delete the musics,
          we need to ensure that the files will be also deleted.
          */
         musicRepository.deleteAll(
             ids = musicsToDelete.map { it.id },
-            username = username,
+            userId = userId,
         )
 
         albumRepository.deleteAll(albumIds)
-
-        relatedArtists.forEach {
-            deleteArtistIfEmptyUseCase(artistId = it.id)
-        }
+        artistRepository.deleteAllEmpty()
+        coverRepository.deletedUnusedCovers(userId)
     }
 
 }

@@ -10,12 +10,15 @@ import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.lastUpdateAt
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
+import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
+import com.github.enteraname74.cloudy.repository.ext.getCoverName
 import org.jetbrains.exposed.v1.core.Op
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNotNull
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
@@ -98,7 +101,19 @@ class PlaylistDataSourceImpl(
         }
     }
 
-    override suspend fun deleteAll(playlistIds: List<Uuid>) {
+    override suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String> =
+        workTransaction {
+            PlaylistTable
+                .select(PlaylistTable.coverPath)
+                .where { (PlaylistTable.userId eq userId) and PlaylistTable.coverPath.isNotNull() }
+                .mapNotNull { it[PlaylistTable.coverPath]?.getCoverName(Playlist.COVER_PATH) }
+                .distinct()
+        }
+
+    override suspend fun deleteAll(
+        playlistIds: List<Uuid>,
+        userId: Uuid,
+    ) {
         workTransaction {
             PlaylistTable.deleteWhere {
                 id inList playlistIds

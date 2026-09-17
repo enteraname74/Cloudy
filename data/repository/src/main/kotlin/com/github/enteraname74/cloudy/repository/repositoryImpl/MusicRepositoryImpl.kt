@@ -2,18 +2,15 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.fileaccess.MusicFileManager
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
@@ -22,7 +19,6 @@ import kotlin.uuid.Uuid
 
 class MusicRepositoryImpl(
     private val musicDataSource: MusicDataSource,
-    private val musicFileManager: MusicFileManager,
     private val musicInformationRetriever: MusicInformationRetriever,
     private val musicFileMetadataManager: MusicFileMetadataManager,
     private val playerRepository: PlayerRepository,
@@ -30,22 +26,23 @@ class MusicRepositoryImpl(
     private val logger = CloudyLogger(this::class)
 
     override suspend fun startUploadProcess(
-        user: User,
-        data: FileSavingData,
+        userId: Uuid,
+        data: FileData,
         shouldSearchForMetadata: Boolean,
         musicUploadSpec: MusicUploadSpec?,
         cover: FileData?,
     ): UploadProcessState = runCatching {
         // We save the file
-        val temporarySavedFileId: Uuid? = musicFileManager.save(
+        val temporarySavedFileId: Uuid? = musicDataSource.saveFile(
+            userId = userId,
             data = data,
         )
 
         if (temporarySavedFileId == null) return UploadProcessState.Error
 
         // We retrieve the saved file to analyze its fingerprint for metadata
-        val temporarySavedFile: File? = musicFileManager.getByName(
-            username = user.username,
+        val temporarySavedFile: File? = musicDataSource.getFile(
+            userId = userId,
             name = temporarySavedFileId.toString(),
         )
 
@@ -77,21 +74,21 @@ class MusicRepositoryImpl(
         val existingMusic: Music? = getFromUser(
             musicId = MusicId(
                 fingerprint = fingerprint,
-                userId = user.id,
+                userId = userId,
             ),
-            userId = user.id,
+            userId = userId,
         )
 
         if (existingMusic != null) {
-            musicFileManager.delete(
+            musicDataSource.deleteFile(
                 name = temporarySavedFileId.toString(),
-                username = user.username,
+                userId = userId,
             )
         } else {
             // We will rename the temporary file to suit the music fingerprint
-            musicFileManager.rename(
+            musicDataSource.renameFile(
                 from = temporarySavedFileId.toString(),
-                username = user.username,
+                userId = userId,
                 to = "$fingerprint.${data.extension}"
             )
         }
@@ -117,11 +114,10 @@ class MusicRepositoryImpl(
 
     override suspend fun upsert(
         music: Music,
-        username: String,
         cover: FileData?,
     ): CloudyResult<Music> {
-        val musicFile: File = musicFileManager.getByName(
-            username = username,
+        val musicFile: File = musicDataSource.getFile(
+            userId = music.userId,
             name = music.fingerprint,
         ) ?: return CloudyResult.Error()
 
@@ -141,10 +137,10 @@ class MusicRepositoryImpl(
         )
     }
 
-    override suspend fun upsertAll(musics: List<Music>, username: String): CloudyResult<Unit> {
+    override suspend fun upsertAll(musics: List<Music>): CloudyResult<Unit> {
         musics.forEach { music ->
-            val musicFile: File = musicFileManager.getByName(
-                username = username,
+            val musicFile: File = musicDataSource.getFile(
+                userId = music.userId,
                 name = music.fingerprint,
             ) ?: return CloudyResult.Error()
 
@@ -178,30 +174,26 @@ class MusicRepositoryImpl(
     override suspend fun getFromCoverPath(coverPath: String): Music? =
         musicDataSource.getFromCoverPath(coverPath = coverPath)
 
-    override suspend fun getMusicFile(fingerprint: String, user: User): File? =
-        musicFileManager.getByName(
+    override suspend fun getMusicFile(fingerprint: String, userId: Uuid): File? =
+        musicDataSource.getFile(
             name = fingerprint,
-            username = user.username,
+            userId = userId,
         )
 
     override suspend fun getAll(ids: List<MusicId>): List<Music> =
         musicDataSource.getAll(ids)
 
-    override suspend fun deleteAll(ids: List<MusicId>, username: String) {
+    override suspend fun deleteAll(ids: List<MusicId>, userId: Uuid) {
         // We must ensure that played lists are reorderd correctly if a music was in it.
         playerRepository.removeMusics(
             listIds = playerRepository.getPlayedListIdsOfMusics(ids),
             musicIds = ids,
             socketDeviceIdToIgnore = null,
         )
-
-        ids.forEach { id ->
-            musicFileManager.delete(
-                name = id.raw,
-                username = username,
-            )
-        }
-        musicDataSource.deleteAll(ids)
+        musicDataSource.deleteAll(
+            ids = ids,
+            userId = userId,
+        )
     }
 
     override suspend fun getAllOfUser(

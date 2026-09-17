@@ -6,7 +6,6 @@ import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
@@ -14,6 +13,7 @@ import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUse
 import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.logging.CloudyLogger
+import kotlin.uuid.Uuid
 
 class UploadMusicUseCase(
     private val uploadArtistUseCase: UploadArtistUseCase,
@@ -28,26 +28,26 @@ class UploadMusicUseCase(
         musicUploadSpec: MusicUploadSpec,
         cover: FileData?,
         fingerprint: String,
-        user: User,
+        userId: Uuid,
         musicPath: String,
     ): CloudyResult<Music> {
         val artistOfMusic: List<Artist> = musicUploadSpec.artists.map { artistUpload ->
             uploadArtistUseCase(
                 artistUpload = artistUpload,
-                user = user,
+                userId = userId,
             )
         }
         val albumOfMusic: Album = uploadAlbumUseCase(
             albumUpload = musicUploadSpec.albumUpload,
-            user = user,
+            userId = userId,
         )
 
         val existingMusic = musicRepository.getFromUser(
             musicId = MusicId(
                 fingerprint = fingerprint,
-                userId = user.id,
+                userId = userId,
             ),
-            userId = user.id,
+            userId = userId,
         )
         val result = if (existingMusic != null) {
             musicRepository.upsert(
@@ -56,19 +56,17 @@ class UploadMusicUseCase(
                     artists = artistOfMusic,
                     album = albumOfMusic,
                 ),
-                username = user.username,
                 cover = cover,
             )
         } else {
             musicRepository.upsert(
                 music = musicUploadSpec.toNewMusic(
-                    userId = user.id,
+                    userId = userId,
                     artists = artistOfMusic,
                     album = albumOfMusic,
                     fingerprint = fingerprint,
                     path = musicPath,
                 ),
-                username = user.username,
                 cover = cover,
             )
         }
@@ -83,10 +81,10 @@ class UploadMusicUseCase(
                 setArtistsOfMusicUseCase(
                     musicId = music.id,
                     artistIds = artistOfMusic.map { it.id },
-                    userId = user.id,
+                    userId = userId,
                 )
                 // Clean up after saving updated data
-                deleteEmptyAlbumsAndArtistsUseCase()
+                deleteEmptyAlbumsAndArtistsUseCase(userId)
                 result
             }
         }

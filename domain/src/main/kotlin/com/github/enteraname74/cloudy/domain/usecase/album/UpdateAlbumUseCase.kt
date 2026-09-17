@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.domain.usecase.album
 
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.album.AlbumUpdate
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
@@ -13,17 +12,17 @@ class UpdateAlbumUseCase(
 ) {
     suspend operator fun invoke(
         albumUpdate: AlbumUpdate,
-        user: User,
+        userId: Uuid,
     ): Album {
         val existingAlbum = getExistingAlbum(
             albumUpdate = albumUpdate,
-            userId = user.id,
+            userId = userId,
         )
 
         return if (existingAlbum != null) {
             val artist = updateArtistUseCase(
                 artistUpdate = albumUpdate.artist,
-                user = user,
+                userId = userId,
             )
             albumRepository.upsert(
                 album = existingAlbum.merge(
@@ -31,20 +30,18 @@ class UpdateAlbumUseCase(
                     artist = artist,
                 ),
                 coverData = null,
-                username = user.username,
             )
         } else {
             val newArtist = updateArtistUseCase(
                 artistUpdate = albumUpdate.artist,
-                user = user,
+                userId = userId,
             )
             albumRepository.upsert(
                 album = albumUpdate.toNewAlbum(
                     artist = newArtist,
-                    userId = user.id,
+                    userId = userId,
                 ),
                 coverData = null,
-                username = user.username,
             )
         }
     }

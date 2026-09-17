@@ -31,11 +31,10 @@ interface PlaylistRepository {
     suspend fun upsert(
         playlist: Playlist,
         coverData: FileData?,
-        username: String,
     ): Playlist
 
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>
-    suspend fun deleteAll(playlistIds: List<Uuid>)
+    suspend fun deleteAll(playlistIds: List<Uuid>, userId: Uuid)
 
     suspend fun deleteOfUser(userId: Uuid)
     suspend fun allOfUser(

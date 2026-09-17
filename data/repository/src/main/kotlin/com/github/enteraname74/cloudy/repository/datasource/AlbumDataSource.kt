@@ -8,6 +8,7 @@ interface AlbumDataSource {
     suspend fun getFromId(
         albumId: Uuid,
     ): Album?
+
     suspend fun getFromCoverPath(coverPath: String): Album?
     suspend fun getAll(albumIds: List<Uuid>): List<Album>
     suspend fun getFromInformation(
@@ -15,17 +16,21 @@ interface AlbumDataSource {
         albumArtist: String,
         userId: Uuid
     ): Album?
+
     suspend fun getFromUser(
         albumId: Uuid,
         userId: Uuid,
     ): Album?
+
     suspend fun upsert(album: Album): Album
     suspend fun upsertAll(albums: List<Album>)
     suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Album>
-    suspend fun deleteById(albumId: Uuid)
+
+    suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String>
+
     suspend fun deleteAll(albumIds: List<Uuid>)
     suspend fun allOfArtist(artistId: Uuid): List<Album>
     suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean

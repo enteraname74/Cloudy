@@ -10,12 +10,4 @@ sealed interface FileSavingData {
     ) : FileSavingData {
         override val extension: String = fileData.extension
     }
-
-    data class MusicUrl(
-        override val username: String,
-        val url: String,
-    ): FileSavingData {
-        // TODO YT: Add possibility to set custom extension
-        override val extension: String = "m4a"
-    }
 }

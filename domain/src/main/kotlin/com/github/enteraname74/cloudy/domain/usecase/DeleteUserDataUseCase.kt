@@ -16,6 +16,7 @@ class DeleteUserDataUseCase(
         // Deleting artists should cascade on musics and albums.
         artistRepository.deleteOfUser(userId)
         playlistRepository.deleteOfUser(userId)
+
         userRepository.clearUserDirectory(userId)
         // TODO V2: broadcast deleted played lists or updated played lists because of user deletion
         playerRepository.deleteAllIfEmpty()

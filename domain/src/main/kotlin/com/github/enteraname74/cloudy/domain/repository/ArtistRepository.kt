@@ -10,23 +10,25 @@ interface ArtistRepository {
         name: String,
         userId: Uuid,
     ): Artist?
+
     suspend fun getFromId(artistId: Uuid): Artist?
     suspend fun getFromUser(
         artistId: Uuid,
         userId: Uuid,
     ): Artist?
+
     suspend fun getFromCoverPath(coverPath: String): Artist?
     suspend fun isArtistPossessedByUser(userId: Uuid, artistId: Uuid): Boolean
     suspend fun upsert(
         artist: Artist,
         coverData: FileData?,
-        username: String,
     ): Artist
+
     suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Artist>
-    suspend fun deleteById(artistId: Uuid): Boolean
+
     suspend fun deleteAll(artistIds: List<Uuid>)
 
     suspend fun deleteOfUser(userId: Uuid)

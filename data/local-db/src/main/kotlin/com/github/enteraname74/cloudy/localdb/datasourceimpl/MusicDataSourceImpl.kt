@@ -1,7 +1,10 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
+import com.github.enteraname74.cloudy.domain.ext.ensureExist
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
+import com.github.enteraname74.cloudy.domain.util.CommonFileUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicEntity
@@ -9,7 +12,9 @@ import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
+import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
+import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
 import org.jetbrains.exposed.v1.core.JoinType
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
@@ -17,9 +22,13 @@ import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
+import java.io.File
 import kotlin.uuid.Uuid
 
-class MusicDataSourceImpl : MusicDataSource {
+class MusicDataSourceImpl(
+    private val userDataSource: UserDataSource,
+    private val coverDataSource: CoverDataSource,
+) : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
         workTransaction {
             MusicTable.upsertAll(listOf(music))
@@ -64,8 +73,14 @@ class MusicDataSourceImpl : MusicDataSource {
             ids.mapNotNull { byIds[it] }
         }
 
-    override suspend fun deleteAll(ids: List<MusicId>) {
+    override suspend fun deleteAll(ids: List<MusicId>, userId: Uuid) {
         workTransaction {
+            ids.forEach { id ->
+                CommonFileUtils.getByNameWithoutExtension(
+                    parent = getMusicsFolder(userId),
+                    name = id.raw,
+                )?.delete()
+            }
             MusicTable.deleteWhere {
                 id inList ids.map { it.raw }
             }
@@ -98,7 +113,7 @@ class MusicDataSourceImpl : MusicDataSource {
                         (MusicTable.id inList ids.map { it.raw })
                 }
                 .map {
-                    MusicId(raw = it[MusicTable.id].toString())
+                    MusicId(raw = it[MusicTable.id].value)
                 }
         }
 
@@ -108,7 +123,7 @@ class MusicDataSourceImpl : MusicDataSource {
                 .select(MusicTable.id)
                 .where { MusicTable.id inList ids.map { it.raw } }
                 .map {
-                    MusicId(raw = it[MusicTable.id].toString())
+                    MusicId(raw = it[MusicTable.id].value)
                 }
         }
 
@@ -141,4 +156,46 @@ class MusicDataSourceImpl : MusicDataSource {
                 .wrapRows(query)
                 .map { it.toMusic(buildScope = { Music.Scope.User }) }
         }
+
+    private suspend fun getMusicsFolder(userId: Uuid): File {
+        val userFolder = userDataSource.getUserDirectory(userId)
+        return File(userFolder, MUSIC_FOLDER).ensureExist()
+    }
+
+    override suspend fun saveFile(userId: Uuid, data: FileData): Uuid? =
+        CommonFileUtils.save(
+            parent = getMusicsFolder(userId),
+            fileData = data,
+        )
+
+    override suspend fun getFile(name: String, userId: Uuid): File? =
+        CommonFileUtils.getByNameWithoutExtension(
+            name = name,
+            parent = getMusicsFolder(userId),
+        )
+
+    override suspend fun deleteFile(name: String, userId: Uuid) {
+        CommonFileUtils.delete(
+            parent = getMusicsFolder(userId),
+            name = name,
+        )
+    }
+
+    override suspend fun renameFile(from: String, to: String, userId: Uuid) {
+        val file = getFile(
+            name = from,
+            userId = userId,
+        )
+
+        val updatedFile = File(
+            getMusicsFolder(userId),
+            to,
+        )
+
+        file?.renameTo(updatedFile)
+    }
+
+    companion object {
+        const val MUSIC_FOLDER: String = "musics"
+    }
 }

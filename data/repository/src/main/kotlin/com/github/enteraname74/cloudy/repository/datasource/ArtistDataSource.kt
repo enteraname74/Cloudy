@@ -9,11 +9,13 @@ interface ArtistDataSource {
         name: String,
         userId: Uuid,
     ): Artist?
+
     suspend fun getFromId(artistId: Uuid): Artist?
     suspend fun getFromUser(
         artistId: Uuid,
         userId: Uuid,
     ): Artist?
+
     suspend fun getFromCoverPath(coverPath: String): Artist?
     suspend fun isArtistPossessedByUser(userId: Uuid, artistId: Uuid): Boolean
     suspend fun upsert(artist: Artist): Artist
@@ -21,7 +23,8 @@ interface ArtistDataSource {
         userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Artist>
-    suspend fun deleteById(artistId: Uuid): Boolean
+
+    suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String>
     suspend fun deleteAll(artistIds: List<Uuid>)
 
     suspend fun deleteOfUser(userId: Uuid)

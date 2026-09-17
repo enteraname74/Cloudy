@@ -8,10 +8,8 @@ import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicRes
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.server.request.receiveMultipart
@@ -23,14 +21,10 @@ import kotlin.uuid.Uuid
 
 fun Route.updateMusics() {
     val musicService by inject<MusicService>()
-    val userService by inject<UserService>()
 
     put<MusicResource> {
         val userId: Uuid = getUserIdFromToken() ?: return@put missingTokenInformation()
         val routingMessages: RoutingMessages = getRoutingMessages()
-        val user: User = userService.getUserFromId(userId) ?: return@put badRequest(
-            message = routingMessages.CANNOT_FIND_USER,
-        )
 
         val payload: CloudyResult<MusicUpdatePayload> = MultiPartDataUtils.processMusicUpdateRequest(
             request = call.receiveMultipart(),
@@ -44,7 +38,7 @@ fun Route.updateMusics() {
             is CloudyResult.Success -> {
                 val result: CloudyResult<Music> = musicService.update(
                     payload = payload.data,
-                    user = user,
+                    userId = userId,
                 )
 
                 when (result) {

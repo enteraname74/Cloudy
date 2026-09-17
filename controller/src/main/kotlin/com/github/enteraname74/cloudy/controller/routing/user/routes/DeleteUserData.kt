@@ -8,8 +8,8 @@ import com.github.enteraname74.cloudy.controller.ext.respond
 import com.github.enteraname74.cloudy.controller.routing.user.resource.UserResource
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.UserService
-import io.ktor.server.resources.*
-import io.ktor.server.routing.*
+import io.ktor.server.resources.delete
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
@@ -28,7 +28,6 @@ fun Route.deleteUserData() {
         respond(
             userService.clearUserData(
                 userId = userId,
-                routingMessages = routingMessages,
             )
         )
     }

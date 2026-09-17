@@ -5,14 +5,13 @@ import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
-import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
+import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import kotlin.uuid.Uuid
 
 class ArtistRepositoryImpl(
     private val artistDataSource: ArtistDataSource,
-    private val coverFileManager: CoverFileManager,
+    private val coverDataSource: CoverDataSource,
 ) : ArtistRepository {
     override suspend fun getFromInformation(name: String, userId: Uuid): Artist? =
         artistDataSource.getFromInformation(
@@ -41,7 +40,6 @@ class ArtistRepositoryImpl(
     override suspend fun upsert(
         artist: Artist,
         coverData: FileData?,
-        username: String
     ): Artist {
         val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
@@ -52,17 +50,15 @@ class ArtistRepositoryImpl(
                     ?.split('/')?.last()
 
             previousName?.let { name ->
-                coverFileManager.delete(
+                coverDataSource.delete(
                     name = name,
-                    username = username,
+                    userId = artist.userId,
                 )
             }
 
-            coverFileManager.save(
-                data = FileSavingData.UserFile(
-                    username = username,
-                    fileData = cover,
-                )
+            coverDataSource.save(
+                userId = artist.userId,
+                data = cover,
             )
         }
 
@@ -88,11 +84,9 @@ class ArtistRepositoryImpl(
                 paginatedRequest = paginatedRequest,
             )
 
-    override suspend fun deleteById(artistId: Uuid) =
-        artistDataSource.deleteById(artistId)
-
-    override suspend fun deleteAll(artistIds: List<Uuid>) =
+    override suspend fun deleteAll(artistIds: List<Uuid>) {
         artistDataSource.deleteAll(artistIds)
+    }
 
     override suspend fun deleteOfUser(userId: Uuid) {
         artistDataSource.deleteOfUser(userId = userId)

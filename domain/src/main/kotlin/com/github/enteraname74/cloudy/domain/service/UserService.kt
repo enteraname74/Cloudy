@@ -23,9 +23,6 @@ class UserService(
     private val playerRepository: PlayerRepository,
     private val deleteUserDataUseCase: DeleteUserDataUseCase,
 ) {
-    suspend fun isUsernameUsed(username: String): Boolean =
-        userRepository.getFromUsername(username = username) != null
-
     suspend fun getUserFromUsername(username: String): User? =
         userRepository.getFromUsername(username = username)
 
@@ -109,33 +106,29 @@ class UserService(
      */
     suspend fun clearUserData(
         userId: Uuid,
-        routingMessages: RoutingMessages,
     ): CloudyResult<UserStorage> {
-        val user = userRepository.getFromId(userId = userId) ?: return CloudyResult.Error(
-            message = routingMessages.CANNOT_FIND_USER,
-        )
         deleteUserDataUseCase(userId)
-        return CloudyResult.Success(getUserStorage(user.username))
+        return CloudyResult.Success(getUserStorage(userId))
     }
 
     suspend fun isUserDirectoryFull(
-        username: String,
+        userId: Uuid,
         addedSize: Long = 0L,
     ): Boolean {
-        val userDirectorySize = userRepository.getUserDirectorySize(username)
+        val userDirectorySize = userRepository.getUserDirectorySize(userId)
         val gbSize = (userDirectorySize + addedSize).toGb()
 
-        return gbSize >= userRepository.getUserDirectoryMaxSizeInGb(username).total
+        return gbSize >= userRepository.getUserDirectoryMaxSizeInGb(userId).total
     }
 
     suspend fun getUserStorage(
-        username: String,
+        userId: Uuid,
     ): UserStorage {
-        val max = userRepository.getUserDirectoryMaxSizeInGb(username)
+        val max = userRepository.getUserDirectoryMaxSizeInGb(userId)
 
         return UserStorage(
             max = max.copyData(total = max.total.roundToTwoDecimals()),
-            current = userRepository.getUserDirectorySize(username).toGb().roundToTwoDecimals(),
+            current = userRepository.getUserDirectorySize(userId).toGb().roundToTwoDecimals(),
         )
     }
 

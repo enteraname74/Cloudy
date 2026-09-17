@@ -1,19 +1,19 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
+import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
+import com.github.enteraname74.cloudy.repository.ext.getCoverName
 import kotlin.uuid.Uuid
 
 class PlaylistRepositoryImpl(
     private val playlistDataSource: PlaylistDataSource,
-    private val coverFileManager: CoverFileManager,
+    private val coverDataSource: CoverDataSource,
 ) : PlaylistRepository {
     override suspend fun getFromId(playlistId: Uuid): Playlist? =
         playlistDataSource.getFromId(
@@ -40,28 +40,24 @@ class PlaylistRepositoryImpl(
     override suspend fun upsert(
         playlist: Playlist,
         coverData: FileData?,
-        username: String
     ): Playlist {
         val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
             val previousName: String? =
                 playlist
                     .coverPath
-                    ?.takeIf { it.startsWith(Playlist.COVER_PATH) }
-                    ?.split('/')?.last()
+                    .getCoverName(Playlist.COVER_PATH)
 
             previousName?.let { name ->
-                coverFileManager.delete(
+                coverDataSource.delete(
                     name = name,
-                    username = username,
+                    userId = playlist.userId,
                 )
             }
 
-            coverFileManager.save(
-                data = FileSavingData.UserFile(
-                    username = username,
-                    fileData = cover,
-                )
+            coverDataSource.save(
+                userId = playlist.userId,
+                data = cover,
             )
         }
 
@@ -87,8 +83,8 @@ class PlaylistRepositoryImpl(
             },
         )
 
-    override suspend fun deleteAll(playlistIds: List<Uuid>) {
-        playlistDataSource.deleteAll(playlistIds)
+    override suspend fun deleteAll(playlistIds: List<Uuid>, userId: Uuid) {
+        playlistDataSource.deleteAll(playlistIds, userId)
     }
 
     override suspend fun deleteOfUser(userId: Uuid) {
