@@ -37,17 +37,17 @@ class MusicResource {
             )
     }
 
-    @Resource("{fingerprint}")
+    @Resource("{musicId}")
     data class File(
         val parent: MusicResource = MusicResource(),
-        val fingerprint: String,
+        val musicId: MusicId,
     )
 
     @Resource("token")
     data class FileFromToken(
         val parent: MusicResource,
         val token: String,
-        val fingerprint: String,
+        val musicId: MusicId,
     )
 
     @Resource("cover/{coverId}")

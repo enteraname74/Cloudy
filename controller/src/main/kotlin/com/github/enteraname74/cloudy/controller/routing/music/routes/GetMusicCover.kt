@@ -42,7 +42,7 @@ fun Route.getMusicCover() {
         )
 
         val finalCover: ByteArray = foundCover ?: musicService.getMusicFile(
-            fingerprint = correspondingMusic.fingerprint,
+            musicId = correspondingMusic.id,
             userId = userId,
         )?.let {
             coverService.getMusicFileCover(

@@ -29,7 +29,7 @@ fun Route.getMusicFile() {
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val musicFile: File = musicService.getMusicFile(
-            fingerprint = musicResource.fingerprint,
+            musicId = musicResource.musicId,
             userId = userId,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,

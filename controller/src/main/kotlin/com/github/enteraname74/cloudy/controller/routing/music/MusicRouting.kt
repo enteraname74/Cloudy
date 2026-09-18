@@ -9,6 +9,7 @@ import com.github.enteraname74.cloudy.controller.routing.music.routes.getMusicFi
 import com.github.enteraname74.cloudy.controller.routing.music.routes.songsOfUser
 import com.github.enteraname74.cloudy.controller.routing.music.routes.updateMusics
 import com.github.enteraname74.cloudy.controller.routing.music.routes.uploadMusic
+import com.github.enteraname74.cloudy.logging.cloudyLogger
 import io.ktor.server.routing.Routing
 
 fun Routing.musicRouting() {

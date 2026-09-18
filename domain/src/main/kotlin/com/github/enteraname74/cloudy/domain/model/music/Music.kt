@@ -19,7 +19,7 @@ data class Music(
     val name: String,
     val album: Album,
     val artists: List<Artist>,
-    val path: String,
+    val path: String = "music/${id.raw}",
     val albumPosition: Int?,
     val coverPath: String = buildLocalCoverPath(),
     val duration: Long,

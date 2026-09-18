@@ -10,7 +10,7 @@ import org.jetbrains.exposed.v1.dao.UuidEntityClass
 import org.jetbrains.exposed.v1.jdbc.batchUpsert
 import kotlin.uuid.Uuid
 
-internal object ArtistTable: UuidTable() {
+internal object ArtistTable : UuidTable() {
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val name = text("name")
     val coverPath = text("coverPath").nullable()

@@ -23,7 +23,6 @@ data class MusicUploadSpec(
         artists: List<Artist>,
         album: Album,
         fingerprint: String,
-        path: String,
     ): Music =
         Music(
             fingerprint = fingerprint,
@@ -31,7 +30,6 @@ data class MusicUploadSpec(
             name = name,
             album = album,
             artists = artists,
-            path = path,
             albumPosition = albumPosition,
             duration = duration,
             addedDateMillis = DateUtils.now(),

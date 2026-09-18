@@ -28,12 +28,7 @@ class MusicService(
             userId = userId,
         )
 
-    suspend fun getMusicFile(fingerprint: String, userId: Uuid): File? {
-        val musicId = MusicId(
-            fingerprint = fingerprint,
-            userId = userId,
-        )
-
+    suspend fun getMusicFile(musicId: MusicId, userId: Uuid): File? {
         val hasPermission: Boolean = musicRepository.isMusicPossessedByUser(
             userId = userId,
             musicId = musicId,
@@ -82,7 +77,6 @@ class MusicService(
                     cover = payload.musicCover,
                     fingerprint = uploadProcess.fingerprint,
                     userId = userId,
-                    musicPath = "music/${uploadProcess.fingerprint}",
                 )
             }
         }
