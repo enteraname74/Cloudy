@@ -3,13 +3,13 @@ package com.github.enteraname74.cloudy.controller.routing.player.routes
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayerSocketUser
-import com.github.enteraname74.cloudy.domain.model.player.PlayerUser
 import com.github.enteraname74.cloudy.domain.service.PlayerService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
-import io.ktor.server.routing.*
-import io.ktor.server.websocket.*
-import io.ktor.websocket.*
+import io.ktor.server.routing.Route
+import io.ktor.server.websocket.webSocket
+import io.ktor.websocket.CloseReason
+import io.ktor.websocket.close
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 

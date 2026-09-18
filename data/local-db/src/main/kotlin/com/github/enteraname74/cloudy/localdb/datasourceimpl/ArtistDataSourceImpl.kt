@@ -9,11 +9,14 @@ import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
+import com.github.enteraname74.cloudy.repository.ext.getCoverName
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNotNull
 import org.jetbrains.exposed.v1.core.notExists
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
+import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import kotlin.uuid.Uuid
 
@@ -79,11 +82,13 @@ class ArtistDataSourceImpl : ArtistDataSource {
                 .map { it.toArtist() }
         }
 
-    override suspend fun deleteById(artistId: Uuid): Boolean =
+    override suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String> =
         workTransaction {
-            ArtistTable.deleteWhere {
-                id eq artistId
-            } > 0
+            ArtistTable
+                .select(ArtistTable.coverPath)
+                .where { (ArtistTable.userId eq userId) and ArtistTable.coverPath.isNotNull() }
+                .mapNotNull { it[ArtistTable.coverPath]?.getCoverName(Artist.COVER_PATH) }
+                .distinct()
         }
 
     override suspend fun deleteAll(artistIds: List<Uuid>) {

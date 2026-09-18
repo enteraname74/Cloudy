@@ -4,14 +4,13 @@ import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UpdateAlbumUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.UpdateArtistUseCase
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
-import com.github.enteraname74.cloudy.domain.util.toCloudyResult
+import kotlin.uuid.Uuid
 
 class UpdateMusicUseCase(
     private val updateAlbumUseCase: UpdateAlbumUseCase,
@@ -22,22 +21,22 @@ class UpdateMusicUseCase(
 ) {
     suspend operator fun invoke(
         payload: MusicUpdatePayload,
-        user: User,
+        userId: Uuid,
     ): CloudyResult<Music> {
         val existingMusic: Music = musicRepository.getFromUser(
             musicId = payload.spec.id,
-            userId = user.id,
+            userId = userId,
         ) ?: return CloudyResult.Error()
 
         val artistOfMusic: List<Artist> = payload.spec.artists.map { artistUpdate ->
             updateArtistUseCase(
                 artistUpdate = artistUpdate,
-                user = user,
+                userId = userId,
             )
         }
         val albumOfMusic: Album = updateAlbumUseCase(
             albumUpdate = payload.spec.album,
-            user = user,
+            userId = userId,
         )
 
         val result = musicRepository.upsert(
@@ -46,7 +45,6 @@ class UpdateMusicUseCase(
                 artists = artistOfMusic,
                 album = albumOfMusic,
             ),
-            username = user.username,
             cover = payload.musicCover,
         )
 
@@ -54,13 +52,13 @@ class UpdateMusicUseCase(
             is CloudyResult.Error -> result
             is CloudyResult.Success -> {
                 setArtistsOfMusicUseCase(
-                    musicId = payload.spec.id,
+                    musicId = result.data.id,
                     artistIds = artistOfMusic.map { it.id },
-                    userId = user.id,
+                    userId = userId,
                 )
                 // Clean up after saving updated data
-                deleteEmptyAlbumsAndArtistsUseCase()
-                musicRepository.getFromId(payload.spec.id).toCloudyResult()
+                deleteEmptyAlbumsAndArtistsUseCase(userId)
+                result
             }
         }
     }

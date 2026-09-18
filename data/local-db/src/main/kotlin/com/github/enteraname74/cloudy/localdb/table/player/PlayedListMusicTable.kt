@@ -28,7 +28,7 @@ internal object PlayedListMusicTable : IdTable<String>() {
         batchUpsert(musics) { music ->
             this[id] = music.id
             this[listId] = music.playedListId
-            this[musicId] = music.music.fingerprint
+            this[musicId] = music.music.id.raw
             this[lastPlayedMillis] = music.lastPlayedMillis
             this[lastUpdateAt] = DateUtils.now()
             this[order] = music.order
@@ -39,7 +39,7 @@ internal object PlayedListMusicTable : IdTable<String>() {
         batchUpsert(musics) { music ->
             this[id] = music.id
             this[listId] = music.playedListId
-            this[musicId] = music.musicId
+            this[musicId] = music.musicId.raw
             this[lastPlayedMillis] = music.lastPlayedMillis
             this[lastUpdateAt] = DateUtils.now()
             this[order] = music.order
@@ -47,8 +47,8 @@ internal object PlayedListMusicTable : IdTable<String>() {
     }
 }
 
-internal class PlayedListMusicEntity(id: EntityID<String>): Entity<String>(id) {
-    companion object: EntityClass<String, PlayedListMusicEntity>(PlayedListMusicTable)
+internal class PlayedListMusicEntity(id: EntityID<String>) : Entity<String>(id) {
+    companion object : EntityClass<String, PlayedListMusicEntity>(PlayedListMusicTable)
 
     var listId by PlayedListMusicTable.listId
     val music by MusicEntity referencedOn PlayedListMusicTable.musicId

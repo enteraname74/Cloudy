@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.usecase.playlist
 
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.repository.MusicPlaylistRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import kotlin.uuid.Uuid
@@ -10,11 +11,11 @@ class SetPlaylistMusicsUseCase(
     private val musicRepository: MusicRepository,
 ) {
     suspend operator fun invoke(
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         playlistId: Uuid,
         userId: Uuid,
     ) {
-        val safeMusics: List<String> = musicRepository.getExistingIdsOfUser(
+        val safeMusics: List<MusicId> = musicRepository.getExistingIdsOfUser(
             userId = userId,
             ids = musicIds,
         )

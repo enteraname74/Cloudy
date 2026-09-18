@@ -7,7 +7,6 @@ import com.github.enteraname74.cloudy.controller.ext.respond
 import com.github.enteraname74.cloudy.controller.routing.playlist.resource.PlaylistResource
 import com.github.enteraname74.cloudy.controller.util.MultiPartDataUtils
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -26,7 +25,7 @@ fun Route.uploadPlaylist() {
     post<PlaylistResource> {
 
         val userId: Uuid = getUserIdFromToken() ?: return@post missingTokenInformation()
-        val user: User = userService.getUserFromId(userId) ?: return@post cannotFindUser()
+        userService.getUserFromId(userId) ?: return@post cannotFindUser()
 
         val multipartData: MultiPartData = call.receiveMultipart()
         when (val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)) {
@@ -39,7 +38,7 @@ fun Route.uploadPlaylist() {
                     playlistService.upload(
                         playlistUpload = uploadData.data.second,
                         coverData = uploadData.data.first,
-                        user = user,
+                        userId = userId,
                     )
                 )
             }

@@ -10,9 +10,11 @@ import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
+import com.github.enteraname74.cloudy.repository.ext.getCoverName
 import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
+import org.jetbrains.exposed.v1.core.isNotNull
 import org.jetbrains.exposed.v1.core.notInSubQuery
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
@@ -96,11 +98,14 @@ class AlbumDataSourceImpl : AlbumDataSource {
                 .map { it.toAlbum() }
         }
 
-    override suspend fun deleteById(albumId: Uuid) {
+    override suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String> =
         workTransaction {
-            AlbumEntity.findById(albumId)?.delete()
+            AlbumTable
+                .select(AlbumTable.coverPath)
+                .where { (AlbumTable.userId eq userId) and AlbumTable.coverPath.isNotNull() }
+                .mapNotNull { it[AlbumTable.coverPath]?.getCoverName(Album.COVER_PATH) }
+                .distinct()
         }
-    }
 
     override suspend fun deleteAll(albumIds: List<Uuid>) {
         workTransaction {

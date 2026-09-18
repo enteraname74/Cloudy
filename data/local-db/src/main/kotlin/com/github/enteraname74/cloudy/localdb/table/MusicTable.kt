@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
-import com.github.enteraname74.cloudy.domain.util.DateUtils
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
@@ -14,6 +14,7 @@ internal object MusicTable : IdTable<String>() {
     override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
+    val fingerprint = text("fingerprint")
     val name = text("name")
     val userId = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     val coverPath = text("coverPath")
@@ -28,7 +29,8 @@ internal object MusicTable : IdTable<String>() {
 
     fun upsertAll(musics: List<Music>) {
         batchUpsert(musics) { music ->
-            this[id] = music.fingerprint
+            this[id] = music.id.raw
+            this[fingerprint] = music.fingerprint
             this[name] = music.name
             this[userId] = music.userId
             this[coverPath] = music.coverPath
@@ -46,6 +48,7 @@ internal object MusicTable : IdTable<String>() {
 internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, MusicEntity>(MusicTable)
 
+    var fingerprint by MusicTable.fingerprint
     var name by MusicTable.name
     var userId by MusicTable.userId
     var coverPath by MusicTable.coverPath
@@ -64,7 +67,8 @@ internal class MusicEntity(id: EntityID<String>) : Entity<String>(id) {
         buildScope: (musicUserId: Uuid) -> Music.Scope
     ): Music =
         Music(
-            fingerprint = id.value,
+            id = MusicId(id.value),
+            fingerprint = fingerprint,
             userId = userId.value,
             name = name,
             album = album.toAlbum(),

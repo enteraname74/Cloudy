@@ -37,7 +37,7 @@ fun Route.deletePlaylists() {
             }
         }
 
-        playlistService.deleteAll(uuids)
+        playlistService.deleteAll(uuids, userId)
 
         response(
             status = HttpStatusCode.OK,

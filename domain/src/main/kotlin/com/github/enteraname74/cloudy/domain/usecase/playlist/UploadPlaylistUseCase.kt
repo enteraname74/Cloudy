@@ -4,10 +4,10 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistUpload
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.toCloudyResult
+import kotlin.uuid.Uuid
 
 class UploadPlaylistUseCase(
     private val playlistRepository: PlaylistRepository,
@@ -16,18 +16,18 @@ class UploadPlaylistUseCase(
     suspend operator fun invoke(
         playlistUpload: PlaylistUpload,
         coverData: FileData?,
-        user: User,
+        userId: Uuid,
     ): CloudyResult<PlaylistWithMusics> {
         val savedPlaylist: Playlist = if (playlistUpload.isFavorite) {
             handleFavorite(
                 playlistUpload = playlistUpload,
-                user = user,
+                userId = userId,
                 coverData = coverData,
             )
         } else {
             handlePlaylist(
                 playlistUpload = playlistUpload,
-                user = user,
+                userId = userId,
                 coverData = coverData,
             )
         }
@@ -35,7 +35,7 @@ class UploadPlaylistUseCase(
         setPlaylistMusicsUseCase(
             musicIds = playlistUpload.musicIds,
             playlistId = savedPlaylist.id,
-            userId = user.id,
+            userId = userId,
         )
 
         return playlistRepository.getWithMusics(
@@ -46,25 +46,23 @@ class UploadPlaylistUseCase(
     private suspend fun handlePlaylist(
         playlistUpload: PlaylistUpload,
         coverData: FileData?,
-        user: User,
+        userId: Uuid,
     ): Playlist {
         val existingPlaylist: Playlist? = playlistUpload.id?.let {
             playlistRepository.getFromId(it)
         } ?: playlistRepository.getFromInformation(
             name = playlistUpload.name,
-            userId = user.id,
+            userId = userId,
         )
         return if (existingPlaylist != null) {
             playlistRepository.upsert(
                 playlist = existingPlaylist.merge(playlistUpload),
                 coverData = coverData,
-                username = user.username,
             )
         } else {
             playlistRepository.upsert(
-                playlist = playlistUpload.toNewPlaylist(user.id),
+                playlist = playlistUpload.toNewPlaylist(userId),
                 coverData = coverData,
-                username = user.username,
             )
         }
     }
@@ -72,22 +70,20 @@ class UploadPlaylistUseCase(
     private suspend fun handleFavorite(
         playlistUpload: PlaylistUpload,
         coverData: FileData?,
-        user: User,
+        userId: Uuid,
     ): Playlist {
-        val favorite: Playlist? = playlistRepository.getFavorite(userId = user.id)
+        val favorite: Playlist? = playlistRepository.getFavorite(userId = userId)
         return if (favorite != null) {
             playlistRepository.upsert(
                 playlist = favorite.merge(playlistUpload),
                 coverData = coverData,
-                username = user.username,
             )
         } else {
             playlistRepository.upsert(
-                playlist = playlistUpload.toNewPlaylist(user.id).copy(
+                playlist = playlistUpload.toNewPlaylist(userId).copy(
                     isFavorite = true,
                 ),
                 coverData = coverData,
-                username = user.username,
             )
         }
     }

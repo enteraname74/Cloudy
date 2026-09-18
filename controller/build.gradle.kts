@@ -18,7 +18,7 @@ ktor {
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 
-    val isDevelopment: Boolean = project.ext.has("development")
+    val isDevelopment = System.getenv("DEV_MODE").toBoolean()
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 

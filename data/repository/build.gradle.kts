@@ -9,7 +9,6 @@ version = "0.0.1"
 dependencies {
     implementation(project(":domain"))
     implementation(project(":metadata"))
-    implementation(project(":file-access"))
     implementation(project(":logging"))
 }
 

@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "com.github.enteraname74.cloudy"
@@ -12,6 +13,7 @@ dependencies {
     implementation(project(":logging"))
 
     implementation(libs.bundles.exposed)
+    implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.sqlite.jdbc)
     implementation(libs.postgresql)
 }

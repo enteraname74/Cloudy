@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistEntity
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
@@ -44,18 +45,18 @@ class MusicArtistDataSourceImpl : MusicArtistDataSource {
         }
     }
 
-    override suspend fun deleteOfMusic(musicId: String) {
+    override suspend fun deleteOfMusic(musicId: MusicId) {
         workTransaction {
             MusicArtistTable.deleteWhere {
-                this.musicId eq musicId
+                this.musicId eq musicId.raw
             }
         }
     }
 
-    override suspend fun isInMultipleArtist(musicId: String): Boolean =
+    override suspend fun isInMultipleArtist(musicId: MusicId): Boolean =
         workTransaction {
             MusicArtistEntity
-                .find { MusicArtistTable.musicId eq musicId }
+                .find { MusicArtistTable.musicId eq musicId.raw }
                 .count() > 1
         }
 

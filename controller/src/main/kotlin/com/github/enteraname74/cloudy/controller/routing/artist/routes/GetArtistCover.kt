@@ -1,15 +1,14 @@
 package com.github.enteraname74.cloudy.controller.routing.artist.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.forbidden
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
 import com.github.enteraname74.cloudy.controller.routing.artist.resource.ArtistResource
-import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
+import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import com.github.enteraname74.cloudy.domain.service.CoverService
 import io.ktor.http.HttpStatusCode
@@ -26,7 +25,6 @@ fun Route.getArtistCover() {
     get<ArtistResource.Cover> { artistResource ->
         val routingMessages: RoutingMessages = getRoutingMessages()
 
-        val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val correspondingArtist: Artist = artistService.getFromCoverPath(
@@ -47,7 +45,7 @@ fun Route.getArtistCover() {
 
         val cover: ByteArray = coverService.getByName(
             name = artistResource.coverId,
-            username = username,
+            userId = userId,
         ) ?: return@get badRequest(routingMessages.IMAGE_NOT_FOUND)
 
         call.respond(cover)

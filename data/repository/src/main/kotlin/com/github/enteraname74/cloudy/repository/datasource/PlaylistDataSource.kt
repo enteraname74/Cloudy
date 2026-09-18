@@ -34,7 +34,10 @@ interface PlaylistDataSource {
         playlistIds: List<Uuid>,
         updatedAt: Long,
     )
-    suspend fun deleteAll(playlistIds: List<Uuid>)
+
+    suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String>
+
+    suspend fun deleteAll(playlistIds: List<Uuid>, userId: Uuid)
     suspend fun deleteOfUser(userId: Uuid)
     suspend fun allOfUser(
         userId: Uuid,

@@ -5,14 +5,13 @@ import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import com.github.enteraname74.cloudy.fileaccess.CoverFileManager
-import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
+import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import kotlin.uuid.Uuid
 
 class AlbumRepositoryImpl(
     private val albumDataSource: AlbumDataSource,
-    private val coverFileManager: CoverFileManager,
+    private val coverDataSource: CoverDataSource,
 ) : AlbumRepository {
     override suspend fun getFromId(albumId: Uuid): Album? =
         albumDataSource.getFromId(
@@ -21,7 +20,6 @@ class AlbumRepositoryImpl(
 
     override suspend fun getFromCoverPath(coverPath: String): Album? =
         albumDataSource.getFromCoverPath(coverPath)
-
 
     override suspend fun getAll(albumIds: List<Uuid>): List<Album> =
         albumDataSource.getAll(albumIds)
@@ -56,7 +54,6 @@ class AlbumRepositoryImpl(
     override suspend fun upsert(
         album: Album,
         coverData: FileData?,
-        username: String,
     ): Album {
         val savedId: Uuid? = coverData?.let { cover ->
             // We will delete the previous cover if any
@@ -67,17 +64,15 @@ class AlbumRepositoryImpl(
                     ?.split('/')?.last()
 
             previousName?.let { name ->
-                coverFileManager.delete(
+                coverDataSource.delete(
                     name = name,
-                    username = username,
+                    userId = album.userId,
                 )
             }
 
-            coverFileManager.save(
-                data = FileSavingData.UserFile(
-                    username = username,
-                    fileData = cover,
-                )
+            coverDataSource.save(
+                userId = album.userId,
+                data = cover,
             )
         }
 
@@ -112,10 +107,6 @@ class AlbumRepositoryImpl(
                 userId = userId,
                 paginatedRequest = paginatedRequest,
             )
-
-    override suspend fun deleteById(albumId: Uuid) {
-        albumDataSource.deleteById(albumId)
-    }
 
     override suspend fun deleteAll(albumIds: List<Uuid>) {
         albumDataSource.deleteAll(albumIds)

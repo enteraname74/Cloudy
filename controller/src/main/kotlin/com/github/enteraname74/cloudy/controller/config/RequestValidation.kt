@@ -44,7 +44,7 @@ fun Application.configureRequestValidation() {
             }
         }
         validate<CheckMusicsBody> { check ->
-            if (check.ids.all { it.isNotBlank() }) {
+            if (check.ids.all { it.raw.isNotBlank() }) {
                 ValidationResult.Valid
             } else {
                 ValidationResult.Invalid(InvalidRequestType.InvalidData.name)

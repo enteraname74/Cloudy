@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -26,15 +27,14 @@ class PlayerService(
     suspend fun create(
         hostId: Uuid,
         deviceId: String,
-        initialMusicIds: List<String>,
+        initialMusicIds: List<MusicId>,
         routingMessages: RoutingMessages,
     ): CloudyResult<PlayedList> {
         if (userRepository.getFromId(hostId) == null) {
             return CloudyResult.Error(routingMessages.CANNOT_FIND_USER)
         }
 
-        val existingMusicIds = musicRepository.getExistingIdsOfUser(
-            userId = hostId,
+        val existingMusicIds = musicRepository.getExistingIds(
             ids = initialMusicIds,
         )
         val orderedMusicIds = initialMusicIds.mapNotNull { id -> existingMusicIds.find { it == id } }
@@ -308,7 +308,7 @@ class PlayerService(
         userId: Uuid,
         deviceId: String,
         listId: Uuid,
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         routingMessages: RoutingMessages,
     ): CloudyResult<Unit> {
 
@@ -340,7 +340,7 @@ class PlayerService(
         userId: Uuid,
         deviceId: String,
         listId: Uuid,
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
         routingMessages: RoutingMessages,
     ): CloudyResult<Unit> {
 
@@ -358,7 +358,7 @@ class PlayerService(
             listId = listId,
             deviceId = deviceId,
         )
-        val availableMusicIds: List<String> = if (isOwner) {
+        val availableMusicIds: List<MusicId> = if (isOwner) {
             musicRepository.getExistingIds(musicIds)
         } else {
             musicRepository.getExistingIdsOfUser(
@@ -382,8 +382,8 @@ class PlayerService(
         userId: Uuid,
         deviceId: String,
         routingMessages: RoutingMessages,
-        musicIds: List<String>
-    ): CloudyResult<List<String>> {
+        musicIds: List<MusicId>
+    ): CloudyResult<List<MusicId>> {
         val isInList: Boolean = playerRepository.isUserInPlayedList(
             userId = userId,
             listId = listId,
@@ -393,7 +393,7 @@ class PlayerService(
             return CloudyResult.Error(routingMessages.PLAYED_LIST_NOT_FOUND_OR_NOT_IN_LIST)
         }
 
-        val existingIds: List<String> = playerRepository.getExistingMusicIds(
+        val existingIds: List<MusicId> = playerRepository.getExistingMusicIds(
             listId = listId,
             musicIds = musicIds,
         )
@@ -406,7 +406,7 @@ class PlayerService(
         userId: Uuid,
         deviceId: String,
         routingMessages: RoutingMessages,
-        musicId: String,
+        musicId: MusicId,
     ): CloudyResult<Unit> {
         val isInList: Boolean = playerRepository.isUserInPlayedList(
             userId = userId,

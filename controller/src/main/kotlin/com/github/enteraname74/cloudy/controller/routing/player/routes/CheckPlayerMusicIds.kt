@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.respond
 import com.github.enteraname74.cloudy.controller.routing.player.model.CheckPlayerMusicIdsBody
 import com.github.enteraname74.cloudy.controller.routing.player.resource.PlayerResource
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.service.PlayerService
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.server.request.*
@@ -20,7 +21,7 @@ fun Route.checkPlayerMusicIds() {
         val userId = getUserIdFromToken() ?: return@post missingTokenInformation()
 
         val body: CheckPlayerMusicIdsBody = call.receive()
-        val result: CloudyResult<List<String>> = playerService.getDeletedMusicIds(
+        val result: CloudyResult<List<MusicId>> = playerService.getDeletedMusicIds(
             listId = body.listId,
             userId = userId,
             deviceId = body.deviceId,

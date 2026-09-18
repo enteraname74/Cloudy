@@ -13,9 +13,15 @@ interface CoverRepository {
     /**
      * Retrieves a cover saved on the file system
      */
-    suspend fun getCover(name: String, username: String): ByteArray?
+    suspend fun getCover(
+        userId: Uuid,
+        name: String,
+    ): ByteArray?
+
     suspend fun save(
-        username: String,
+        userId: Uuid,
         coverData: FileData,
     ): Uuid?
+
+    suspend fun deletedUnusedCovers(userId: Uuid)
 }

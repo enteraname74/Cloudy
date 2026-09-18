@@ -33,7 +33,7 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
         val fingerprintData: FingerprintData? = fingerprintRetriever
             .getFingerprintFromMusic(musicPath = musicFile.path)
 
-        // TODO: Handle duration missing for OPUS format (JaudioTagger crashing)
+        // TODO V2: Handle duration missing for OPUS format (JaudioTagger crashing)
         return if (!shouldSearchForMetadata || fingerprintData == null) {
             MusicInformationRetriever.Metadata(
                 name = customMetadata?.name ?: fileMetadata.name,

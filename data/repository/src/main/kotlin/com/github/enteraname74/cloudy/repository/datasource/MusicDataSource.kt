@@ -1,21 +1,51 @@
 package com.github.enteraname74.cloudy.repository.datasource
 
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import java.io.File
 import kotlin.uuid.Uuid
 
 interface MusicDataSource {
+
+    suspend fun saveFile(
+        userId: Uuid,
+        data: FileData,
+    ): Uuid?
+
     suspend fun upsert(music: Music): Music
     suspend fun upsertAll(musics: List<Music>)
-    suspend fun getFromId(musicId: String): Music?
+
+    suspend fun getFile(
+        name: String,
+        userId: Uuid,
+    ): File?
+
     suspend fun getFromUser(
-        musicId: String,
+        musicId: MusicId,
         userId: Uuid,
     ): Music?
 
     suspend fun getFromCoverPath(coverPath: String): Music?
-    suspend fun getAll(ids: List<String>): List<Music>
-    suspend fun deleteAll(ids: List<String>)
+    suspend fun getAll(ids: List<MusicId>): List<Music>
+
+    suspend fun deleteFile(
+        name: String,
+        userId: Uuid,
+    )
+
+    suspend fun renameFile(
+        from: String,
+        to: String,
+        userId: Uuid,
+    )
+
+    suspend fun deleteAll(
+        ids: List<MusicId>,
+        userId: Uuid,
+    )
+
     suspend fun getAllOfUser(
         userId: Uuid,
         paginatedRequest: PaginatedRequest,
@@ -23,15 +53,14 @@ interface MusicDataSource {
 
     suspend fun getExistingIdsOfUser(
         userId: Uuid,
-        ids: List<String>,
-    ): List<String>
+        ids: List<MusicId>,
+    ): List<MusicId>
 
     suspend fun getExistingIds(
-        ids: List<String>,
-    ): List<String>
+        ids: List<MusicId>,
+    ): List<MusicId>
 
-    suspend fun isMusicPossessedByUser(userId: Uuid, musicId: String): Boolean
-    suspend fun getFromFingerprint(fingerprint: String, userId: Uuid): Music?
+    suspend fun isMusicPossessedByUser(userId: Uuid, musicId: MusicId): Boolean
     suspend fun allFromAlbum(albumId: Uuid): List<Music>
     suspend fun allFromArtist(artistId: Uuid): List<Music>
 }

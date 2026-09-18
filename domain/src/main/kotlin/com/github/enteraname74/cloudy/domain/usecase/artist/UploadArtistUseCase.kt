@@ -1,33 +1,31 @@
 package com.github.enteraname74.cloudy.domain.usecase.artist
 
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.artist.ArtistUpload
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
+import kotlin.uuid.Uuid
 
 class UploadArtistUseCase(
     private val artistRepository: ArtistRepository,
 ) {
     suspend operator fun invoke(
         artistUpload: ArtistUpload,
-        user: User,
+        userId: Uuid,
     ): Artist {
         val existingArtist: Artist? = artistRepository.getFromInformation(
             name = artistUpload.name,
-            userId = user.id,
+            userId = userId,
         )
 
         return if (existingArtist == null) {
             artistRepository.upsert(
-                artist = artistUpload.toNewArtist(user.id),
+                artist = artistUpload.toNewArtist(userId),
                 coverData = null,
-                username = user.username,
             )
         } else {
             artistRepository.upsert(
                 artist = existingArtist.merge(artistUpload),
                 coverData = null,
-                username = user.username,
             )
         }
     }

@@ -1,10 +1,13 @@
 package com.github.enteraname74.cloudy.domain.util
 
+import com.github.enteraname74.cloudy.domain.ext.ensureExist
+import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.logging.CloudyLogger
-import io.ktor.http.content.*
-import io.ktor.http.websocket.websocketServerAccept
+import io.ktor.http.content.PartData
+import java.io.File
+import kotlin.uuid.Uuid
 
-object FileUtils {
+object CommonFileUtils {
     private val logger = CloudyLogger(this::class)
     fun getFileExtension(fileName: String): String? =
         fileName
@@ -63,4 +66,58 @@ object FileUtils {
 
         return authorizedMimeTypes.contains(type)
     }
+
+    fun getAllNamesWithoutExtension(folder: File): List<String> =
+        folder
+            .listFiles()
+            ?.filter { it.isFile }
+            ?.mapNotNull {
+                it.name.replaceFirst(
+                    regex = """[.][^.]+$""".toRegex(),
+                    replacement = ""
+                )
+            } ?: emptyList()
+
+    /**
+     * Retrieve file by its name (without extension)
+     */
+    fun getByNameWithoutExtension(parent: File, name: String): File? {
+        return parent
+            .listFiles()
+            ?.filter { it.isFile }
+            ?.firstOrNull {
+                it.name.replaceFirst(
+                    regex = """[.][^.]+$""".toRegex(),
+                    replacement = ""
+                ) == name
+            }
+    }
+
+    fun delete(
+        parent: File,
+        name: String
+    ) {
+        getByNameWithoutExtension(parent, name)?.delete()
+    }
+
+    /**
+     * Saves a file and returns its id (its name without an extension).
+     */
+    fun save(
+        parent: File,
+        fileData: FileData,
+    ): Uuid? =
+        try {
+            val fileId = Uuid.random()
+            val filename = "$fileId.${fileData.extension}"
+            val fileToSave = File(parent, filename)
+
+            fileToSave.parentFile?.ensureExist()
+            fileToSave.writeBytes(fileData.data)
+
+            return fileId
+        } catch (e: Exception) {
+            logger.error("Failed to save temporary file to user storage: $e")
+            null
+        }
 }

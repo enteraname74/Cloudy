@@ -25,7 +25,9 @@ fun Application.configureRouting() {
         header("Cross-Origin-Resource-Policy", "cross-origin")
     }
     routing {
-        configureSwagger()
+        if (developmentMode) {
+            configureSwagger()
+        }
         userRoutes()
         authRouting()
         musicRouting()

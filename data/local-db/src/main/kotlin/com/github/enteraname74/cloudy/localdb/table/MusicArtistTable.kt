@@ -1,7 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
-import com.github.enteraname74.cloudy.domain.util.DateUtils
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
@@ -12,7 +12,7 @@ import org.jetbrains.exposed.v1.jdbc.batchUpsert
 /**
  * Table for storing MusicArtists.
  */
-internal object MusicArtistTable: IdTable<String>() {
+internal object MusicArtistTable : IdTable<String>() {
     override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
@@ -24,7 +24,7 @@ internal object MusicArtistTable: IdTable<String>() {
     fun upsertAll(musicArtists: List<MusicArtist>) {
         batchUpsert(musicArtists) { musicArtist ->
             this[id] = musicArtist.id
-            this[musicId] = musicArtist.musicId
+            this[musicId] = musicArtist.musicId.raw
             this[artistId] = musicArtist.artistId
             this[userId] = musicArtist.userId
             this[lastUpdateAt] = musicArtist.lastUpdateAtMillis
@@ -32,7 +32,7 @@ internal object MusicArtistTable: IdTable<String>() {
     }
 }
 
-internal class MusicArtistEntity(id: EntityID<String>): Entity<String>(id) {
+internal class MusicArtistEntity(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, MusicArtistEntity>(MusicArtistTable)
 
     var userId by MusicArtistTable.userId
@@ -42,7 +42,7 @@ internal class MusicArtistEntity(id: EntityID<String>): Entity<String>(id) {
 
     fun toMusicArtist(): MusicArtist =
         MusicArtist(
-            musicId = musicId.value,
+            musicId = MusicId(musicId.value),
             artistId = artistId.value,
             userId = userId.value,
             lastUpdateAtMillis = lastUpdateAt,

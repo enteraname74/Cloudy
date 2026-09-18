@@ -2,15 +2,15 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.Settings
 import com.github.enteraname74.cloudy.domain.repository.SettingsRepository
-import com.github.enteraname74.cloudy.fileaccess.SettingsFileManager
+import com.github.enteraname74.cloudy.repository.datasource.SettingsDataSource
 
 class SettingsRepositoryImpl(
-    private val settingsFileManager: SettingsFileManager,
+    private val dataSource: SettingsDataSource,
 ) : SettingsRepository {
     override suspend fun getSettings(): Settings? =
-        settingsFileManager.getSettings()
+        dataSource.getSettings()
 
     override suspend fun saveSettings(settings: Settings) {
-        settingsFileManager.saveSettings(settings)
+        dataSource.saveSettings(settings)
     }
 }

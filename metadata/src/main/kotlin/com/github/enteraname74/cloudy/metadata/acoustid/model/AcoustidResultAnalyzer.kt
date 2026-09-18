@@ -106,7 +106,7 @@ internal class AcoustidResultAnalyzer(
         val optimalMatch: AcoustidMatch = getOptimalMatch() ?: return initialMetadata
         val optimalRecording: AcoustidRecording = getOptimalRecording(match = optimalMatch) ?: return initialMetadata
 
-        // TODO ACOUSTID: Better system for multiple artists.
+        // TODO V2 ACOUSTID: Better system for multiple artists.
         val mainArtist = getArtistName(optimalRecording)
         return MusicMetadata(
             name = getMusicTitle(optimalRecording),

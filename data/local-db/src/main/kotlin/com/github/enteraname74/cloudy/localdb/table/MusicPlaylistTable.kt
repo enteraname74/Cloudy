@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.localdb.table
 
 import com.github.enteraname74.cloudy.domain.model.MusicPlaylist
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import org.jetbrains.exposed.v1.core.ReferenceOption
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
@@ -21,7 +22,7 @@ internal object MusicPlaylistTable : IdTable<String>() {
         batchUpsert(musicPlaylists) {
             this[id] = it.id
             this[userId] = it.userId
-            this[musicId] = it.musicId
+            this[musicId] = it.musicId.raw
             this[playlistId] = it.playlistId
             this[lastUpdateAt] = it.lastUpdateAtMillis
         }
@@ -38,7 +39,7 @@ internal class MusicPlaylistEntity(id: EntityID<String>) : Entity<String>(id) {
 
     fun toMusicPlaylist(): MusicPlaylist =
         MusicPlaylist(
-            musicId = musicId.value,
+            musicId = MusicId(musicId.value),
             playlistId = playlistId.value,
             userId = userId.value,
             lastUpdateAtMillis = lastUpdateAt,

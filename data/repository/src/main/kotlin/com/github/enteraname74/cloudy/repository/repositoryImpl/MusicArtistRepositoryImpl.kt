@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.MusicArtist
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.repository.MusicArtistRepository
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -36,11 +37,11 @@ class MusicArtistRepositoryImpl(
         musicArtistDataSource.deleteAll(ids)
     }
 
-    override suspend fun deleteOfMusic(musicId: String) {
+    override suspend fun deleteOfMusic(musicId: MusicId) {
         musicArtistDataSource.deleteOfMusic(musicId)
     }
 
-    override suspend fun isInMultipleArtist(musicId: String): Boolean =
+    override suspend fun isInMultipleArtist(musicId: MusicId): Boolean =
         musicArtistDataSource.isInMultipleArtist(musicId)
 
     override suspend fun getAllOfUser(

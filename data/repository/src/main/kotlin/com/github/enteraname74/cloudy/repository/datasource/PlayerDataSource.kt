@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.repository.datasource
 
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.player.PlayedList
 import com.github.enteraname74.cloudy.domain.model.player.PlayedListUpdate
 import com.github.enteraname74.cloudy.domain.model.player.PlayerMusic
@@ -11,7 +12,7 @@ interface PlayerDataSource {
     suspend fun create(
         hostId: Uuid,
         deviceId: String,
-        initialMusicIds: List<String>,
+        initialMusicIds: List<MusicId>,
     ): PlayedList
 
     suspend fun update(
@@ -45,7 +46,7 @@ interface PlayerDataSource {
     suspend fun getMusicIdsOfUser(
         userId: Uuid,
         listId: Uuid,
-    ): List<String>
+    ): List<MusicId>
 
     suspend fun deleteIfEmpty(listId: Uuid): Boolean
 
@@ -102,8 +103,8 @@ interface PlayerDataSource {
 
     suspend fun getExistingMusicIds(
         listId: Uuid,
-        musicIds: List<String>
-    ): List<String>
+        musicIds: List<MusicId>
+    ): List<MusicId>
 
     suspend fun getAllUsersByJoinedAt(
         listId: Uuid,
@@ -115,31 +116,31 @@ interface PlayerDataSource {
 
     suspend fun getNextMusic(
         listId: Uuid,
-        idsToSkip: List<String>,
+        idsToSkip: List<MusicId>,
     ): PlayerMusic?
 
     suspend fun deleteMusics(
         listId: Uuid,
-        musicIds: List<String>
+        musicIds: List<MusicId>
     )
 
     suspend fun areAnyMusicAfterCurrentOne(
         listId: Uuid,
-        musicIds: List<String>
+        musicIds: List<MusicId>
     ): Boolean
 
     suspend fun hasReadPermission(
         userId: Uuid,
-        musicId: String
+        musicId: MusicId
     ): Boolean
 
     suspend fun getPlayerMusic(
-        musicId: String,
+        musicId: MusicId,
         listId: Uuid,
         userId: Uuid,
     ): PlayerMusic?
 
     suspend fun getPlayedListIdsOfMusics(
-        musicIds: List<String>,
+        musicIds: List<MusicId>,
     ): List<Uuid>
 }

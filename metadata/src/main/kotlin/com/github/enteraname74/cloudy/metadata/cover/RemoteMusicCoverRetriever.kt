@@ -15,7 +15,7 @@ internal class RemoteMusicCoverRetriever {
         musicName: String,
         musicArtist: String,
     ): String? = try {
-        // TODO: Find better source for cover
+        // TODO V2: Find better source for cover
         val path = "https://lyrist.vercel.app/api/$musicName/$musicArtist".replace(" ", "%20")
         val remoteCover: RemoteCover = defaultHttpClient.get(path).body()
         remoteCover.image

@@ -25,7 +25,7 @@ fun Route.getMusicFileFromToken() {
         val routingMessages = getRoutingMessages()
 
         val musicFile: File = musicService.getMusicFile(
-            musicId = musicResource.musicId,
+            fingerprint = musicResource.fingerprint,
             userId = userId,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,

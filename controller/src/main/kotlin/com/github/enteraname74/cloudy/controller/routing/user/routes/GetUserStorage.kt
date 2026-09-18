@@ -1,7 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.user.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
@@ -21,16 +20,13 @@ fun Route.getUserStorage() {
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
         val routingMessages: RoutingMessages = getRoutingMessages()
-        val username = getUsernameFromToken() ?: return@get badRequest(
-            message = routingMessages.CANNOT_FIND_USER,
-        )
 
         userService.getUserFromId(userId) ?: return@get badRequest(
             message = routingMessages.CANNOT_FIND_USER,
         )
 
         call.respond(
-            userService.getUserStorage(username = username)
+            userService.getUserStorage(userId = userId)
         )
     }
 }

@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.controller.routing.music.resource
 
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import io.ktor.resources.Resource
 
@@ -36,17 +37,17 @@ class MusicResource {
             )
     }
 
-    @Resource("{id}")
+    @Resource("{fingerprint}")
     data class File(
         val parent: MusicResource = MusicResource(),
-        val id: String,
+        val fingerprint: String,
     )
 
     @Resource("token")
     data class FileFromToken(
         val parent: MusicResource,
         val token: String,
-        val musicId: String,
+        val fingerprint: String,
     )
 
     @Resource("cover/{coverId}")

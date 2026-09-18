@@ -1,16 +1,12 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.model.FileData
-import com.github.enteraname74.cloudy.domain.model.FileSavingData
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
-import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
 import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
-import com.github.enteraname74.cloudy.domain.repository.UserRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
@@ -21,16 +17,23 @@ import kotlin.uuid.Uuid
 
 class MusicService(
     private val musicRepository: MusicRepository,
-    private val userRepository: UserRepository,
     private val updateMusicUseCase: UpdateMusicUseCase,
     private val uploadMusicUseCase: UploadMusicUseCase,
     private val playerRepository: PlayerRepository,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
-    suspend fun getFromId(musicId: String): Music? =
-        musicRepository.getFromId(musicId = musicId)
+    suspend fun getFromUser(userId: Uuid, musicId: MusicId): Music? =
+        musicRepository.getFromUser(
+            musicId = musicId,
+            userId = userId,
+        )
 
-    suspend fun getMusicFile(musicId: String, userId: Uuid): File? {
+    suspend fun getMusicFile(fingerprint: String, userId: Uuid): File? {
+        val musicId = MusicId(
+            fingerprint = fingerprint,
+            userId = userId,
+        )
+
         val hasPermission: Boolean = musicRepository.isMusicPossessedByUser(
             userId = userId,
             musicId = musicId,
@@ -41,31 +44,31 @@ class MusicService(
 
         if (!hasPermission) return null
 
-        val music: Music = musicRepository.getFromId(musicId) ?: return null
-        val user: User = userRepository.getFromId(music.userId) ?: return null
+        val music: Music = musicRepository.getFromUser(
+            musicId = musicId,
+            userId = userId,
+        ) ?: return null
 
         return musicRepository.getMusicFile(
-            musicId = musicId,
-            username = user.username,
+            fingerprint = music.fingerprint,
+            userId = userId,
         )
     }
 
     suspend fun getFromCoverPath(coverPath: String): Music? =
         musicRepository.getFromCoverPath(coverPath = coverPath)
 
-    private suspend fun saveData(
-        user: User,
-        fileSavingData: FileSavingData,
+    suspend fun saveUserFile(
+        userId: Uuid,
+        payload: MusicUploadPayload,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec?,
-        cover: FileData?,
     ): CloudyResult<Music> {
         val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
-            user = user,
-            data = fileSavingData,
+            userId = userId,
+            data = payload.musicFile,
             shouldSearchForMetadata = shouldSearchForMetadata,
-            musicUploadSpec = musicUploadSpec,
-            cover = cover,
+            musicUploadSpec = payload.spec,
+            cover = payload.musicCover,
         )
 
         return when (uploadProcess) {
@@ -76,49 +79,33 @@ class MusicService(
             is UploadProcessState.ContinueProcess -> {
                 uploadMusicUseCase(
                     musicUploadSpec = uploadProcess.musicUploadSpec,
-                    cover = cover,
+                    cover = payload.musicCover,
                     fingerprint = uploadProcess.fingerprint,
-                    user = user,
+                    userId = userId,
                     musicPath = "music/${uploadProcess.fingerprint}",
                 )
             }
         }
     }
 
-    suspend fun saveUserFile(
-        user: User,
-        payload: MusicUploadPayload,
-        shouldSearchForMetadata: Boolean,
-    ): CloudyResult<Music> =
-        saveData(
-            user = user,
-            fileSavingData = FileSavingData.UserFile(
-                username = user.username,
-                fileData = payload.musicFile,
-            ),
-            shouldSearchForMetadata = shouldSearchForMetadata,
-            musicUploadSpec = payload.spec,
-            cover = payload.musicCover,
-        )
-
     suspend fun update(
         payload: MusicUpdatePayload,
-        user: User,
+        userId: Uuid,
     ): CloudyResult<Music> =
         updateMusicUseCase(
             payload = payload,
-            user = user,
+            userId = userId,
         )
 
     suspend fun deleteAll(
-        musicIds: List<String>,
-        username: String,
+        musicIds: List<MusicId>,
+        userId: Uuid,
     ) {
         musicRepository.deleteAll(
             ids = musicIds,
-            username = username,
+            userId = userId,
         )
-        deleteEmptyAlbumsAndArtistsUseCase()
+        deleteEmptyAlbumsAndArtistsUseCase(userId)
     }
 
     suspend fun getAllOfUser(
@@ -131,7 +118,7 @@ class MusicService(
         )
 
     suspend fun isMusicPossessedByUser(
-        musicId: String,
+        musicId: MusicId,
         userId: Uuid
     ): Boolean =
         musicRepository.isMusicPossessedByUser(
@@ -146,10 +133,10 @@ class MusicService(
      */
     // TODO OPTIMIZATION: Logic should be at DB layer, avoid fetching all musics for checks.
     suspend fun getDeletedMusicsIds(
-        idsToCheck: List<String>,
+        idsToCheck: List<MusicId>,
         userId: Uuid
-    ): List<String> {
-        val existingIds: List<String> = musicRepository.getExistingIdsOfUser(
+    ): List<MusicId> {
+        val existingIds: List<MusicId> = musicRepository.getExistingIdsOfUser(
             ids = idsToCheck,
             userId = userId,
         )
