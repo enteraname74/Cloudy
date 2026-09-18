@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.localdb
 
 import com.github.enteraname74.cloudy.domain.migration.DatabaseManager
+import com.github.enteraname74.cloudy.domain.migration.DatabaseSetup
 import com.github.enteraname74.cloudy.domain.model.Settings
 import com.github.enteraname74.cloudy.domain.repository.SettingsRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
@@ -85,16 +86,13 @@ class DatabaseManagerImpl(
     }
 
     override suspend fun manage(
-        url: String,
-        driver: String,
-        user: String,
-        password: String,
+        setup: DatabaseSetup,
     ) {
         Database.connect(
-            url = url,
-            driver = driver,
-            user = user,
-            password = password,
+            url = setup.url,
+            driver = setup.driver,
+            user = setup.user,
+            password = setup.password,
         )
         initTables()
         handleMigration()
