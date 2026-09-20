@@ -38,7 +38,7 @@ fun Application.configureRouting() {
         playerRouting()
         statisticsRouting()
         get("/hello") {
-            call.respondText("Hello Ktor My Beloved!")
+            call.respondText("Cloudy - Average White Band - 1975")
         }
     }
 }
