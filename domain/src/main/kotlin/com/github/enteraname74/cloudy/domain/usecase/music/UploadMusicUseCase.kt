@@ -29,7 +29,6 @@ class UploadMusicUseCase(
         cover: FileData?,
         fingerprint: String,
         userId: Uuid,
-        musicPath: String,
     ): CloudyResult<Music> {
         val artistOfMusic: List<Artist> = musicUploadSpec.artists.map { artistUpload ->
             uploadArtistUseCase(
@@ -65,7 +64,6 @@ class UploadMusicUseCase(
                     artists = artistOfMusic,
                     album = albumOfMusic,
                     fingerprint = fingerprint,
-                    path = musicPath,
                 ),
                 cover = cover,
             )

@@ -10,7 +10,6 @@ import com.github.enteraname74.cloudy.localdb.table.PlaylistTable.lastUpdateAt
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
-import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
 import com.github.enteraname74.cloudy.repository.ext.getCoverName
