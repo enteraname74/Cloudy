@@ -13,6 +13,7 @@ import io.ktor.websocket.close
 import org.koin.ktor.ext.inject
 import kotlin.uuid.Uuid
 
+// TODO V2: Improve authentication
 fun Route.playerSocket() {
     val playerService: PlayerService by inject()
     val playerUserCommunication: PlayerUserCommunication by inject()

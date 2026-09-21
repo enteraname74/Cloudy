@@ -22,6 +22,10 @@ interface MusicDataSource {
         userId: Uuid,
     ): File?
 
+    suspend fun getFromId(
+        musicId: MusicId,
+    ): Music?
+
     suspend fun getFromUser(
         musicId: MusicId,
         userId: Uuid,

@@ -171,6 +171,24 @@ class MusicRepositoryImpl(
             musicId = musicId,
         )
 
+    override suspend fun getIfReadPermissionGranted(
+        musicId: MusicId,
+        userId: Uuid,
+    ): Music? {
+        val hasPermission: Boolean = musicDataSource.isMusicPossessedByUser(
+            userId = userId,
+            musicId = musicId,
+        ) || playerRepository.hasReadPermission(
+            userId = userId,
+            musicId = musicId,
+        )
+        return if (hasPermission) {
+            musicDataSource.getFromId(musicId)
+        } else {
+            null
+        }
+    }
+
     override suspend fun getFromCoverPath(coverPath: String): Music? =
         musicDataSource.getFromCoverPath(coverPath = coverPath)
 

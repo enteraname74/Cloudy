@@ -68,9 +68,5 @@ object FrRoutingMessages: RoutingMessages {
     override val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String = "L'utilisateur ne peut pas supprimer quelqu'un d'autre de la liste."
     override val MISING_DEVICE_ID: String = "L'identifiant d'appareil est absent"
 
-    override fun internalServerError(error: String): String =
-        """
-            Une erreur interne est survenue.
-            Cause : $error
-        """.trimIndent()
+    override val INTERNAL_SERVER_ERROR: String = "Une erreur interne est survenue."
 }

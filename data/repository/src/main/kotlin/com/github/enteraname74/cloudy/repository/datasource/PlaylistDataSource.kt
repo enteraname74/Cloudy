@@ -6,8 +6,9 @@ import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import kotlin.uuid.Uuid
 
 interface PlaylistDataSource {
-    suspend fun getFromId(
-        playlistId: Uuid
+    suspend fun getFromUser(
+        playlistId: Uuid,
+        userId: Uuid,
     ): Playlist?
 
     suspend fun getWithMusics(

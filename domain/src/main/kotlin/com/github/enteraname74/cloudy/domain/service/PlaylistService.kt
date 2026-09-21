@@ -16,9 +16,6 @@ class PlaylistService(
     private val uploadPlaylistUseCase: UploadPlaylistUseCase,
     private val coverRepository: CoverRepository,
 ) {
-    suspend fun getFromId(playlistId: Uuid): Playlist? =
-        playlistRepository.getFromId(playlistId)
-
     suspend fun getFromCoverPath(coverPath: String): Playlist? =
         playlistRepository.getFromCoverPath(coverPath)
 

@@ -15,9 +15,13 @@ class PlaylistRepositoryImpl(
     private val playlistDataSource: PlaylistDataSource,
     private val coverDataSource: CoverDataSource,
 ) : PlaylistRepository {
-    override suspend fun getFromId(playlistId: Uuid): Playlist? =
-        playlistDataSource.getFromId(
+    override suspend fun getFromUser(
+        playlistId: Uuid,
+        userId: Uuid,
+    ): Playlist? =
+        playlistDataSource.getFromUser(
             playlistId = playlistId,
+            userId = userId,
         )
 
     override suspend fun getWithMusics(playlistId: Uuid): PlaylistWithMusics? =

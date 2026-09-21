@@ -27,7 +27,6 @@ import kotlin.uuid.Uuid
 
 class MusicDataSourceImpl(
     private val userDataSource: UserDataSource,
-    private val coverDataSource: CoverDataSource,
 ) : MusicDataSource {
     override suspend fun upsert(music: Music): Music =
         workTransaction {
@@ -50,6 +49,14 @@ class MusicDataSourceImpl(
         workTransaction {
             MusicEntity
                 .find { (MusicTable.id eq musicId.raw) and (MusicTable.userId eq userId) }
+                .firstOrNull()
+                ?.toMusic(buildScope = { Music.Scope.User })
+        }
+
+    override suspend fun getFromId(musicId: MusicId): Music? =
+        workTransaction {
+            MusicEntity
+                .find { MusicTable.id eq musicId.raw }
                 .firstOrNull()
                 ?.toMusic(buildScope = { Music.Scope.User })
         }
@@ -82,7 +89,7 @@ class MusicDataSourceImpl(
                 )?.delete()
             }
             MusicTable.deleteWhere {
-                id inList ids.map { it.raw }
+                (id inList ids.map { it.raw }) and (MusicTable.userId eq userId)
             }
         }
     }

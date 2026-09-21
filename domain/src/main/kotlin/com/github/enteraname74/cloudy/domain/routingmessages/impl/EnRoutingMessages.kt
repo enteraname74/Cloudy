@@ -68,9 +68,5 @@ object EnRoutingMessages: RoutingMessages {
     override val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String = "The user doesn't have the permission to remove someone else from the played list."
     override val MISING_DEVICE_ID: String = "Missing device id"
 
-    override fun internalServerError(error: String): String =
-        """
-            There was an internal server error.
-            Cause: $error
-        """.trimIndent()
+    override val INTERNAL_SERVER_ERROR: String = "There is an internal server error."
 }

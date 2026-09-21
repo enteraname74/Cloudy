@@ -13,6 +13,7 @@ import io.ktor.http.content.PartData
 import io.ktor.http.content.forEachPart
 import io.ktor.utils.io.toByteArray
 
+// TODO V2: Avoid loading big files into memory, use streams instead.
 object MultiPartDataUtils {
     suspend fun retrieveImageData(fileItem: PartData.FileItem): FileData? {
         val fileExtension = CommonFileUtils.getFileExtension(

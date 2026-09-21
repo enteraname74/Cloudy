@@ -6,7 +6,6 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
-import com.github.enteraname74.cloudy.domain.repository.PlayerRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
@@ -19,7 +18,6 @@ class MusicService(
     private val musicRepository: MusicRepository,
     private val updateMusicUseCase: UpdateMusicUseCase,
     private val uploadMusicUseCase: UploadMusicUseCase,
-    private val playerRepository: PlayerRepository,
     private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
     suspend fun getFromUser(userId: Uuid, musicId: MusicId): Music? =
@@ -29,24 +27,14 @@ class MusicService(
         )
 
     suspend fun getMusicFile(musicId: MusicId, userId: Uuid): File? {
-        val hasPermission: Boolean = musicRepository.isMusicPossessedByUser(
-            userId = userId,
-            musicId = musicId,
-        ) || playerRepository.hasReadPermission(
-            userId = userId,
-            musicId = musicId,
-        )
-
-        if (!hasPermission) return null
-
-        val music: Music = musicRepository.getFromUser(
+        val music: Music = musicRepository.getIfReadPermissionGranted(
             musicId = musicId,
             userId = userId,
         ) ?: return null
 
         return musicRepository.getMusicFile(
             fingerprint = music.fingerprint,
-            userId = userId,
+            userId = music.userId,
         )
     }
 

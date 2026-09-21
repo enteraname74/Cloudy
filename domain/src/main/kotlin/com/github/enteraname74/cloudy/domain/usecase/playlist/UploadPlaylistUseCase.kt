@@ -49,7 +49,10 @@ class UploadPlaylistUseCase(
         userId: Uuid,
     ): Playlist {
         val existingPlaylist: Playlist? = playlistUpload.id?.let {
-            playlistRepository.getFromId(it)
+            playlistRepository.getFromUser(
+                playlistId = it,
+                userId = userId,
+            )
         } ?: playlistRepository.getFromInformation(
             name = playlistUpload.name,
             userId = userId,

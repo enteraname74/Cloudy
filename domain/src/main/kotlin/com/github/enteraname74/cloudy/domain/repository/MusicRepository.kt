@@ -4,7 +4,6 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
-import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import java.io.File
@@ -40,6 +39,14 @@ interface MusicRepository {
 
     suspend fun upsertAll(musics: List<Music>): CloudyResult<Unit>
     suspend fun getFromUser(
+        musicId: MusicId,
+        userId: Uuid,
+    ): Music?
+
+    /**
+     * A music can be retrieved by someone else than its owner (scope mechanism), but only for read permission.
+     */
+    suspend fun getIfReadPermissionGranted(
         musicId: MusicId,
         userId: Uuid,
     ): Music?

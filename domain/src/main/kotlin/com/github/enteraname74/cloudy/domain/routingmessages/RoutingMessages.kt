@@ -65,7 +65,7 @@ interface RoutingMessages {
     val NO_PERMISSION_TO_REMOVE_USER_IN_PLAYED_LIST: String
     val MISING_DEVICE_ID: String
 
-    fun internalServerError(error: String): String
+    val INTERNAL_SERVER_ERROR: String
 
     companion object {
         fun fromLocale(locale: AppLocale): RoutingMessages =

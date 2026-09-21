@@ -26,9 +26,14 @@ import kotlin.uuid.Uuid
 class PlaylistDataSourceImpl(
     private val musicPlaylistDataSource: MusicPlaylistDataSource,
 ) : PlaylistDataSource {
-    override suspend fun getFromId(playlistId: Uuid): Playlist? =
+    override suspend fun getFromUser(
+        playlistId: Uuid,
+        userId: Uuid,
+    ): Playlist? =
         workTransaction {
-            PlaylistEntity.findById(playlistId)?.toPlaylist()
+            PlaylistEntity.find {
+                (PlaylistTable.userId eq userId) and (PlaylistTable.id eq playlistId)
+            }.firstOrNull()?.toPlaylist()
         }
 
     override suspend fun getWithMusics(playlistId: Uuid): PlaylistWithMusics? =
@@ -115,7 +120,7 @@ class PlaylistDataSourceImpl(
     ) {
         workTransaction {
             PlaylistTable.deleteWhere {
-                id inList playlistIds
+                (id inList playlistIds) and (PlaylistTable.userId eq userId)
             }
         }
     }

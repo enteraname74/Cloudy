@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.controller.config
 
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -11,6 +12,8 @@ import io.ktor.server.plugins.statuspages.StatusPages
 import io.ktor.server.response.respond
 
 internal fun Application.configureStatusPage() {
+    val logger = CloudyLogger(this::class)
+
     install(StatusPages) {
         exception<BadRequestException> { call, _ ->
             call.respond(
@@ -29,12 +32,12 @@ internal fun Application.configureStatusPage() {
             )
         }
         exception<Throwable> { call, cause ->
+            logger.error(
+                "Internal server error: ${cause.message}"
+            )
             call.respond(
                 status = HttpStatusCode.InternalServerError,
-                // TODO V2: This could leak data like SQL details, db paths?
-                message = call.getRoutingMessages().internalServerError(
-                    error = cause.message.orEmpty()
-                ),
+                message = call.getRoutingMessages().INTERNAL_SERVER_ERROR,
             )
         }
     }
@@ -44,5 +47,5 @@ private fun RoutingMessages.fromInvalidRequestType(type: InvalidRequestType): St
     when (type) {
         InvalidRequestType.UserInformation -> MISSING_USER_INFORMATION
         InvalidRequestType.InvalidData -> INVALID_INFORMATION
-        InvalidRequestType.Unknown ->  WRONG_INFORMATION
+        InvalidRequestType.Unknown -> WRONG_INFORMATION
     }
