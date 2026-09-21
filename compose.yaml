@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    #    image: ghcr.io/enteraname74/cloudy:0.0.1
+    #    image: ghcr.io/enteraname74/cloudy:0.0.7
     restart: unless-stopped
     depends_on:
       postgres:
