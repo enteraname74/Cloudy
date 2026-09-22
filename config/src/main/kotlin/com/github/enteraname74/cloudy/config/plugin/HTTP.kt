@@ -20,5 +20,8 @@ internal fun Application.configureHTTP() {
         allowHeader(HttpHeaders.Authorization)
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Accept)
+        allowHeader(SOUL_SEARCHING_VERSION_HEADER)
     }
 }
+
+internal const val SOUL_SEARCHING_VERSION_HEADER: String = "SoulSearching-version"

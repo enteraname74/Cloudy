@@ -13,8 +13,10 @@ internal fun Application.configureSockets() {
     install(WebSockets) {
         pingPeriod = 15.seconds
         timeout = 40.seconds
-        maxFrameSize = Long.MAX_VALUE
+        maxFrameSize = PLAYER_WEBSOCKET_MAX_FRAME_SIZE
         masking = false
         contentConverter = KotlinxWebsocketSerializationConverter(CloudyJson)
     }
 }
+
+private const val PLAYER_WEBSOCKET_MAX_FRAME_SIZE: Long = 4 * 1024L
