@@ -31,20 +31,18 @@ sealed interface DatabaseSetup {
         private val logger = CloudyLogger(this::class)
 
         fun fromEnvironment(): DatabaseSetup = try {
-            val name = System.getenv("DB_NAME")
-            val user = System.getenv("DB_USER")
-            val password = System.getenv("DB_PASSWORD")
+            val name = requiredEnvironmentVariable("DB_NAME")
 
-            when (val flavor = System.getenv("DB_FLAVOR")) {
+            when (val flavor = requiredEnvironmentVariable("DB_FLAVOR")) {
                 "postgres" -> Postgres(
                     dbName = name,
-                    user = user,
-                    password = password,
+                    user = requiredEnvironmentVariable("DB_USER"),
+                    password = requiredEnvironmentVariable("DB_PASSWORD"),
                 )
                 "sqlite" -> Sqlite(
                     dbName = name,
-                    user = user,
-                    password = password,
+                    user = System.getenv("DB_USER").orEmpty(),
+                    password = System.getenv("DB_PASSWORD").orEmpty(),
                 )
                 else -> throw Exception("Unknown flavor: $flavor")
             }
@@ -55,5 +53,10 @@ sealed interface DatabaseSetup {
             )
             throw e
         }
+
+        private fun requiredEnvironmentVariable(name: String): String =
+            System.getenv(name)
+                ?.takeIf(String::isNotBlank)
+                ?: error("Missing or empty environment variable: $name")
     }
 }

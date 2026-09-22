@@ -51,6 +51,7 @@ services:
       AUTH_SECRET: ${AUTH_SECRET}
       PORT: ${PORT}
       DB_FLAVOR: ${DB_FLAVOR}
+      DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
