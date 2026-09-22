@@ -67,7 +67,6 @@ services:
       JAUDIOTAGGER_LOG_LEVEL: ${JAUDIOTAGGER_LOG_LEVEL}
     volumes:
       - cloudy_data:/cloudy_data:z
-      - ./cookies.txt:/app/cookies.txt:ro,z
     networks:
       - proxy
       - backend
