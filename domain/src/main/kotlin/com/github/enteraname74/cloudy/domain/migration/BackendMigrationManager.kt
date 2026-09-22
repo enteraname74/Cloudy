@@ -34,8 +34,7 @@ class BackendMigrationManager(
                 for (version in (settings.backendVersion + 1)..Settings.CURRENT.backendVersion) {
                     logger.info("Executing migration for updating backend to version $version")
                     val migration = MIGRATIONS.find { it.forVersion == version }
-                    val result = migration?.execute()
-                    when (result) {
+                    when (val result = migration?.execute()) {
                         is CloudyResult.Error -> {
                             logger.error("Failed to execute backend migration for version $version, error: ${result.message}")
                             return

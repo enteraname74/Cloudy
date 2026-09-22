@@ -1,13 +1,6 @@
 FROM amazoncorretto:21-alpine-jdk
 
-RUN apk add --no-cache ffmpeg chromaprint nodejs curl
-
-RUN curl -L \
-      https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_musllinux \
-      -o /usr/local/bin/yt-dlp \
- && chmod +x /usr/local/bin/yt-dlp \
- && yt-dlp --version \
- && apk del curl
+RUN apk add --no-cache chromaprint
 
 RUN addgroup -S cloudy && adduser -S cloudy -G cloudy
 
