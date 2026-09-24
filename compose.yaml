@@ -49,7 +49,6 @@ services:
     environment:
       ACOUSTID_API_KEY: ${ACOUSTID_API_KEY}
       AUTH_SECRET: ${AUTH_SECRET}
-      PORT: ${PORT}
       DB_FLAVOR: ${DB_FLAVOR}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
