@@ -23,7 +23,7 @@ internal object UserInscriptionCodeTable : UuidTable() {
     }
 }
 
-internal class UserInscriptionCodeEntity(id: EntityID<Uuid>): UuidEntity(id) {
+internal class UserInscriptionCodeEntity(id: EntityID<Uuid>) : UuidEntity(id) {
     companion object : UuidEntityClass<UserInscriptionCodeEntity>(UserInscriptionCodeTable)
 
     var userId by UserInscriptionCodeTable.userId

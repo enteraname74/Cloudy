@@ -10,5 +10,5 @@ data class UserSignIn(
     val inscriptionCode: Uuid,
 ) {
     fun isValid() = username.isNotBlank()
-            && password.isNotBlank()
+        && password.isNotBlank()
 }

@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import kotlin.uuid.Uuid
 
-object EnRoutingMessages: RoutingMessages {
+object EnRoutingMessages : RoutingMessages {
     override val USERNAME_TAKEN: String = "The username is already taken."
     override val WRONG_INFORMATION: String = "The given information are incorrect."
     override val INVALID_INFORMATION: String = "The given information are invalid"

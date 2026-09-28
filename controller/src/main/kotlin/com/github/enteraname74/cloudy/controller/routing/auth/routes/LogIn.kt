@@ -1,6 +1,5 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
-
 import com.github.enteraname74.cloudy.controller.ext.badRequest
 import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth

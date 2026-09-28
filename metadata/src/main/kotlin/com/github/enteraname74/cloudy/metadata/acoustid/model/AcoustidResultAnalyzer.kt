@@ -70,8 +70,8 @@ internal class AcoustidResultAnalyzer(
     private fun getOptimalRecordingMatchingMetadata(match: AcoustidMatch): AcoustidRecording? =
         match.recordings.firstOrNull { recording ->
             recording.hasUsefulInformation()
-                    && recording.doesContainsAlbum()
-                    && recording.isMatchingMetadata(musicMetadata = initialMetadata)
+                && recording.doesContainsAlbum()
+                && recording.isMatchingMetadata(musicMetadata = initialMetadata)
         }
 
     /**
@@ -102,7 +102,7 @@ internal class AcoustidResultAnalyzer(
      *
      * @return the music metadata from a request. If nothing is found, return the initial metadata.
      */
-    fun getMusicMetadataFromRequest() : MusicMetadata{
+    fun getMusicMetadataFromRequest(): MusicMetadata {
         val optimalMatch: AcoustidMatch = getOptimalMatch() ?: return initialMetadata
         val optimalRecording: AcoustidRecording = getOptimalRecording(match = optimalMatch) ?: return initialMetadata
 
@@ -114,7 +114,7 @@ internal class AcoustidResultAnalyzer(
                 name = getAlbumName(optimalRecording),
                 artist = mainArtist
             ),
-            artists = listOf(mainArtist ),
+            artists = listOf(mainArtist),
             duration = initialMetadata.duration,
             albumPosition = null,
         )

@@ -19,7 +19,7 @@ fun ApplicationCall.getRoutingMessages(): RoutingMessages {
     return RoutingMessages.fromLocale(locale)
 }
 
-suspend inline fun <reified T: Any> RoutingContext.respond(result: CloudyResult<T>) {
+suspend inline fun <reified T : Any> RoutingContext.respond(result: CloudyResult<T>) {
     when (result) {
         is CloudyResult.Error<T> -> badRequest(result.message.orEmpty())
         is CloudyResult.Success<T> -> {

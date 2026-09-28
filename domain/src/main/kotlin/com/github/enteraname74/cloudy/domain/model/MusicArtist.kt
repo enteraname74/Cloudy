@@ -11,7 +11,7 @@ data class MusicArtist(
     val artistId: Uuid,
     val userId: Uuid,
     override val lastUpdateAtMillis: Long = DateUtils.now(),
-): UpdatableElement {
+) : UpdatableElement {
     val id: String
         get() = "$musicId$artistId"
 }
