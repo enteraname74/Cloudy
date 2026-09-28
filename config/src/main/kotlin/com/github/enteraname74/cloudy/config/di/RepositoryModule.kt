@@ -18,5 +18,6 @@ internal val repositoryModule = module {
     singleOf(::PlayerRepositoryImpl) bind PlayerRepository::class
     singleOf(::UserInscriptionCodeRepositoryImpl) bind UserInscriptionCodeRepository::class
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
+    singleOf(::SoulSearchingSettingsRepositoryImpl) bind SoulSearchingSettingsRepository::class
     singleOf(::ListeningStatisticsRepositoryImpl) bind ListeningStatisticsRepository::class
 }

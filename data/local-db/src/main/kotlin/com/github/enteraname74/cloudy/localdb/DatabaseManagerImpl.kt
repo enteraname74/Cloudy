@@ -12,6 +12,7 @@ import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
+import com.github.enteraname74.cloudy.localdb.table.SoulSearchingSettingsTable
 import com.github.enteraname74.cloudy.localdb.table.UserInscriptionCodeTable
 import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicTable
@@ -113,6 +114,7 @@ class DatabaseManagerImpl(
             PlayedListMusicTable,
             UserInscriptionCodeTable,
             ListeningStatisticsTable,
+            SoulSearchingSettingsTable,
         )
 
         val MIGRATIONS: List<DatabaseMigration> = listOf()

@@ -10,6 +10,7 @@ import com.github.enteraname74.cloudy.localdb.datasourceimpl.MusicPlaylistDataSo
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.PlayerDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.PlaylistDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.SettingsDataSourceImpl
+import com.github.enteraname74.cloudy.localdb.datasourceimpl.SoulSearchingSettingsDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.UserDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.UserInscriptionCodeDataSourceImpl
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
@@ -22,6 +23,7 @@ import com.github.enteraname74.cloudy.repository.datasource.MusicPlaylistDataSou
 import com.github.enteraname74.cloudy.repository.datasource.PlayerDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.SettingsDataSource
+import com.github.enteraname74.cloudy.repository.datasource.SoulSearchingSettingsDataSource
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
 import com.github.enteraname74.cloudy.repository.datasource.UserInscriptionCodeDataSource
 import org.koin.core.module.dsl.singleOf
@@ -39,6 +41,7 @@ internal val datasourceModule = module {
     singleOf(::PlayerDataSourceImpl) bind PlayerDataSource::class
     singleOf(::UserInscriptionCodeDataSourceImpl) bind UserInscriptionCodeDataSource::class
     singleOf(::SettingsDataSourceImpl) bind SettingsDataSource::class
+    singleOf(::SoulSearchingSettingsDataSourceImpl) bind SoulSearchingSettingsDataSource::class
     singleOf(::CoverDataSourceImpl) bind CoverDataSource::class
     singleOf(::ListeningStatisticsDataSourceImpl) bind ListeningStatisticsDataSource::class
 }
