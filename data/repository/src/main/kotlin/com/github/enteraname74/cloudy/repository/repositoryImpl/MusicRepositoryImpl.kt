@@ -38,7 +38,10 @@ class MusicRepositoryImpl(
             data = data,
         )
 
-        if (temporarySavedFileId == null) return UploadProcessState.Error
+        if (temporarySavedFileId == null) {
+            logger.error("Temporary saved file for ${musicUploadSpec?.name} couldn't be saved")
+            return UploadProcessState.Error
+        }
 
         // We retrieve the saved file to analyze its fingerprint for metadata
         val temporarySavedFile: File? = musicDataSource.getFile(
