@@ -1,32 +1,56 @@
 package com.github.enteraname74.cloudy.controller.routing
 
-import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
-import com.github.enteraname74.cloudy.config.plugin.isAdmin
 import com.github.enteraname74.cloudy.controller.routing.album.albumRouting
 import com.github.enteraname74.cloudy.controller.routing.artist.artistRouting
 import com.github.enteraname74.cloudy.controller.routing.auth.authRouting
 import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import com.github.enteraname74.cloudy.controller.routing.player.playerRouting
+import com.github.enteraname74.cloudy.controller.routing.playlist.playlistRouting
+import com.github.enteraname74.cloudy.controller.routing.statistics.statisticsRouting
+import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
+import io.ktor.http.ContentType
+import io.ktor.openapi.OpenApiInfo
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.plugins.defaultheaders.DefaultHeaders
+import io.ktor.server.plugins.swagger.swaggerUI
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.get
+import io.ktor.server.routing.openapi.OpenApiDocSource
+import io.ktor.server.routing.routing
+import io.ktor.server.routing.routingRoot
 
 fun Application.configureRouting() {
+    install(DefaultHeaders) {
+        header("Cross-Origin-Resource-Policy", "cross-origin")
+    }
     routing {
+        if (developmentMode) {
+            configureSwagger()
+        }
+        userRoutes()
         authRouting()
         musicRouting()
         albumRouting()
         artistRouting()
+        playlistRouting()
+        playerRouting()
+        statisticsRouting()
         get("/hello") {
-            call.respondText("Hello Ktor My Beloved!")
+            call.respondText("Cloudy - Average White Band - 1975")
         }
-        authenticatedRoutes {
-            get("/admin") {
-                if (isAdmin()) {
-                    call.respondText("Hello admin!")
-                } else {
-                    call.respondText("Not an admin!")
-                }
-            }
+    }
+}
+
+private fun Route.configureSwagger() {
+    swaggerUI("/swagger") {
+        info = OpenApiInfo(
+            title = "Cloudy Swagger",
+            version = "1.0",
+        )
+        source = OpenApiDocSource.Routing(ContentType.Application.Json) {
+            routingRoot.descendants()
         }
     }
 }

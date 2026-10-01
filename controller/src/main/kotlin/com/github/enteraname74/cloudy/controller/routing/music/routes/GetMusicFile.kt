@@ -1,41 +1,42 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
-import com.github.enteraname74.cloudy.config.auth.getUsernameFromToken
-import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
 import com.github.enteraname74.cloudy.controller.ext.response
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
-import com.github.enteraname74.cloudy.domain.service.MusicFileService
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
+import com.github.enteraname74.cloudy.domain.service.MusicService
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.defaultForFile
+import io.ktor.server.plugins.partialcontent.PartialContent
+import io.ktor.server.resources.get
+import io.ktor.server.response.header
+import io.ktor.server.response.respondFile
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 import java.io.File
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.getMusicFile() {
-    val musicFileService by inject<MusicFileService>()
+    val musicService by inject<MusicService>()
 
-    get("/{musicId}") {
-        val musicId: UUID = try {
-            UUID.fromString(call.parameters["musicId"])
-        } catch (_: Exception) {
-            return@get badRequest(
-                message = RoutingMessages.Generic.WRONG_ID
-            )
-        }
+    install(PartialContent)
 
-        val username: String = getUsernameFromToken() ?: return@get missingTokenInformation()
+    get<MusicResource.File> { musicResource ->
+        val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
-        val musicFile: File = musicFileService.getMusicFile(
-            musicId = musicId,
-            username = username,
+        val musicFile: File = musicService.getMusicFile(
+            musicId = musicResource.musicId,
+            userId = userId,
         ) ?: return@get response(
             status = HttpStatusCode.NotFound,
-            message = RoutingMessages.Music.FILE_NOT_FOUND,
+            message = getRoutingMessages().FILE_NOT_FOUND,
         )
         val contentType: ContentType = ContentType.defaultForFile(musicFile)
+
         call.response.header(
             HttpHeaders.ContentDisposition,
             ContentDisposition.Inline.withParameter(

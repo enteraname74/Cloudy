@@ -1,106 +1,77 @@
-## PENIN Noah
-## DI LUNA Tommy
+# Cloudy
 
-# INFO 910 Projet
+Cloud server for the multiplatform music player application [***Soul Searching***](https://github.com/enteraname74/SoulSearching).
 
-> :warning: Le dépôt git utilisé pour ce projet est un dépôt personnel. Aussi, la manipulation de kubernetes et la réalisation du projet a été réalisé sur une seule machine 
-> en cours pour des raisons pratiques. Cela explique le manque de commit de la part de mon collègue (travail à deux sur une même machine, une seule personne ayant fait des commits).
-> 
-> Si vous voulez voir uniquement les commits exacts du projet pour INFO910, regardez la branche `feature/pod-moi-le-minikube`
+## Features
+- save your *Soul Searching* data (songs, playlists, statistics,...) remotely
+- support for multiple users (optimized for a group of friends, a family) with inscription codes
+- shared played list between multiple users (like Spotify)
 
-## Déployer l'application
+> Check the matching Cloudy releases with [Soul Searching](https://github.com/enteraname74/SoulSearching) ones in the [compatibilities](compatibilities.md) file in this repository
 
-> :warning: Les commandes qui vont suivre sont à éxecuter à la source du projet.
+## Set up the server
 
-### Créer et utiliser une image du projet
+> The app works best with docker and docker compose. Be sure to have these installed on your system.
 
-Tout d'abord, il vous faut une image du projet. Vous pouvez utiliser celle disponible dans la partie release du dépôt github ou la construire avec la commande suivante :
+You need to provide a `.env` file with all the environment variable that the server needs.
+With this, you can customize the settings of the server.
 
+You will find a `.env.template` file with all the environment variables that the server needs.
+You can use this file as a template to create your `.env` file.
+> For the database setup, Cloudy supports SQLite and PostgreSQL (see DB_FLAVOR env var). I recommend using PostgreSQL with the docker setup.
+
+You can use the existing `compose.yaml` file of this project.
+> For development purpose, the build section of the ktor service may be used.
+> Uncomment the image section of the ktor service and comment the build section to use an official release of cloudy, 
+> thus skipping the need to clone this repository in your system.
+> See [GitHub packages](https://github.com/users/enteraname74/packages/container/package/cloudy) for the latest image.
+
+### HTTPS support
+Cloudy can be deployed on a VPS with HTTPS support using [Traefik](https://traefik.io/traefik).
+To make it work properly, you will need to add a `dynamic.yml` file in a `traefik` folder, at the root of your setup folder (containing compose file,...).
+This will contain some setup for the backend service.
+Template of a `dynamic.yml` file:
 ```
-./gradlew controller:buildImage
-```
+http:
+  routers:
+    api:
+      # Here, replace with your domain name
+      rule: "Host(`my.domain.com`)"
+      entryPoints:
+        - websecure
+      service: api-service
+      tls:
+        certResolver: letsencrypt
 
-Il vous faudra ensuite charger l'image dans minikube.
-
-> :warning: la système a été testé et validé avec le driver docker pour minikube.
-
-Lier docker à minikube si besoin.
-
-```
-eval $(minikube docker-env)
-```
-
-```
-// le chemin donné si dessous est celui lorsque l'image est générée avec la commande gradle donnée plus haut.
-minikube image load controller/build/jib-image.tar
-```
-
-### Lancer minikube
-
-```
-minikube start --vm-driver=docker
-```
-
-Pensez à créer un tunnel pour que l'api soit accessible.
-
-```
-minikube tunnel
-```
-
-### Utiliser Kubernetes pour déployer l'application
-
-```
-kubectl apply -f k8s
+  services:
+    api-service:
+      loadBalancer:
+        servers:
+          - url: "http://ktor:8080"
 ```
 
-### Accéder à l'api
-Vous trouverez l'url de l'api avec la commande suivante :
+## Development mode
+### Launch locally without docker
+You can launch the app locally using a premade bash script. Be sure to make the bash script executable on your device:
+```shell
+chmod +x cloudy.sh
 ```
-minikube service api --url
-```
-
-## Utiliser l'application
-
-L'api permet de stocker et d'accéder aux données de fichiers audio.
-Le projet est consituté des éléments suivants :
-- api réalisé en Kotlin avec Ktor
-- BDD Postgres
-
-La plupart des requêtes du serveur nécessitent d'être authentifié (Bearer token). 
-Il vous faudra vous créer un compte ou vous connecter pour récupérer un token à utiliser dans vos prochaines requêtes.
-
-### Vérifier le bon fonctionnement du serveur
-Une route permet de vérifier simplement si le serveur tourne :
-```
-curl {SERVER_URL}/hello
-
-Si le serveur tourne, vous devriez avoir le résultat suivant :
-Hello Ktor My Beloved!
+Then, launch the project using the script. You will need to pass a path to your env file:
+```shell
+# Here, the .env file is located at the same place as the script.
+./cloudy.sh .env
 ```
 
-### Création de compte
-```
-curl -X POST {SERVER_URL}/auth/sign -H 'Content-Type: application/json' -d '{"username":"GigaChad","password":"GigaChad"}'
+### Launch locally with docker
 
-Vous obtiendrez un résultat de la sorte :
-{"token":"TOKEN_À_UTILISER"}
+Build the jar of the ktor backend
 ```
-
-### Connexion
-```
-curl -X POST {SERVER_URL}/auth/login -H 'Content-Type: application/json' -d '{"username":"GigaChad","password":"GigaChad"}'
-
-Vous obtiendrez un résultat de la sorte :
-{"token":"TOKEN_À_UTILISER"}
+./gradlew controller:buildFatJar
 ```
 
-### Envoyer une musique au serveur
+Ensure that the ktor service in `compose.yaml` is built from the `Dockerfile` of the project.
 
+Launch the server with docker compose and ensure that the image is always up to date
 ```
-curl -v {SERVER_URL}/music/upload -H "Authorization: Bearer TOKEN_À_UTILISER" -F "file=@{MUSIC_PATH};type=audio/mp4"
-```
-
-### Récupérer les informations des musiques envoyées
-```
-curl {SERVER_URL}/music/ofUser -H 'Content-Type: application/json' -H "Authorization: Bearer TOKEN_À_UTILISER"
+docker compose build --no-cache --pull ktor && docker compose up
 ```

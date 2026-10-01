@@ -1,14 +1,17 @@
 package com.github.enteraname74.cloudy.metadata.acoustid
 
-import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidLookupRequestResult
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidResultAnalyzer
 import com.github.enteraname74.cloudy.metadata.fingerprint.FingerprintData
 import com.github.enteraname74.cloudy.metadata.htppclient.defaultHttpClient
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
-import io.ktor.client.call.*
-import io.ktor.client.request.*
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 
 internal class AcoustidApiClient {
+    private val logger = CloudyLogger(this::class)
 
     /**
      * Retrieve music metadata from the Acoustid API.
@@ -29,17 +32,20 @@ internal class AcoustidApiClient {
                     fingerprintData.duration +
                     "&fingerprint=${fingerprintData.fingerprint}"
 
-            val requestResult: AcoustidLookupRequestResult = defaultHttpClient.get(
-                apiKey
-            ).body()
+            val requestResult: HttpResponse = defaultHttpClient.get(
+                urlString = uri
+            )
+
+            logger.info("Got response: ${requestResult.bodyAsText()}")
 
             val resultAnalyzer = AcoustidResultAnalyzer(
-                requestResult = requestResult,
+                requestResult = requestResult.body(),
                 initialMetadata = fileMetadata,
             )
 
            resultAnalyzer.getMusicMetadataFromRequest()
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger.error("Failed to retrieve music metadata from Acoustid with error: ${e.message}")
             fileMetadata
         }
 }

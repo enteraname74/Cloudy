@@ -1,14 +1,22 @@
 package com.github.enteraname74.cloudy.config.di
 
-import org.koin.core.module.dsl.singleOf
-import org.koin.dsl.module
-import com.github.enteraname74.cloudy.repository.repositoryImpl.*
 import com.github.enteraname74.cloudy.domain.repository.*
+import com.github.enteraname74.cloudy.repository.repositoryImpl.*
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import org.koin.dsl.module
 
 internal val repositoryModule = module {
     singleOf(::MusicRepositoryImpl) bind MusicRepository::class
     singleOf(::UserRepositoryImpl) bind UserRepository::class
     singleOf(::AlbumRepositoryImpl) bind AlbumRepository::class
     singleOf(::ArtistRepositoryImpl) bind ArtistRepository::class
+    singleOf(::PlaylistRepositoryImpl) bind PlaylistRepository::class
+    singleOf(::CoverRepositoryImpl) bind CoverRepository::class
+    singleOf(::MusicArtistRepositoryImpl) bind MusicArtistRepository::class
+    singleOf(::MusicPlaylistRepositoryImpl) bind MusicPlaylistRepository::class
+    singleOf(::PlayerRepositoryImpl) bind PlayerRepository::class
+    singleOf(::UserInscriptionCodeRepositoryImpl) bind UserInscriptionCodeRepository::class
+    singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
+    singleOf(::ListeningStatisticsRepositoryImpl) bind ListeningStatisticsRepository::class
 }

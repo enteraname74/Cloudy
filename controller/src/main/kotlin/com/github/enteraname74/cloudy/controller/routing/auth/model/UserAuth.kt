@@ -1,11 +1,10 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.model
 
+import com.github.enteraname74.cloudy.controller.routing.user.model.SimpleUser
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class UserAuth(
-    val username: String,
-    val password: String,
-) {
-    fun isValid() = username.isNotBlank() && password.isNotBlank()
-}
+    val user: SimpleUser,
+    val tokens: UserTokens,
+)

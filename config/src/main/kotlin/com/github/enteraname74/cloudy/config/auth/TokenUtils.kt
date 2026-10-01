@@ -2,49 +2,88 @@ package com.github.enteraname74.cloudy.config.auth
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import com.github.enteraname74.cloudy.domain.model.User
-import com.github.enteraname74.cloudy.domain.model.UserType
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
-import io.ktor.util.pipeline.*
-import java.time.Instant
-import java.time.temporal.ChronoUnit
-import java.util.*
+import com.github.enteraname74.cloudy.config.ApplicationContext
+import com.github.enteraname74.cloudy.domain.ext.toUuid
+import com.github.enteraname74.cloudy.domain.model.user.User
+import io.ktor.server.auth.jwt.JWTCredential
+import io.ktor.server.auth.jwt.JWTPrincipal
+import io.ktor.server.auth.principal
+import java.util.Date
+import kotlin.uuid.Uuid
 
-fun PipelineContext<Unit, ApplicationCall>.generateToken(
+fun ApplicationContext.generateToken(
     user: User,
+    expireDate: Date,
+    type: TokenType,
 ): String {
-    val environment = this.application.environment
+    val environment = call.application.environment
     val secret = environment.config.property("jwt.secret").getString()
     val issuer = environment.config.property("jwt.issuer").getString()
 
-    val expiresAt = Date.from(Instant.now().plus(30, ChronoUnit.DAYS))
-    val userType: UserType = if (user.isAdmin) {
-        UserType.Admin
-    } else {
-        UserType.User
-    }
-
     return JWT.create()
         .withIssuer(issuer)
-        .withClaim(TOKEN_USERNAME_CLAIM_KEY, user.username)
         .withClaim(TOKEN_USER_ID_CLAIM_KEY, user.id.toString())
-        .withClaim(TOKEN_ROLE_CLAIM_KEY, userType.value)
-        .withExpiresAt(expiresAt)
+        .withClaim(TOKEN_ROLE_CLAIM_KEY, user.type.value)
+        .withClaim(TOKEN_TYPE_CLAIM_KEY, type.value)
+        .withExpiresAt(expireDate)
         .sign(Algorithm.HMAC256(secret))
 }
 
-fun PipelineContext<Unit, ApplicationCall>.getUsernameFromToken(): String? {
+fun ApplicationContext.getUserIdFromToken(): Uuid? {
     val principal = call.principal<JWTPrincipal>()
-    return principal?.payload?.getClaim(TOKEN_USERNAME_CLAIM_KEY)?.asString()
+    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUuid()
 }
 
-fun PipelineContext<Unit, ApplicationCall>.getUserIdFromToken(): UUID? {
+fun ApplicationContext.isTokenARefreshOne(): Boolean {
     val principal = call.principal<JWTPrincipal>()
-    return principal?.payload?.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.let { UUID.fromString(it) }
+    return principal
+        ?.payload
+        ?.getClaim(TOKEN_TYPE_CLAIM_KEY)
+        ?.asString()
+        ?.let {
+            TokenType.fromString(it)
+        } == TokenType.Refresh
 }
 
-internal const val TOKEN_USERNAME_CLAIM_KEY = "username"
+fun ApplicationContext.getUserIdFromPlayerToken(
+    token: String,
+): Uuid? {
+    if (token.isBlank()) return null
+
+    val environment = call.application.environment
+    val secret = environment.config.property("jwt.secret").getString()
+    val issuer = environment.config.property("jwt.issuer").getString()
+
+    val verifier = JWT
+        .require(Algorithm.HMAC256(secret))
+        .withIssuer(issuer)
+        .build()
+
+    val credential = runCatching {
+        JWTCredential(verifier.verify(token))
+    }.getOrNull() ?: return null
+
+    val isPlayerToken = TokenType
+        .fromString(
+            credential.payload.getClaim(TOKEN_TYPE_CLAIM_KEY).asString(),
+        ) == TokenType.Player
+
+    if (!isPlayerToken) return null
+
+    return credential.payload.getClaim(TOKEN_USER_ID_CLAIM_KEY)?.asString()?.toUuid()
+}
+
 internal const val TOKEN_ROLE_CLAIM_KEY = "role"
 internal const val TOKEN_USER_ID_CLAIM_KEY = "userId"
+internal const val TOKEN_TYPE_CLAIM_KEY = "tokenType"
+
+enum class TokenType(val value: String) {
+    Access("Access"),
+    Refresh("Refresh"),
+    Player("Player");
+
+    companion object {
+        fun fromString(token: String): TokenType? =
+            entries.find { it.value == token }
+    }
+}

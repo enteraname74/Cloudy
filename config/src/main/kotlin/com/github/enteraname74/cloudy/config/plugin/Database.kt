@@ -1,15 +1,13 @@
 package com.github.enteraname74.cloudy.config.plugin
 
-import com.github.enteraname74.cloudy.localdb.AppDatabase
-import io.ktor.server.application.*
-import org.slf4j.LoggerFactory
+import com.github.enteraname74.cloudy.domain.migration.DatabaseManager
+import com.github.enteraname74.cloudy.domain.migration.DatabaseSetup
+import io.ktor.server.application.Application
+import org.koin.ktor.ext.inject
 
-fun Application.configureDatabase() {
-    AppDatabase.connectToDatabase(
-        url = environment.config.property("storage.url").getString(),
-//        url = "jdbc:postgresql://db:5432/postgres",
-        driver = environment.config.property("storage.driver").getString(),
-        user = environment.config.property("storage.user").getString(),
-        password = environment.config.property("storage.password").getString(),
+suspend fun Application.configureDatabase() {
+    val databaseManager by inject<DatabaseManager>()
+    databaseManager.manage(
+        setup = DatabaseSetup.fromEnvironment(),
     )
 }

@@ -1,17 +1,13 @@
 package com.github.enteraname74.cloudy.controller.routing.artist
 
 import com.github.enteraname74.cloudy.config.plugin.authenticatedRoutes
-import com.github.enteraname74.cloudy.controller.routing.artist.routes.artistsOfUser
-import com.github.enteraname74.cloudy.controller.routing.artist.routes.deleteArtist
-import com.github.enteraname74.cloudy.controller.routing.artist.routes.updateArtist
-import io.ktor.server.routing.*
+import com.github.enteraname74.cloudy.controller.routing.artist.routes.deleteArtists
+import com.github.enteraname74.cloudy.controller.routing.artist.routes.getArtistCover
+import io.ktor.server.routing.Routing
 
 fun Routing.artistRouting() {
     authenticatedRoutes {
-        route("/artist") {
-            artistsOfUser()
-            updateArtist()
-            deleteArtist()
-        }
+        deleteArtists()
+        getArtistCover()
     }
 }

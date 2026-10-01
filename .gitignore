@@ -10,6 +10,7 @@ build/
 .factorypath
 .project
 .settings
+.kotlin
 .springBeans
 .sts4-cache
 bin/
@@ -36,3 +37,14 @@ out/
 .vscode/
 app
 cloudyDB.db
+
+*.db
+.env
+cloudy_data
+postgres_docker_data
+
+traefik/certs
+traefik/dynamic.yml
+
+local.properties
+docker_commands.txt

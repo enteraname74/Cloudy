@@ -1,10 +1,13 @@
 package com.github.enteraname74.cloudy.metadata.fingerprint
 
+import com.github.enteraname74.cloudy.logging.CloudyLogger
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 internal class FingerprintRetriever {
+    private val logger = CloudyLogger(this::class)
 
+    // TODO FINGERPRINT: I think that there is an option to retrieve a JSON instead of manually parsing the data
     fun getFingerprintFromMusic(musicPath: String): FingerprintData? =
         try {
             val command = arrayOf("fpcalc", musicPath)
@@ -24,6 +27,7 @@ internal class FingerprintRetriever {
             }
 
             val exitCode = process.waitFor()
+
             if (exitCode == 0) {
                 // Successfully calculated fingerprint
                 FingerprintData(
@@ -31,10 +35,12 @@ internal class FingerprintRetriever {
                     fingerprint = fingerprint,
                 )
             } else {
+                logger.error("Fingerprint process exited with an error")
                 null
             }
 
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            logger.error("Failed to retrieve fingerprint with error: ${e.message}")
             null
         }
 

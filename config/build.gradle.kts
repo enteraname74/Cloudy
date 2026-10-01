@@ -5,10 +5,6 @@ plugins {
 group = "com.github.enteraname74.cloudy"
 version = "0.0.1"
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(project(":domain"))
     implementation(project(":repository"))
@@ -32,8 +28,13 @@ dependencies {
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
 
-    // Status page
-    implementation(libs.ktor.server.status.page)
+    api(libs.logback.classic)
+}
+
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
 }
 
 tasks.test {

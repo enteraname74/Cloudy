@@ -1,21 +1,41 @@
 package com.github.enteraname74.cloudy.domain.repository
 
-import com.github.enteraname74.cloudy.domain.model.Album
+import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.UUID
+import kotlin.uuid.Uuid
 
 interface AlbumRepository {
+    suspend fun getFromId(
+        albumId: Uuid,
+    ): Album?
+
+    suspend fun getFromCoverPath(coverPath: String): Album?
     suspend fun getFromInformation(
         albumName: String,
         albumArtist: String,
-        userId: UUID
+        userId: Uuid
     ): Album?
-    suspend fun upsert(album: Album): Album
+
+    suspend fun getFromUser(
+        albumId: Uuid,
+        userId: Uuid,
+    ): Album?
+
+    suspend fun getAll(albumIds: List<Uuid>): List<Album>
+    suspend fun upsert(
+        album: Album,
+        coverData: FileData?,
+    ): Album
+
     suspend fun upsertAll(albums: List<Album>)
     suspend fun getAllOfUser(
-        userId: UUID,
-        paginatedRequest: PaginatedRequest,
+        userId: Uuid,
+        paginatedRequest: PaginatedRequest = PaginatedRequest(),
     ): List<Album>
-    suspend fun deleteById(albumId: UUID)
-    suspend fun allOfArtist(artistId: UUID): List<Album>
+
+    suspend fun deleteAll(albumIds: List<Uuid>)
+    suspend fun allOfArtist(artistId: Uuid): List<Album>
+    suspend fun isAlbumPossessedByUser(userId: Uuid, albumId: Uuid): Boolean
+    suspend fun deleteAllEmpty()
 }

@@ -1,47 +1,55 @@
 plugins {
     alias(libs.plugins.ktor)
-    alias(libs.plugins.kotlin.jvm)
+    kotlin("jvm")
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 group = "com.github.enteraname74.cloudy"
 version = "0.0.1"
 
-repositories {
-    mavenCentral()
-}
-
 ktor {
     docker {
         localImageName.set("cloudy-docker-image")
-        imageTag.set("0.0.14")
-        jreVersion.set(JavaVersion.VERSION_17)
+        imageTag.set("0.0.1")
+        jreVersion.set(JavaVersion.VERSION_21)
     }
 }
 
 application {
     mainClass.set("io.ktor.server.netty.EngineMain")
 
-    val isDevelopment: Boolean = project.ext.has("development")
+    val isDevelopment = System.getenv("DEV_MODE").toBoolean()
     applicationDefaultJvmArgs = listOf("-Dio.ktor.development=$isDevelopment")
 }
 
 dependencies {
     implementation(project(":domain"))
     implementation(project(":config"))
+    implementation(project(":logging"))
 
     implementation(libs.ktor.server.core)
     implementation(libs.ktor.server.websockets)
     implementation(libs.ktor.serialization.kotlinx.json)
     implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.resources)
+    implementation(libs.ktor.server.request.validation)
+    implementation(libs.ktor.server.status.page)
+    implementation(libs.ktor.server.partial.content)
+    implementation(libs.ktor.server.swagger)
 
     implementation(libs.ktor.simple.cache)
     implementation(libs.ktor.server.netty)
-    implementation(libs.logback.classic)
+    implementation("io.ktor:ktor-server-default-headers:3.4.1")
 
     testImplementation(libs.kotlin.test.junit)
 
     implementation(libs.bundles.koin)
+}
+
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
 }
 
 tasks.test {

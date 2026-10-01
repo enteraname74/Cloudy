@@ -6,13 +6,18 @@ plugins {
 group = "com.github.enteraname74.cloudy"
 version = "0.0.1"
 
-repositories {
-    mavenCentral()
+dependencies {
+    implementation(libs.jbcrypt)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.server.websockets)
+    testImplementation(kotlin("test"))
+    implementation(project(":logging"))
 }
 
-dependencies {
-    implementation(libs.ktor.serialization.kotlinx.json)
-    testImplementation(kotlin("test"))
+kotlin {
+    compilerOptions {
+        optIn.add("kotlin.uuid.ExperimentalUuidApi")
+    }
 }
 
 tasks.test {

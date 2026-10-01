@@ -1,0 +1,29 @@
+package com.github.enteraname74.cloudy.domain.model.playlist
+
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
+import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
+
+@Serializable
+data class PlaylistUpload(
+    val id: Uuid?,
+    val name: String,
+    val isFavorite: Boolean,
+    val nbPlayed: Int,
+    val isInQuickAccess: Boolean,
+    val musicIds: List<MusicId>,
+) {
+
+    fun isValid(): Boolean =
+        name.isNotBlank() && nbPlayed >= 0 && musicIds.all { it.raw.isNotBlank() }
+
+    fun toNewPlaylist(
+        userId: Uuid,
+    ): Playlist =
+        Playlist(
+            userId = userId,
+            name = name,
+            coverPath = null,
+            isInQuickAccess = isInQuickAccess,
+        )
+}

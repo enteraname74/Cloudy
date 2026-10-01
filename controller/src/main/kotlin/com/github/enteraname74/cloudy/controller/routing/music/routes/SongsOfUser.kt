@@ -1,33 +1,27 @@
 package com.github.enteraname74.cloudy.controller.routing.music.routes
 
 import com.github.enteraname74.cloudy.config.auth.getUserIdFromToken
-import com.github.enteraname74.cloudy.controller.ext.getLocalDateTimeFromQueryParam
 import com.github.enteraname74.cloudy.controller.ext.missingTokenInformation
+import com.github.enteraname74.cloudy.controller.routing.music.resource.MusicResource
+import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.service.MusicService
-import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import io.ktor.server.application.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.resources.get
+import io.ktor.server.response.respond
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
-import java.time.LocalDateTime
-import java.util.*
+import kotlin.uuid.Uuid
 
 fun Route.songsOfUser() {
     val musicService by inject<MusicService>()
 
-    get("/ofUser") {
-        val userId: UUID = getUserIdFromToken() ?: return@get missingTokenInformation()
-        val lastUpdateAt: LocalDateTime? = getLocalDateTimeFromQueryParam(key = "lastUpdateAt")
+    get<MusicResource.OfUser> { musicResource ->
+        val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
 
-        val paginatedRequest = PaginatedRequest(
-            lastUpdateAt = lastUpdateAt
+        val data: List<Music> = musicService.getAllOfUser(
+            userId = userId,
+            paginatedRequest = musicResource.toPaginatedRequest(),
         )
 
-        call.respond(
-            musicService.getAllOfUser(
-                userId = userId,
-                paginatedRequest = paginatedRequest,
-            )
-        )
+        call.respond(data)
     }
 }

@@ -1,44 +1,46 @@
 package com.github.enteraname74.cloudy.controller.routing.auth.routes
 
 
-import com.github.enteraname74.cloudy.config.auth.generateToken
 import com.github.enteraname74.cloudy.controller.ext.badRequest
+import com.github.enteraname74.cloudy.controller.ext.getRoutingMessages
 import com.github.enteraname74.cloudy.controller.routing.auth.model.UserAuth
-import com.github.enteraname74.cloudy.controller.util.RoutingMessages
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.controller.routing.auth.model.UserLogin
+import com.github.enteraname74.cloudy.controller.routing.auth.model.buildUserTokens
+import com.github.enteraname74.cloudy.controller.routing.auth.resource.AuthResource
+import com.github.enteraname74.cloudy.controller.routing.user.model.toSimpleUser
+import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.service.UserService
-import com.github.enteraname74.cloudy.domain.util.ServiceResult
-import io.ktor.server.application.*
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import io.ktor.server.request.*
+import io.ktor.server.resources.post
 import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
 import org.koin.ktor.ext.inject
 
 fun Route.logIn() {
     val userService: UserService by inject()
 
-    post("/login") {
-        val user: UserAuth = call.receive()
+    post<AuthResource.LogIn> {
+        val user: UserLogin = call.receive()
 
-        if (!user.isValid()) {
-            return@post badRequest(message = RoutingMessages.User.MISSING_INFORMATION)
-        }
-
-        val serviceResult: ServiceResult = userService.logUser(
+        val cloudyResult: CloudyResult<User> = userService.logUser(
             username = user.username,
             password = user.password,
         )
 
-        when (serviceResult) {
-            is ServiceResult.Error -> {
-                badRequest(message = RoutingMessages.User.WRONG_INFORMATION)
+        when (cloudyResult) {
+            is CloudyResult.Error -> {
+                badRequest(message = getRoutingMessages().WRONG_INFORMATION)
             }
 
-            is ServiceResult.Ok -> {
-                val authenticatedUser = (serviceResult.data as User)
-                val token: String = generateToken(user = authenticatedUser)
+            is CloudyResult.Success -> {
+                val authenticatedUser = cloudyResult.data
+                val tokens = buildUserTokens(user = authenticatedUser)
                 call.respond(
-                    message = hashMapOf("token" to token)
+                    UserAuth(
+                        user = authenticatedUser.toSimpleUser(),
+                        tokens = tokens,
+                    )
                 )
             }
         }

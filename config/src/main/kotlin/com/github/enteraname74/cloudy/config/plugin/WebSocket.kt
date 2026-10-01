@@ -1,14 +1,22 @@
 package com.github.enteraname74.cloudy.config.plugin
 
-import io.ktor.server.application.*
-import io.ktor.server.websocket.*
-import java.time.Duration
+import com.github.enteraname74.cloudy.domain.util.CloudyJson
+import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
+import io.ktor.server.application.Application
+import io.ktor.server.application.install
+import io.ktor.server.websocket.WebSockets
+import io.ktor.server.websocket.pingPeriod
+import io.ktor.server.websocket.timeout
+import kotlin.time.Duration.Companion.seconds
 
 internal fun Application.configureSockets() {
     install(WebSockets) {
-        pingPeriod = Duration.ofSeconds(15)
-        timeout = Duration.ofSeconds(15)
-        maxFrameSize = Long.MAX_VALUE
+        pingPeriod = 15.seconds
+        timeout = 40.seconds
+        maxFrameSize = PLAYER_WEBSOCKET_MAX_FRAME_SIZE
         masking = false
+        contentConverter = KotlinxWebsocketSerializationConverter(CloudyJson)
     }
 }
+
+private const val PLAYER_WEBSOCKET_MAX_FRAME_SIZE: Long = 4 * 1024L

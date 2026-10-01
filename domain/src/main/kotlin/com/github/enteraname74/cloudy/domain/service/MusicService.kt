@@ -1,108 +1,97 @@
 package com.github.enteraname74.cloudy.domain.service
 
-import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationResult
-import com.github.enteraname74.cloudy.domain.model.Album
-import com.github.enteraname74.cloudy.domain.model.Artist
-import com.github.enteraname74.cloudy.domain.model.Music
-import com.github.enteraname74.cloudy.domain.model.User
+import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.music.MusicId
+import com.github.enteraname74.cloudy.domain.model.music.MusicUpdatePayload
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
-import com.github.enteraname74.cloudy.domain.usecase.album.DeleteAlbumIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.album.GetOrCreateAlbumUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.DeleteArtistIfEmptyUseCase
-import com.github.enteraname74.cloudy.domain.usecase.artist.GetOrCreateArtistUseCase
+import com.github.enteraname74.cloudy.domain.repository.MusicRepository.UploadProcessState
+import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
+import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
+import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
-import java.util.*
+import java.io.File
+import kotlin.uuid.Uuid
 
 class MusicService(
     private val musicRepository: MusicRepository,
-    private val getOrCreateArtistUseCase: GetOrCreateArtistUseCase,
-    private val deleteArtistIfEmptyUseCase: DeleteArtistIfEmptyUseCase,
-    private val getOrCreateAlbumUseCase: GetOrCreateAlbumUseCase,
-    private val deleteAlbumIfEmptyUseCase: DeleteAlbumIfEmptyUseCase,
+    private val updateMusicUseCase: UpdateMusicUseCase,
+    private val uploadMusicUseCase: UploadMusicUseCase,
+    private val deleteEmptyAlbumsAndArtistsUseCase: DeleteEmptyAlbumsAndArtistsUseCase,
 ) {
-
-    suspend fun getFromId(musicId: UUID): Music? =
-        musicRepository.getFromId(musicId = musicId)
-
-    suspend fun saveAndCreateMissingAlbumAndArtist(
-        user: User,
-        musicPath: String,
-        musicInformationResult: MusicInformationResult.FileMetadata,
-    ) {
-
-        val artist: Artist = getOrCreateArtistUseCase(
-            artistName = musicInformationResult.artist,
-            userId = user.id,
-            coverPath = musicInformationResult.coverPath,
+    suspend fun getFromUser(userId: Uuid, musicId: MusicId): Music? =
+        musicRepository.getFromUser(
+            musicId = musicId,
+            userId = userId,
         )
 
-        val album: Album = getOrCreateAlbumUseCase(
-            albumName = musicInformationResult.name,
-            userId = user.id,
-            artistId = artist.id,
-            artistName = artist.name,
-            coverPath = musicInformationResult.coverPath,
-        )
+    suspend fun getMusicFile(musicId: MusicId, userId: Uuid): File? {
+        val music: Music = musicRepository.getIfReadPermissionGranted(
+            musicId = musicId,
+            userId = userId,
+        ) ?: return null
 
-        val music: Music = musicInformationToMusic(
-            userId = user.id,
-            albumId = album.id,
-            artistId = artist.id,
-            musicPath = musicPath,
-            musicInformationResult = musicInformationResult,
+        return musicRepository.getMusicFile(
+            fingerprint = music.fingerprint,
+            userId = music.userId,
         )
-
-        musicRepository.upsert(music)
     }
 
-    suspend fun upsert(
-        modifiedMusic: Music,
-        userId: UUID,
-    ) {
-        // We get or create the artist of the modified music
-        val artist: Artist = getOrCreateArtistUseCase(
-            artistName = modifiedMusic.artist,
+    suspend fun getFromCoverPath(coverPath: String): Music? =
+        musicRepository.getFromCoverPath(coverPath = coverPath)
+
+    suspend fun saveUserFile(
+        userId: Uuid,
+        payload: MusicUploadPayload,
+        shouldSearchForMetadata: Boolean,
+    ): CloudyResult<Music> {
+        val uploadProcess: UploadProcessState = musicRepository.startUploadProcess(
             userId = userId,
-            coverPath = modifiedMusic.coverPath,
+            data = payload.musicFile,
+            shouldSearchForMetadata = shouldSearchForMetadata,
+            musicUploadSpec = payload.spec,
+            cover = payload.musicCover,
         )
 
-        // We get or create the album of the modified music
-        val album: Album = getOrCreateAlbumUseCase(
-            albumName = modifiedMusic.album,
-            userId = userId,
-            artistId = artist.id,
-            artistName = artist.name,
-            coverPath = modifiedMusic.coverPath,
-        )
+        return when (uploadProcess) {
+            UploadProcessState.Error -> {
+                CloudyResult.Error()
+            }
 
-        // We update the album and artist id of the music
-        val musicWithCorrectIds = modifiedMusic.copy(
-            albumId = album.id,
-            artistId = artist.id,
-        )
-        musicRepository.upsert(musicWithCorrectIds)
-
-        // We check if the legacy album and artist can be deleted
-        deleteAlbumIfEmptyUseCase(albumId = modifiedMusic.albumId)
-
-        deleteArtistIfEmptyUseCase(artistId = modifiedMusic.artistId)
+            is UploadProcessState.ContinueProcess -> {
+                uploadMusicUseCase(
+                    musicUploadSpec = uploadProcess.musicUploadSpec,
+                    cover = payload.musicCover,
+                    fingerprint = uploadProcess.fingerprint,
+                    userId = userId,
+                )
+            }
+        }
     }
 
-    suspend fun deleteById(musicId: UUID): Boolean {
-        val music: Music = musicRepository.getFromId(musicId = musicId) ?: return false
-        musicRepository.deleteById(musicId)
+    suspend fun update(
+        payload: MusicUpdatePayload,
+        userId: Uuid,
+    ): CloudyResult<Music> =
+        updateMusicUseCase(
+            payload = payload,
+            userId = userId,
+        )
 
-        // We check if we can delete the album of the music:
-        deleteAlbumIfEmptyUseCase(albumId = music.albumId)
-
-        // We then check if we can delete the artist of the music:
-        deleteArtistIfEmptyUseCase(artistId = music.artistId)
-
-        return true
+    suspend fun deleteAll(
+        musicIds: List<MusicId>,
+        userId: Uuid,
+    ) {
+        musicRepository.deleteAll(
+            ids = musicIds,
+            userId = userId,
+        )
+        deleteEmptyAlbumsAndArtistsUseCase(userId)
     }
 
     suspend fun getAllOfUser(
-        userId: UUID,
+        userId: Uuid,
         paginatedRequest: PaginatedRequest,
     ): List<Music> =
         musicRepository.getAllOfUser(
@@ -111,31 +100,29 @@ class MusicService(
         )
 
     suspend fun isMusicPossessedByUser(
-        musicId: UUID,
-        userId: UUID
+        musicId: MusicId,
+        userId: Uuid
     ): Boolean =
         musicRepository.isMusicPossessedByUser(
             userId = userId,
             musicId = musicId,
         )
 
-    private fun musicInformationToMusic(
-        userId: UUID,
-        albumId: UUID,
-        artistId: UUID,
-        musicPath: String,
-        musicInformationResult: MusicInformationResult.FileMetadata,
-    ): Music = Music(
-        id = musicInformationResult.musicId,
-        userId = userId,
-        name = musicInformationResult.name,
-        album = musicInformationResult.album,
-        artist = musicInformationResult.artist,
-        duration = musicInformationResult.duration,
-        coverPath = musicInformationResult.coverPath,
-        fingerprint = musicInformationResult.fingerprint,
-        albumId = albumId,
-        artistId = artistId,
-        path = musicPath,
-    )
+    /**
+     * Given a list of music ids to check,
+     * returns a list of all the ids of the initial list that are not present
+     * in the db.
+     */
+    // TODO OPTIMIZATION: Logic should be at DB layer, avoid fetching all musics for checks.
+    suspend fun getDeletedMusicsIds(
+        idsToCheck: List<MusicId>,
+        userId: Uuid
+    ): List<MusicId> {
+        val existingIds: List<MusicId> = musicRepository.getExistingIdsOfUser(
+            ids = idsToCheck,
+            userId = userId,
+        )
+
+        return idsToCheck.filterNot { it in existingIds }
+    }
 }
