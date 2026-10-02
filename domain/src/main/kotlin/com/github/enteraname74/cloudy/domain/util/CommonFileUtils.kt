@@ -5,6 +5,7 @@ import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import io.ktor.http.content.PartData
 import java.io.File
+import java.nio.file.Files
 import kotlin.uuid.Uuid
 
 object CommonFileUtils {
@@ -98,6 +99,17 @@ object CommonFileUtils {
         name: String
     ) {
         getByNameWithoutExtension(parent, name)?.delete()
+    }
+
+    fun deleteAllByNames(
+        parent: File,
+        names: Set<String>,
+    ) {
+        parent.listFiles()
+            ?.asSequence()
+            ?.filter(File::isFile)
+            ?.filter { it.nameWithoutExtension in names }
+            ?.forEach { Files.deleteIfExists(it.toPath()) }
     }
 
     /**

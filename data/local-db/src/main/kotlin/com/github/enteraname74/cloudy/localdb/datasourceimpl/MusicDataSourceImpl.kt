@@ -81,17 +81,27 @@ class MusicDataSourceImpl(
         }
 
     override suspend fun deleteAll(ids: List<MusicId>, userId: Uuid) {
-        workTransaction {
-            ids.forEach { id ->
-                CommonFileUtils.getByNameWithoutExtension(
-                    parent = getMusicsFolder(userId),
-                    name = id.raw,
-                )?.delete()
-            }
+        val fingerprints: Set<String> = workTransaction {
+            val fingerprints = MusicTable
+                .select(MusicTable.fingerprint)
+                .where {
+                    (MusicTable.id inList ids.map { it.raw }) and
+                        (MusicTable.userId eq userId)
+                }
+                .map { it[MusicTable.fingerprint] }
+                .toSet()
+
             MusicTable.deleteWhere {
                 (id inList ids.map { it.raw }) and (MusicTable.userId eq userId)
             }
+
+            fingerprints
         }
+
+        CommonFileUtils.deleteAllByNames(
+            parent = getMusicsFolder(userId),
+            names = fingerprints,
+        )
     }
 
     override suspend fun getAllOfUser(
