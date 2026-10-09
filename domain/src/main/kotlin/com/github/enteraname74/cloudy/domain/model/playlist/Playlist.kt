@@ -29,6 +29,6 @@ data class Playlist(
     )
 
     companion object {
-        const val COVER_PATH = "playlist/cover/"
+        const val COVER_PATH: String = "playlist/cover/"
     }
 }

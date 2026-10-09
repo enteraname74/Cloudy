@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.UpdatableElement
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
+import kotlin.math.max
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -26,7 +27,7 @@ data class Album(
         copy(
             name = albumUpload.name,
             isInQuickAccess = albumUpload.isInQuickAccess,
-            nbPlayed = albumUpload.nbPlayed,
+            nbPlayed = max(albumUpload.nbPlayed, nbPlayed),
             artist = artist,
         )
 
@@ -37,11 +38,11 @@ data class Album(
         copy(
             name = albumUpdate.name,
             isInQuickAccess = albumUpdate.isInQuickAccess,
-            nbPlayed = albumUpdate.nbPlayed,
+            nbPlayed = max(albumUpdate.nbPlayed, nbPlayed),
             artist = artist,
         )
 
     companion object {
-        const val COVER_PATH = "album/cover/"
+        const val COVER_PATH: String = "album/cover/"
     }
 }

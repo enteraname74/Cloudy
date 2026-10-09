@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
 import java.util.*
+import kotlin.math.max
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -46,7 +47,7 @@ data class Music(
             artists = artists,
             albumPosition = musicUploadSpec.albumPosition,
             duration = musicUploadSpec.duration,
-            nbPlayed = musicUploadSpec.nbPlayed,
+            nbPlayed = max(musicUploadSpec.nbPlayed, nbPlayed),
             isInQuickAccess = musicUploadSpec.isInQuickAccess,
         )
 
@@ -60,7 +61,7 @@ data class Music(
             album = album,
             artists = artists,
             albumPosition = musicUpdateSpec.albumPosition,
-            nbPlayed = musicUpdateSpec.nbPlayed,
+            nbPlayed = max(musicUpdateSpec.nbPlayed, nbPlayed),
             isInQuickAccess = musicUpdateSpec.isInQuickAccess,
         )
 
@@ -68,7 +69,7 @@ data class Music(
         fun buildLocalCoverPath(): String =
             "$COVER_PATH${UUID.randomUUID()}"
 
-        const val COVER_PATH = "music/cover/"
+        const val COVER_PATH: String = "music/cover/"
     }
 }
 
