@@ -7,6 +7,9 @@ import com.github.enteraname74.cloudy.domain.repository.SettingsRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionAlbumTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionArtistTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionTable
 import com.github.enteraname74.cloudy.localdb.table.ListeningStatisticsTable
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
@@ -106,8 +109,11 @@ class DatabaseManagerImpl(
             AlbumTable,
             UserTable,
             PlaylistTable,
+            CollectionTable,
             MusicArtistTable,
             MusicPlaylistTable,
+            CollectionArtistTable,
+            CollectionAlbumTable,
             PlayedListTable,
             PlayedListUserTable,
             PlayedListMusicTable,

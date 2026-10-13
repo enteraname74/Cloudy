@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.config.di
 import com.github.enteraname74.cloudy.domain.service.AlbumService
 import com.github.enteraname74.cloudy.domain.service.ArtistService
 import com.github.enteraname74.cloudy.domain.service.CoverService
+import com.github.enteraname74.cloudy.domain.service.CollectionService
 import com.github.enteraname74.cloudy.domain.service.ListeningStatisticsService
 import com.github.enteraname74.cloudy.domain.service.MusicArtistService
 import com.github.enteraname74.cloudy.domain.service.MusicPlaylistService
@@ -18,6 +19,7 @@ internal val serviceModule = module {
     singleOf(::ArtistService)
     singleOf(::AlbumService)
     singleOf(::PlaylistService)
+    singleOf(::CollectionService)
     singleOf(::UserService)
     singleOf(::CoverService)
     singleOf(::MusicArtistService)

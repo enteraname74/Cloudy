@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.controller.routing
 import com.github.enteraname74.cloudy.controller.routing.album.albumRouting
 import com.github.enteraname74.cloudy.controller.routing.artist.artistRouting
 import com.github.enteraname74.cloudy.controller.routing.auth.authRouting
+import com.github.enteraname74.cloudy.controller.routing.collection.collectionRouting
 import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
 import com.github.enteraname74.cloudy.controller.routing.player.playerRouting
 import com.github.enteraname74.cloudy.controller.routing.playlist.playlistRouting
@@ -35,6 +36,7 @@ fun Application.configureRouting() {
         albumRouting()
         artistRouting()
         playlistRouting()
+        collectionRouting()
         playerRouting()
         statisticsRouting()
         get("/hello") {

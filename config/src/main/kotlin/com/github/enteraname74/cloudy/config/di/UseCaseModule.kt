@@ -9,6 +9,7 @@ import com.github.enteraname74.cloudy.domain.usecase.artist.UploadArtistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UpdateMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.music.UploadMusicUseCase
 import com.github.enteraname74.cloudy.domain.usecase.artist.SetArtistsOfMusicUseCase
+import com.github.enteraname74.cloudy.domain.usecase.collection.UploadCollectionUseCase
 import com.github.enteraname74.cloudy.domain.usecase.playlist.AddMusicsToPlaylistUseCase
 import com.github.enteraname74.cloudy.domain.usecase.playlist.SetPlaylistMusicsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.playlist.UploadPlaylistUseCase
@@ -33,6 +34,9 @@ internal val useCaseModule = module {
     factoryOf(::SetPlaylistMusicsUseCase)
     factoryOf(::AddMusicsToPlaylistUseCase)
     factoryOf(::UploadPlaylistUseCase)
+
+    // Collection
+    factoryOf(::UploadCollectionUseCase)
 
     factoryOf(::DeleteEmptyAlbumsAndArtistsUseCase)
     factoryOf(::DeleteUserDataUseCase)
