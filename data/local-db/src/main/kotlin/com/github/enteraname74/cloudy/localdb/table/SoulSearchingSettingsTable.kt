@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.model.soulsearching.SortSetup
 import com.github.enteraname74.cloudy.domain.model.soulsearching.SortType
 import com.github.enteraname74.cloudy.domain.model.soulsearching.SoulSearchingSettings
 import org.jetbrains.exposed.v1.core.ReferenceOption
+import org.jetbrains.exposed.v1.core.less
 import org.jetbrains.exposed.v1.core.dao.id.EntityID
 import org.jetbrains.exposed.v1.core.dao.id.IdTable
 import org.jetbrains.exposed.v1.dao.Entity
@@ -17,6 +18,7 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
     override val id = reference("userId", UserTable.id, onDelete = ReferenceOption.CASCADE)
     override val primaryKey = PrimaryKey(id)
 
+    val updatedAtMillis = long("updatedAtMillis")
     val isMusicFileModificationOn = bool("isMusicFileModificationOn")
 
     val musicSortType = integer("musicSortType")
@@ -49,6 +51,7 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
     val isFoldersTabShown = bool("isFoldersTabShown")
     val areMusicsByMonthShown = bool("areMusicsByMonthShown")
     val isUsingVerticalAccessBar = bool("isUsingVerticalAccessBar")
+    val initialTab = varchar("initialTab", 128)
 
     val isFetchReleaseFromGithubEnabled = bool("isFetchReleaseFromGithubEnabled")
     val shouldShowReleaseBottomEnableHint = bool("shouldShowReleaseBottomEnableHint")
@@ -59,8 +62,11 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
         userId: Uuid,
         settings: SoulSearchingSettings,
     ) {
-        upsert {
+        upsert(
+            where = { updatedAtMillis less settings.updatedAtMillis },
+        ) {
             it[id] = userId
+            it[updatedAtMillis] = settings.updatedAtMillis
             it[isMusicFileModificationOn] = settings.isMusicFileModificationOn
 
             it[musicSortType] = settings.musicSortSetup.type.value
@@ -93,6 +99,7 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
             it[isFoldersTabShown] = settings.mainPage.isFoldersTabShown
             it[areMusicsByMonthShown] = settings.mainPage.areMusicsByMonthShown
             it[isUsingVerticalAccessBar] = settings.mainPage.isUsingVerticalAccessBar
+            it[initialTab] = settings.mainPage.initialTab
 
             it[isFetchReleaseFromGithubEnabled] = settings.release.isFetchReleaseFromGithubEnabled
             it[shouldShowReleaseBottomEnableHint] = settings.release.shouldShowReleaseBottomEnableHint
@@ -105,6 +112,7 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
 internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id) {
     companion object : EntityClass<Uuid, SoulSearchingSettingsEntity>(SoulSearchingSettingsTable)
 
+    var updatedAtMillis by SoulSearchingSettingsTable.updatedAtMillis
     var isMusicFileModificationOn by SoulSearchingSettingsTable.isMusicFileModificationOn
 
     var musicSortType by SoulSearchingSettingsTable.musicSortType
@@ -137,6 +145,7 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
     var isFoldersTabShown by SoulSearchingSettingsTable.isFoldersTabShown
     var areMusicsByMonthShown by SoulSearchingSettingsTable.areMusicsByMonthShown
     var isUsingVerticalAccessBar by SoulSearchingSettingsTable.isUsingVerticalAccessBar
+    var initialTab by SoulSearchingSettingsTable.initialTab
 
     var isFetchReleaseFromGithubEnabled by SoulSearchingSettingsTable.isFetchReleaseFromGithubEnabled
     var shouldShowReleaseBottomEnableHint by SoulSearchingSettingsTable.shouldShowReleaseBottomEnableHint
@@ -145,6 +154,7 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
 
     fun toSoulSearchingSettings(): SoulSearchingSettings =
         SoulSearchingSettings(
+            updatedAtMillis = updatedAtMillis,
             isMusicFileModificationOn = isMusicFileModificationOn,
             musicSortSetup = SortSetup(
                 type = SortType.fromOrDefault(musicSortType),
@@ -188,6 +198,7 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
                 isFoldersTabShown = isFoldersTabShown,
                 areMusicsByMonthShown = areMusicsByMonthShown,
                 isUsingVerticalAccessBar = isUsingVerticalAccessBar,
+                initialTab = initialTab,
             ),
             release = SoulSearchingSettings.Release(
                 isFetchReleaseFromGithubEnabled = isFetchReleaseFromGithubEnabled,

@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SoulSearchingSettings(
+    val updatedAtMillis: Long,
     val isMusicFileModificationOn: Boolean,
     val musicSortSetup: SortSetup,
     val albumSortSetup: SortSetup,
@@ -43,6 +44,7 @@ data class SoulSearchingSettings(
         val isFoldersTabShown: Boolean,
         val areMusicsByMonthShown: Boolean,
         val isUsingVerticalAccessBar: Boolean,
+        val initialTab: String,
     )
 
     @Serializable

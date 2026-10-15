@@ -7,5 +7,6 @@ class SoulSearchingResource {
     @Resource("settings")
     data class Settings(
         val parent: SoulSearchingResource = SoulSearchingResource(),
+        val lastUpdateAt: Long? = null,
     )
 }

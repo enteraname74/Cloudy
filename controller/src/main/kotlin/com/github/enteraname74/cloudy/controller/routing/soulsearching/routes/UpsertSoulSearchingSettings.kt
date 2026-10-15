@@ -20,10 +20,10 @@ fun Route.upsertSoulSearchingSettings() {
         val userId: Uuid = getUserIdFromToken() ?: return@post missingTokenInformation()
         val settings: SoulSearchingSettings = call.receive()
 
-        service.upsert(
+        val storedSettings = service.upsert(
             userId = userId,
             settings = settings,
         )
-        call.respond(HttpStatusCode.OK)
+        call.respond(HttpStatusCode.OK, storedSettings)
     }
 }

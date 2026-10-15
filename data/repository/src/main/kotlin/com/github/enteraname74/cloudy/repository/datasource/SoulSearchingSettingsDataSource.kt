@@ -4,10 +4,13 @@ import com.github.enteraname74.cloudy.domain.model.soulsearching.SoulSearchingSe
 import kotlin.uuid.Uuid
 
 interface SoulSearchingSettingsDataSource {
-    suspend fun get(userId: Uuid): SoulSearchingSettings?
+    suspend fun get(
+        userId: Uuid,
+        lastUpdateAt: Long?,
+    ): SoulSearchingSettings?
 
     suspend fun upsert(
         userId: Uuid,
         settings: SoulSearchingSettings,
-    )
+    ): SoulSearchingSettings
 }

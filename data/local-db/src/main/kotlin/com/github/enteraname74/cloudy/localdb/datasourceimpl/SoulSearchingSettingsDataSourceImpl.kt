@@ -8,22 +8,29 @@ import com.github.enteraname74.cloudy.repository.datasource.SoulSearchingSetting
 import kotlin.uuid.Uuid
 
 class SoulSearchingSettingsDataSourceImpl : SoulSearchingSettingsDataSource {
-    override suspend fun get(userId: Uuid): SoulSearchingSettings? =
+    override suspend fun get(
+        userId: Uuid,
+        lastUpdateAt: Long?,
+    ): SoulSearchingSettings? =
         workTransaction {
             SoulSearchingSettingsEntity
                 .findById(userId)
                 ?.toSoulSearchingSettings()
+                ?.takeIf { lastUpdateAt == null || it.updatedAtMillis > lastUpdateAt }
         }
 
     override suspend fun upsert(
         userId: Uuid,
         settings: SoulSearchingSettings,
-    ) {
+    ): SoulSearchingSettings =
         workTransaction {
             SoulSearchingSettingsTable.upsert(
                 userId = userId,
                 settings = settings,
             )
+            SoulSearchingSettingsEntity
+                .findById(userId)
+                ?.toSoulSearchingSettings()
+                ?: error("Soul Searching settings upsert did not produce a stored row")
         }
-    }
 }

@@ -14,9 +14,12 @@ import kotlin.uuid.Uuid
 fun Route.getSoulSearchingSettings() {
     val service by inject<SoulSearchingSettingsService>()
 
-    get<SoulSearchingResource.Settings> {
+    get<SoulSearchingResource.Settings> { resource ->
         val userId: Uuid = getUserIdFromToken() ?: return@get missingTokenInformation()
-        val settings: SoulSearchingSettings? = service.get(userId = userId)
+        val settings: SoulSearchingSettings? = service.get(
+            userId = userId,
+            lastUpdateAt = resource.lastUpdateAt,
+        )
 
         call.respondNullable(settings)
     }

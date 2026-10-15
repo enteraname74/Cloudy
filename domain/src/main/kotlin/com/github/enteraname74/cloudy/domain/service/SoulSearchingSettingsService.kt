@@ -7,16 +7,21 @@ import kotlin.uuid.Uuid
 class SoulSearchingSettingsService(
     private val repository: SoulSearchingSettingsRepository,
 ) {
-    suspend fun get(userId: Uuid): SoulSearchingSettings? =
-        repository.get(userId = userId)
+    suspend fun get(
+        userId: Uuid,
+        lastUpdateAt: Long?,
+    ): SoulSearchingSettings? =
+        repository.get(
+            userId = userId,
+            lastUpdateAt = lastUpdateAt,
+        )
 
     suspend fun upsert(
         userId: Uuid,
         settings: SoulSearchingSettings,
-    ) {
+    ): SoulSearchingSettings =
         repository.upsert(
             userId = userId,
             settings = settings,
         )
-    }
 }

@@ -8,16 +8,21 @@ import kotlin.uuid.Uuid
 class SoulSearchingSettingsRepositoryImpl(
     private val dataSource: SoulSearchingSettingsDataSource,
 ) : SoulSearchingSettingsRepository {
-    override suspend fun get(userId: Uuid): SoulSearchingSettings? =
-        dataSource.get(userId = userId)
+    override suspend fun get(
+        userId: Uuid,
+        lastUpdateAt: Long?,
+    ): SoulSearchingSettings? =
+        dataSource.get(
+            userId = userId,
+            lastUpdateAt = lastUpdateAt,
+        )
 
     override suspend fun upsert(
         userId: Uuid,
         settings: SoulSearchingSettings,
-    ) {
+    ): SoulSearchingSettings =
         dataSource.upsert(
             userId = userId,
             settings = settings,
         )
-    }
 }
