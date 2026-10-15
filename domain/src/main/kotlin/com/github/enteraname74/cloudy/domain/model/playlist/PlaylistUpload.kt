@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.model.playlist
 
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -12,6 +13,7 @@ data class PlaylistUpload(
     val nbPlayed: Int,
     val isInQuickAccess: Boolean,
     val musicIds: List<MusicId>,
+    val coverMode: Cover.Mode,
 ) {
 
     fun isValid(): Boolean =
@@ -23,7 +25,7 @@ data class PlaylistUpload(
         Playlist(
             userId = userId,
             name = name,
-            coverPath = null,
+            cover = null,
             nbPlayed = nbPlayed,
             isInQuickAccess = isInQuickAccess,
         )

@@ -29,10 +29,13 @@ class CollectionService(
 
     suspend fun upload(
         collectionUpload: CollectionUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
-    ): CloudyResult<CollectionWithElements> =
-        uploadCollectionUseCase(collectionUpload, coverData, userId)
+    ): CloudyResult<CollectionWithElements> {
+        val result = uploadCollectionUseCase(collectionUpload, coversData, userId)
+        if (result is CloudyResult.Success) coverRepository.deletedUnusedCovers(userId)
+        return result
+    }
 
     suspend fun deleteAll(collectionIds: List<Uuid>, userId: Uuid) {
         collectionRepository.deleteAll(collectionIds, userId)

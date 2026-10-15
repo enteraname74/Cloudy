@@ -28,7 +28,7 @@ fun Route.uploadPlaylist() {
         userService.getUserFromId(userId) ?: return@post cannotFindUser()
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        when (val uploadData = MultiPartDataUtils.processUpdateRequest<PlaylistUpload>(multipartData)) {
+        when (val uploadData = MultiPartDataUtils.processCoverUpdateRequest<PlaylistUpload>(multipartData)) {
             is CloudyResult.Error -> {
                 cloudyLogger.error("Error while uploading playlist: $uploadData")
                 respond(uploadData)
@@ -37,7 +37,7 @@ fun Route.uploadPlaylist() {
                 respond(
                     playlistService.upload(
                         playlistUpload = uploadData.data.second,
-                        coverData = uploadData.data.first,
+                        coversData = uploadData.data.first,
                         userId = userId,
                     )
                 )

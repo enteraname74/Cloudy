@@ -39,14 +39,17 @@ class PlaylistService(
 
     suspend fun upload(
         playlistUpload: PlaylistUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
-    ): CloudyResult<PlaylistWithMusics> =
-        uploadPlaylistUseCase(
+    ): CloudyResult<PlaylistWithMusics> {
+        val result = uploadPlaylistUseCase(
             playlistUpload = playlistUpload,
             userId = userId,
-            coverData = coverData,
+            coversData = coversData,
         )
+        if (result is CloudyResult.Success) coverRepository.deletedUnusedCovers(userId)
+        return result
+    }
 
     suspend fun deleteAll(playlistIds: List<Uuid>, userId: Uuid) {
         playlistRepository.deleteAll(playlistIds, userId)

@@ -14,7 +14,7 @@ class UploadCollectionUseCase(
 ) {
     suspend operator fun invoke(
         collectionUpload: CollectionUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
     ): CloudyResult<CollectionWithElements> {
         if (!collectionUpload.isValid()) return CloudyResult.Error()
@@ -28,7 +28,8 @@ class UploadCollectionUseCase(
         val savedCollection = collectionRepository.upsert(
             collection = existingCollection?.merge(collectionUpload)
                 ?: collectionUpload.toNewCollection(userId),
-            coverData = coverData,
+            coversData = coversData,
+            coverMode = collectionUpload.coverMode,
         )
         collectionRepository.replaceElements(
             collectionId = savedCollection.id,

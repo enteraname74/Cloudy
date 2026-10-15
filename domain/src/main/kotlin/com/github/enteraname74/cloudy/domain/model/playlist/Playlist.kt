@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.model.playlist
 
 import com.github.enteraname74.cloudy.domain.model.UpdatableElement
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.util.DateUtils
 import kotlinx.serialization.Serializable
 import kotlin.math.max
@@ -11,7 +12,7 @@ data class Playlist(
     val id: Uuid = Uuid.random(),
     val userId: Uuid,
     val name: String,
-    val coverPath: String?,
+    val cover: Cover?,
     val isFavorite: Boolean = false,
     val addedDateMillis: Long = DateUtils.now(),
     val nbPlayed: Int = 0,

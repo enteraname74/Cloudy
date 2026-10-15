@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.model.collection.Collection
 import com.github.enteraname74.cloudy.domain.model.collection.CollectionWithElements
 import com.github.enteraname74.cloudy.domain.repository.CollectionRepository
@@ -8,7 +9,7 @@ import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.CollectionDataSource
 import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
-import com.github.enteraname74.cloudy.repository.ext.getCoverName
+import java.util.concurrent.CancellationException
 import kotlin.uuid.Uuid
 
 class CollectionRepositoryImpl(
@@ -27,19 +28,37 @@ class CollectionRepositoryImpl(
     override suspend fun getFromInformation(name: String, userId: Uuid): Collection? =
         collectionDataSource.getFromInformation(name, userId)
 
-    override suspend fun upsert(collection: Collection, coverData: FileData?): Collection {
-        val savedId = coverData?.let { cover ->
-            collection.coverPath.getCoverName(Collection.COVER_PATH)?.let { previousName ->
-                coverDataSource.delete(name = previousName, userId = collection.userId)
-            }
-            coverDataSource.save(userId = collection.userId, data = cover)
+    override suspend fun upsert(
+        collection: Collection,
+        coversData: List<FileData?>,
+        coverMode: Cover.Mode,
+    ): Collection {
+        val savedIds = List(Cover.MAX_PATHS) { index ->
+            coversData.getOrNull(index)?.let { saveCoverOrNull(collection.userId, it) }
         }
-        return collectionDataSource.upsert(
-            collection.copy(
-                coverPath = savedId?.let { "${Collection.COVER_PATH}$it" } ?: collection.coverPath,
-                lastUpdateAtMillis = DateUtils.now(),
+        return try {
+            collectionDataSource.upsert(
+                collection.copy(
+                    cover = Cover.update(
+                        cover = collection.cover,
+                        mode = coverMode,
+                        paths = savedIds.map { it?.let { id -> "${Collection.COVER_PATH}$id" } },
+                    ),
+                    lastUpdateAtMillis = DateUtils.now(),
+                )
             )
-        )
+        } catch (throwable: Throwable) {
+            coverDataSource.deleteAll(collection.userId, savedIds.mapNotNull { it?.toString() })
+            throw throwable
+        }
+    }
+
+    private suspend fun saveCoverOrNull(userId: Uuid, data: FileData): Uuid? = try {
+        coverDataSource.save(userId, data)
+    } catch (exception: CancellationException) {
+        throw exception
+    } catch (_: Exception) {
+        null
     }
 
     override suspend fun replaceElements(

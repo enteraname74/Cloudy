@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.model.collection.Collection
 import com.github.enteraname74.cloudy.domain.model.collection.CollectionWithElements
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -11,7 +12,12 @@ interface CollectionRepository {
     suspend fun getWithElements(collectionId: Uuid): CollectionWithElements?
     suspend fun getFromCoverPath(coverPath: String): Collection?
     suspend fun getFromInformation(name: String, userId: Uuid): Collection?
-    suspend fun upsert(collection: Collection, coverData: FileData?): Collection
+    suspend fun upsert(
+        collection: Collection,
+        coversData: List<FileData?>,
+        coverMode: Cover.Mode,
+    ): Collection
+
     suspend fun replaceElements(
         collectionId: Uuid,
         userId: Uuid,

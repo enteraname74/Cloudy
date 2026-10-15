@@ -19,6 +19,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNotNull
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
@@ -36,7 +37,12 @@ class CollectionDataSourceImpl : CollectionDataSource {
     }
 
     override suspend fun getFromCoverPath(coverPath: String): Collection? = workTransaction {
-        CollectionEntity.find { CollectionTable.coverPath eq coverPath }
+        CollectionEntity.find {
+            (CollectionTable.coverUrl0 eq coverPath) or
+                (CollectionTable.coverUrl1 eq coverPath) or
+                (CollectionTable.coverUrl2 eq coverPath) or
+                (CollectionTable.coverUrl3 eq coverPath)
+        }
             .firstOrNull()
             ?.toCollection()
     }
@@ -83,9 +89,21 @@ class CollectionDataSourceImpl : CollectionDataSource {
     }
 
     override suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String> = workTransaction {
-        CollectionTable.select(CollectionTable.coverPath)
-            .where { (CollectionTable.userId eq userId) and CollectionTable.coverPath.isNotNull() }
-            .mapNotNull { it[CollectionTable.coverPath]?.getCoverName(Collection.COVER_PATH) }
+        val coverColumns = listOf(
+            CollectionTable.coverUrl0,
+            CollectionTable.coverUrl1,
+            CollectionTable.coverUrl2,
+            CollectionTable.coverUrl3,
+        )
+        CollectionTable.select(coverColumns)
+            .where {
+                (CollectionTable.userId eq userId) and
+                    (CollectionTable.coverUrl0.isNotNull() or
+                        CollectionTable.coverUrl1.isNotNull() or
+                        CollectionTable.coverUrl2.isNotNull() or
+                        CollectionTable.coverUrl3.isNotNull())
+            }
+            .flatMap { row -> coverColumns.mapNotNull { row[it]?.getCoverName(Collection.COVER_PATH) } }
             .distinct()
     }
 

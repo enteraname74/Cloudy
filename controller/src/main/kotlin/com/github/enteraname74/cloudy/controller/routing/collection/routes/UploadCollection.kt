@@ -27,7 +27,7 @@ fun Route.uploadCollection() {
         userService.getUserFromId(userId) ?: return@post cannotFindUser()
 
         val multipartData: MultiPartData = call.receiveMultipart()
-        when (val uploadData = MultiPartDataUtils.processUpdateRequest<CollectionUpload>(multipartData)) {
+        when (val uploadData = MultiPartDataUtils.processCoverUpdateRequest<CollectionUpload>(multipartData)) {
             is CloudyResult.Error -> {
                 cloudyLogger.error("Error while uploading collection: $uploadData")
                 respond(uploadData)
@@ -35,7 +35,7 @@ fun Route.uploadCollection() {
             is CloudyResult.Success -> respond(
                 collectionService.upload(
                     collectionUpload = uploadData.data.second,
-                    coverData = uploadData.data.first,
+                    coversData = uploadData.data.first,
                     userId = userId,
                 )
             )
