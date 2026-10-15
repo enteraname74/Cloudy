@@ -9,6 +9,7 @@ data class SoulSearchingSettings(
     val albumSortSetup: SortSetup,
     val artistSortSetup: SortSetup,
     val playlistSortSetup: SortSetup,
+    val collectionSortSetup: SortSetup,
     val playerSettings: PlayerSettings,
     val colorTheme: ColorTheme,
     val mainPage: MainPage,
@@ -30,8 +31,6 @@ data class SoulSearchingSettings(
         val dynamicPlayerTheme: Boolean,
         val dynamicPlaylistTheme: Boolean,
         val dynamicOtherViewsTheme: Boolean,
-        val forceDarkTheme: Boolean,
-        val forceLightTheme: Boolean,
     )
 
     @Serializable
@@ -40,6 +39,7 @@ data class SoulSearchingSettings(
         val isArtistsTabShown: Boolean,
         val isAlbumsTabShown: Boolean,
         val isPlaylistsTabShown: Boolean,
+        val isCollectionsTabShown: Boolean,
         val isFoldersTabShown: Boolean,
         val areMusicsByMonthShown: Boolean,
         val isUsingVerticalAccessBar: Boolean,
@@ -48,6 +48,8 @@ data class SoulSearchingSettings(
     @Serializable
     data class Release(
         val isFetchReleaseFromGithubEnabled: Boolean,
+        val shouldShowReleaseBottomEnableHint: Boolean,
+        val latestViewedReleaseTag: String?,
     )
 
     @Serializable

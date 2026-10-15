@@ -27,6 +27,8 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
     val artistSortDirection = integer("artistSortDirection")
     val playlistSortType = integer("playlistSortType")
     val playlistSortDirection = integer("playlistSortDirection")
+    val collectionSortType = integer("collectionSortType")
+    val collectionSortDirection = integer("collectionSortDirection")
 
     val isPlayerSwipeEnabled = bool("isPlayerSwipeEnabled")
     val soulMixTotalByList = integer("soulMixTotalByList")
@@ -38,18 +40,19 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
     val dynamicPlayerTheme = bool("dynamicPlayerTheme")
     val dynamicPlaylistTheme = bool("dynamicPlaylistTheme")
     val dynamicOtherViewsTheme = bool("dynamicOtherViewsTheme")
-    val forceDarkTheme = bool("forceDarkTheme")
-    val forceLightTheme = bool("forceLightTheme")
 
     val isQuickAccessTabShown = bool("isQuickAccessTabShown")
     val isArtistsTabShown = bool("isArtistsTabShown")
     val isAlbumsTabShown = bool("isAlbumsTabShown")
     val isPlaylistsTabShown = bool("isPlaylistsTabShown")
+    val isCollectionsTabShown = bool("isCollectionsTabShown")
     val isFoldersTabShown = bool("isFoldersTabShown")
     val areMusicsByMonthShown = bool("areMusicsByMonthShown")
     val isUsingVerticalAccessBar = bool("isUsingVerticalAccessBar")
 
     val isFetchReleaseFromGithubEnabled = bool("isFetchReleaseFromGithubEnabled")
+    val shouldShowReleaseBottomEnableHint = bool("shouldShowReleaseBottomEnableHint")
+    val latestViewedReleaseTag = varchar("latestViewedReleaseTag", 128).nullable()
     val shouldShowTrackPositionInAlbumView = bool("shouldShowTrackPositionInAlbumView")
 
     fun upsert(
@@ -68,6 +71,8 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
             it[artistSortDirection] = settings.artistSortSetup.direction.value
             it[playlistSortType] = settings.playlistSortSetup.type.value
             it[playlistSortDirection] = settings.playlistSortSetup.direction.value
+            it[collectionSortType] = settings.collectionSortSetup.type.value
+            it[collectionSortDirection] = settings.collectionSortSetup.direction.value
 
             it[isPlayerSwipeEnabled] = settings.playerSettings.isPlayerSwipeEnabled
             it[soulMixTotalByList] = settings.playerSettings.soulMixTotalByList
@@ -79,18 +84,19 @@ internal object SoulSearchingSettingsTable : IdTable<Uuid>() {
             it[dynamicPlayerTheme] = settings.colorTheme.dynamicPlayerTheme
             it[dynamicPlaylistTheme] = settings.colorTheme.dynamicPlaylistTheme
             it[dynamicOtherViewsTheme] = settings.colorTheme.dynamicOtherViewsTheme
-            it[forceDarkTheme] = settings.colorTheme.forceDarkTheme
-            it[forceLightTheme] = settings.colorTheme.forceLightTheme
 
             it[isQuickAccessTabShown] = settings.mainPage.isQuickAccessTabShown
             it[isArtistsTabShown] = settings.mainPage.isArtistsTabShown
             it[isAlbumsTabShown] = settings.mainPage.isAlbumsTabShown
             it[isPlaylistsTabShown] = settings.mainPage.isPlaylistsTabShown
+            it[isCollectionsTabShown] = settings.mainPage.isCollectionsTabShown
             it[isFoldersTabShown] = settings.mainPage.isFoldersTabShown
             it[areMusicsByMonthShown] = settings.mainPage.areMusicsByMonthShown
             it[isUsingVerticalAccessBar] = settings.mainPage.isUsingVerticalAccessBar
 
             it[isFetchReleaseFromGithubEnabled] = settings.release.isFetchReleaseFromGithubEnabled
+            it[shouldShowReleaseBottomEnableHint] = settings.release.shouldShowReleaseBottomEnableHint
+            it[latestViewedReleaseTag] = settings.release.latestViewedReleaseTag
             it[shouldShowTrackPositionInAlbumView] = settings.album.shouldShowTrackPositionInAlbumView
         }
     }
@@ -109,6 +115,8 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
     var artistSortDirection by SoulSearchingSettingsTable.artistSortDirection
     var playlistSortType by SoulSearchingSettingsTable.playlistSortType
     var playlistSortDirection by SoulSearchingSettingsTable.playlistSortDirection
+    var collectionSortType by SoulSearchingSettingsTable.collectionSortType
+    var collectionSortDirection by SoulSearchingSettingsTable.collectionSortDirection
 
     var isPlayerSwipeEnabled by SoulSearchingSettingsTable.isPlayerSwipeEnabled
     var soulMixTotalByList by SoulSearchingSettingsTable.soulMixTotalByList
@@ -120,18 +128,19 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
     var dynamicPlayerTheme by SoulSearchingSettingsTable.dynamicPlayerTheme
     var dynamicPlaylistTheme by SoulSearchingSettingsTable.dynamicPlaylistTheme
     var dynamicOtherViewsTheme by SoulSearchingSettingsTable.dynamicOtherViewsTheme
-    var forceDarkTheme by SoulSearchingSettingsTable.forceDarkTheme
-    var forceLightTheme by SoulSearchingSettingsTable.forceLightTheme
 
     var isQuickAccessTabShown by SoulSearchingSettingsTable.isQuickAccessTabShown
     var isArtistsTabShown by SoulSearchingSettingsTable.isArtistsTabShown
     var isAlbumsTabShown by SoulSearchingSettingsTable.isAlbumsTabShown
     var isPlaylistsTabShown by SoulSearchingSettingsTable.isPlaylistsTabShown
+    var isCollectionsTabShown by SoulSearchingSettingsTable.isCollectionsTabShown
     var isFoldersTabShown by SoulSearchingSettingsTable.isFoldersTabShown
     var areMusicsByMonthShown by SoulSearchingSettingsTable.areMusicsByMonthShown
     var isUsingVerticalAccessBar by SoulSearchingSettingsTable.isUsingVerticalAccessBar
 
     var isFetchReleaseFromGithubEnabled by SoulSearchingSettingsTable.isFetchReleaseFromGithubEnabled
+    var shouldShowReleaseBottomEnableHint by SoulSearchingSettingsTable.shouldShowReleaseBottomEnableHint
+    var latestViewedReleaseTag by SoulSearchingSettingsTable.latestViewedReleaseTag
     var shouldShowTrackPositionInAlbumView by SoulSearchingSettingsTable.shouldShowTrackPositionInAlbumView
 
     fun toSoulSearchingSettings(): SoulSearchingSettings =
@@ -153,6 +162,10 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
                 type = SortType.fromOrDefault(playlistSortType),
                 direction = SortDirection.fromOrDefault(playlistSortDirection),
             ),
+            collectionSortSetup = SortSetup(
+                type = SortType.fromOrDefault(collectionSortType),
+                direction = SortDirection.fromOrDefault(collectionSortDirection),
+            ),
             playerSettings = SoulSearchingSettings.PlayerSettings(
                 isPlayerSwipeEnabled = isPlayerSwipeEnabled,
                 soulMixTotalByList = soulMixTotalByList,
@@ -165,20 +178,21 @@ internal class SoulSearchingSettingsEntity(id: EntityID<Uuid>) : Entity<Uuid>(id
                 dynamicPlayerTheme = dynamicPlayerTheme,
                 dynamicPlaylistTheme = dynamicPlaylistTheme,
                 dynamicOtherViewsTheme = dynamicOtherViewsTheme,
-                forceDarkTheme = forceDarkTheme,
-                forceLightTheme = forceLightTheme,
             ),
             mainPage = SoulSearchingSettings.MainPage(
                 isQuickAccessTabShown = isQuickAccessTabShown,
                 isArtistsTabShown = isArtistsTabShown,
                 isAlbumsTabShown = isAlbumsTabShown,
                 isPlaylistsTabShown = isPlaylistsTabShown,
+                isCollectionsTabShown = isCollectionsTabShown,
                 isFoldersTabShown = isFoldersTabShown,
                 areMusicsByMonthShown = areMusicsByMonthShown,
                 isUsingVerticalAccessBar = isUsingVerticalAccessBar,
             ),
             release = SoulSearchingSettings.Release(
                 isFetchReleaseFromGithubEnabled = isFetchReleaseFromGithubEnabled,
+                shouldShowReleaseBottomEnableHint = shouldShowReleaseBottomEnableHint,
+                latestViewedReleaseTag = latestViewedReleaseTag,
             ),
             album = SoulSearchingSettings.Album(
                 shouldShowTrackPositionInAlbumView = shouldShowTrackPositionInAlbumView,
