@@ -3,6 +3,7 @@ package com.github.enteraname74.cloudy.config.di
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.AlbumDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.ArtistDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.CoverDataSourceImpl
+import com.github.enteraname74.cloudy.localdb.datasourceimpl.CollectionDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.ListeningStatisticsDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.MusicArtistDataSourceImpl
 import com.github.enteraname74.cloudy.localdb.datasourceimpl.MusicDataSourceImpl
@@ -16,6 +17,7 @@ import com.github.enteraname74.cloudy.localdb.datasourceimpl.UserInscriptionCode
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
+import com.github.enteraname74.cloudy.repository.datasource.CollectionDataSource
 import com.github.enteraname74.cloudy.repository.datasource.ListeningStatisticsDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicArtistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
@@ -36,6 +38,7 @@ internal val datasourceModule = module {
     singleOf(::ArtistDataSourceImpl) bind ArtistDataSource::class
     singleOf(::AlbumDataSourceImpl) bind AlbumDataSource::class
     singleOf(::PlaylistDataSourceImpl) bind PlaylistDataSource::class
+    singleOf(::CollectionDataSourceImpl) bind CollectionDataSource::class
     singleOf(::MusicArtistDataSourceImpl) bind MusicArtistDataSource::class
     singleOf(::MusicPlaylistDataSourceImpl) bind MusicPlaylistDataSource::class
     singleOf(::PlayerDataSourceImpl) bind PlayerDataSource::class

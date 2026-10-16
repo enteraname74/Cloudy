@@ -7,6 +7,8 @@ Cloud server for the multiplatform music player application [***Soul Searching**
 - support for multiple users (optimized for a group of friends, a family) with inscription codes
 - shared played list between multiple users (like Spotify)
 
+> Check the matching Cloudy releases with [Soul Searching](https://github.com/enteraname74/SoulSearching) ones in the [compatibilities](compatibilities.md) file in this repository
+
 ## Set up the server
 
 > The app works best with docker and docker compose. Be sure to have these installed on your system.

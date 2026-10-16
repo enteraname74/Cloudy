@@ -16,5 +16,6 @@ data class ListeningStatistics(
     val playlistId: Uuid?,
     val albumId: Uuid?,
     val artistId: Uuid?,
+    val collectionId: Uuid? = null,
     override val lastUpdateAtMillis: Long,
 ) : UpdatableElement

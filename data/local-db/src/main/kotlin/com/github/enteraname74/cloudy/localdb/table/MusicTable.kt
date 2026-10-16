@@ -41,6 +41,7 @@ internal object MusicTable : IdTable<String>() {
             this[isInQuickAccess] = music.isInQuickAccess
             this[path] = music.path
             this[lastUpdateAt] = music.lastUpdateAtMillis
+            this[albumPosition] = music.albumPosition
         }
     }
 }

@@ -18,7 +18,7 @@ data class Artist(
     override val lastUpdateAtMillis: Long = DateUtils.now(),
 ) : UpdatableElement {
     companion object {
-        const val COVER_PATH = "artist/cover/"
+        const val COVER_PATH: String = "artist/cover/"
     }
 
     fun merge(
@@ -34,7 +34,7 @@ data class Artist(
         artistUpdate: ArtistUpdate,
     ): Artist =
         copy(
-            name = name,
+            name = artistUpdate.name,
             nbPlayed = max(artistUpdate.nbPlayed, nbPlayed),
             isInQuickAccess = artistUpdate.isInQuickAccess,
         )

@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataMan
 import com.github.enteraname74.cloudy.repository.datasource.AlbumDataSource
 import com.github.enteraname74.cloudy.repository.datasource.ArtistDataSource
 import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
+import com.github.enteraname74.cloudy.repository.datasource.CollectionDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
 import java.io.File
 import kotlin.uuid.Uuid
@@ -15,6 +16,7 @@ class CoverRepositoryImpl(
     private val playlistDataSource: PlaylistDataSource,
     private val albumDataSource: AlbumDataSource,
     private val artistDataSource: ArtistDataSource,
+    private val collectionDataSource: CollectionDataSource,
     private val coverDataSource: CoverDataSource,
 ) : CoverRepository {
     override suspend fun getMusicFileCover(musicFile: File): ByteArray? =
@@ -36,7 +38,8 @@ class CoverRepositoryImpl(
         val coversNames = (
             playlistDataSource.getAllCoverNamesOfUser(userId) +
                 albumDataSource.getAllCoverNamesOfUser(userId) +
-                artistDataSource.getAllCoverNamesOfUser(userId)
+                artistDataSource.getAllCoverNamesOfUser(userId) +
+                collectionDataSource.getAllCoverNamesOfUser(userId)
             ).distinct()
 
         val savedCoverNames = coverDataSource.getAllNames(userId)

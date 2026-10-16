@@ -55,6 +55,11 @@ object EnRoutingMessages : RoutingMessages {
     override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "The album with id: $playlistId is not possessed by the user."
 
+    override val COLLECTIONS_DELETED: String = "Collections have been deleted."
+    override val COLLECTION_NOT_POSSESSED_BY_USER: String = "This collection is not possessed by the user."
+    override fun collectionNotPossessedByUser(collectionId: Uuid): String =
+        "The collection with id: $collectionId is not possessed by the user."
+
     override val MISSING_TOKEN_INFORMATION: String = "Missing information from token."
     override val NOT_A_REFRESH_TOKEN: String = "The given token is not a refresh token."
 
