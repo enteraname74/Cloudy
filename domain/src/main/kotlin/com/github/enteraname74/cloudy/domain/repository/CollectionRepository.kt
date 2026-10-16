@@ -15,7 +15,7 @@ interface CollectionRepository {
     suspend fun upsert(
         collection: Collection,
         coversData: List<FileData?>,
-        coverMode: Cover.Mode,
+        coverMode: Cover.Mode?,
     ): Collection
 
     suspend fun replaceElements(

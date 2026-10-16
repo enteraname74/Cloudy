@@ -31,19 +31,23 @@ class CollectionRepositoryImpl(
     override suspend fun upsert(
         collection: Collection,
         coversData: List<FileData?>,
-        coverMode: Cover.Mode,
+        coverMode: Cover.Mode?,
     ): Collection {
         val savedIds = List(Cover.MAX_PATHS) { index ->
-            coversData.getOrNull(index)?.let { saveCoverOrNull(collection.userId, it) }
+            coverMode?.let {
+                coversData.getOrNull(index)?.let { saveCoverOrNull(collection.userId, it) }
+            }
         }
         return try {
             collectionDataSource.upsert(
                 collection.copy(
-                    cover = Cover.update(
-                        cover = collection.cover,
-                        mode = coverMode,
-                        paths = savedIds.map { it?.let { id -> "${Collection.COVER_PATH}$id" } },
-                    ),
+                    cover = coverMode?.let { mode ->
+                        Cover.update(
+                            cover = collection.cover,
+                            mode = mode,
+                            paths = savedIds.map { it?.let { id -> "${Collection.COVER_PATH}$id" } },
+                        )
+                    } ?: collection.cover,
                     lastUpdateAtMillis = DateUtils.now(),
                 )
             )

@@ -10,6 +10,7 @@ import com.github.enteraname74.cloudy.domain.service.MusicPlaylistService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.PlayerService
 import com.github.enteraname74.cloudy.domain.service.PlaylistService
+import com.github.enteraname74.cloudy.domain.service.SoulSearchingSettingsService
 import com.github.enteraname74.cloudy.domain.service.UserService
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -26,4 +27,5 @@ internal val serviceModule = module {
     singleOf(::MusicPlaylistService)
     singleOf(::PlayerService)
     singleOf(::ListeningStatisticsService)
+    singleOf(::SoulSearchingSettingsService)
 }

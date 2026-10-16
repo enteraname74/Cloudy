@@ -8,7 +8,7 @@ data class Settings(
     val dbVersion: Int,
 ) {
     companion object {
-        val CURRENT = Settings(
+        val CURRENT: Settings = Settings(
             backendVersion = 1,
             dbVersion = 1,
         )
