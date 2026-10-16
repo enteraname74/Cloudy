@@ -100,7 +100,12 @@ object MultiPartDataUtils {
         return if (!isInvalid && metadata != null) {
             CloudyResult.Success(covers to metadata!!)
         } else {
-            CloudyResult.Error()
+            val message = if (isInvalid) {
+                "Data is invalid"
+            } else {
+                "No metadata found"
+            }
+            CloudyResult.Error(message)
         }
     }
 

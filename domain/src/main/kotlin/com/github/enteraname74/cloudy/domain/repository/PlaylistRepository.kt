@@ -33,7 +33,7 @@ interface PlaylistRepository {
     suspend fun upsert(
         playlist: Playlist,
         coversData: List<FileData?>,
-        coverMode: Cover.Mode,
+        coverMode: Cover.Mode?,
     ): Playlist
 
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>

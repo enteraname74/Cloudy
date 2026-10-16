@@ -12,7 +12,7 @@ data class CollectionUpload(
     val isInQuickAccess: Boolean,
     val artistIds: List<Uuid>,
     val albumIds: List<Uuid>,
-    val coverMode: Cover.Mode,
+    val coverMode: Cover.Mode? = null,
 ) {
     fun isValid(): Boolean = name.isNotBlank() && nbPlayed >= 0
 

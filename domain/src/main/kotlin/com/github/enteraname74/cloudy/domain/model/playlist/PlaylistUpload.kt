@@ -13,7 +13,7 @@ data class PlaylistUpload(
     val nbPlayed: Int,
     val isInQuickAccess: Boolean,
     val musicIds: List<MusicId>,
-    val coverMode: Cover.Mode,
+    val coverMode: Cover.Mode? = null,
 ) {
 
     fun isValid(): Boolean =

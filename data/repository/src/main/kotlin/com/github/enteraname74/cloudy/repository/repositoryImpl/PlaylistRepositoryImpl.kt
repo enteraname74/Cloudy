@@ -45,20 +45,24 @@ class PlaylistRepositoryImpl(
     override suspend fun upsert(
         playlist: Playlist,
         coversData: List<FileData?>,
-        coverMode: Cover.Mode,
+        coverMode: Cover.Mode?,
     ): Playlist {
         val savedIds = List(Cover.MAX_PATHS) { index ->
-            coversData.getOrNull(index)?.let { saveCoverOrNull(playlist.userId, it) }
+            coverMode?.let {
+                coversData.getOrNull(index)?.let { saveCoverOrNull(playlist.userId, it) }
+            }
         }
         return try {
             playlistDataSource.upsert(
                 playlist.copy(
                     lastUpdateAtMillis = DateUtils.now(),
-                    cover = Cover.update(
-                        cover = playlist.cover,
-                        mode = coverMode,
-                        paths = savedIds.map { it?.let { id -> "${Playlist.COVER_PATH}$id" } },
-                    ),
+                    cover = coverMode?.let { mode ->
+                        Cover.update(
+                            cover = playlist.cover,
+                            mode = mode,
+                            paths = savedIds.map { it?.let { id -> "${Playlist.COVER_PATH}$id" } },
+                        )
+                    } ?: playlist.cover,
                 ),
             )
         } catch (throwable: Throwable) {
