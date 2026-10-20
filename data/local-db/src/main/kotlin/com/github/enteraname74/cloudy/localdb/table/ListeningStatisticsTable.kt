@@ -27,6 +27,7 @@ internal object ListeningStatisticsTable : IdTable<String>() {
     val albumId = reference("albumId", AlbumTable.id, onDelete = ReferenceOption.CASCADE).nullable()
     val artistId = reference("artistId", ArtistTable.id, onDelete = ReferenceOption.CASCADE).nullable()
     val playlistId = reference("playlistId", PlaylistTable.id, onDelete = ReferenceOption.CASCADE).nullable()
+    val collectionId = reference("collectionId", CollectionTable.id, onDelete = ReferenceOption.CASCADE).nullable()
 
     fun upsertAll(statistics: List<ListeningStatistics>) {
         batchUpsert(statistics) { statistic ->
@@ -41,6 +42,7 @@ internal object ListeningStatisticsTable : IdTable<String>() {
             this[albumId] = statistic.albumId
             this[artistId] = statistic.artistId
             this[playlistId] = statistic.playlistId
+            this[collectionId] = statistic.collectionId
         }
     }
 }
@@ -58,6 +60,7 @@ internal class ListeningStatisticsEntity(id: EntityID<String>) : Entity<String>(
     var albumId by ListeningStatisticsTable.albumId
     var artistId by ListeningStatisticsTable.artistId
     var playlistId by ListeningStatisticsTable.playlistId
+    var collectionId by ListeningStatisticsTable.collectionId
 
     fun toListeningStats(): ListeningStatistics =
         ListeningStatistics(
@@ -73,6 +76,7 @@ internal class ListeningStatisticsEntity(id: EntityID<String>) : Entity<String>(
             playlistId = playlistId?.value,
             albumId = albumId?.value,
             artistId = artistId?.value,
+            collectionId = collectionId?.value,
             lastUpdateAtMillis = lastUpdateAt
         )
 }

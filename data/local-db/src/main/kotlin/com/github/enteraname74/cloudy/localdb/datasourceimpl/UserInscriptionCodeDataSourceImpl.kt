@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import kotlin.uuid.Uuid
 
-class UserInscriptionCodeDataSourceImpl: UserInscriptionCodeDataSource {
+class UserInscriptionCodeDataSourceImpl : UserInscriptionCodeDataSource {
     override suspend fun generate(userId: Uuid): UserInscriptionCode =
         workTransaction {
 

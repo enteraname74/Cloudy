@@ -12,7 +12,7 @@ import org.jetbrains.exposed.v1.dao.EntityClass
 import org.jetbrains.exposed.v1.jdbc.insert
 import kotlin.uuid.Uuid
 
-internal object PlayedListUserTable: IdTable<String>() {
+internal object PlayedListUserTable : IdTable<String>() {
     override val id = text("id").entityId()
     override val primaryKey = PrimaryKey(id)
 
@@ -38,7 +38,7 @@ internal object PlayedListUserTable: IdTable<String>() {
     }
 }
 
-internal class PlayedListUserEntity(id: EntityID<String>): Entity<String>(id) {
+internal class PlayedListUserEntity(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, PlayedListUserEntity>(PlayedListUserTable)
 
     val user by UserEntity referencedOn PlayedListUserTable.userId

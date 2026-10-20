@@ -56,31 +56,56 @@ object MultiPartDataUtils {
         )
     }
 
-    suspend inline fun <reified T> processUpdateRequest(request: MultiPartData): CloudyResult<Pair<FileData?, T>> {
-        var fileData: FileData? = null
-        var modifiedMusic: T? = null
+    suspend inline fun <reified T> processCoverUpdateRequest(
+        request: MultiPartData,
+    ): CloudyResult<Pair<List<FileData?>, T>> {
+        val covers = MutableList<FileData?>(4) { null }
+        val receivedIndices = mutableSetOf<Int>()
+        var metadata: T? = null
+        var isInvalid = false
+
         request.forEachPart { part ->
             when (part) {
                 is PartData.FormItem -> {
-                    modifiedMusic = CloudyJson.decodeFromString(part.value)
+                    if (part.name != "metadata" || metadata != null) {
+                        isInvalid = true
+                    } else {
+                        metadata = runCatching { CloudyJson.decodeFromString<T>(part.value) }.getOrNull()
+                        if (metadata == null) isInvalid = true
+                    }
                 }
                 is PartData.FileItem -> {
-                    fileData = retrieveImageData(fileItem = part)
+                    val partName = part.name
+                    val index = partName
+                        ?.takeIf { it.startsWith("cover") }
+                        ?.removePrefix("cover")
+                        ?.toIntOrNull()
+                    if (
+                        index == null ||
+                        partName != "cover$index" ||
+                        index !in covers.indices ||
+                        !receivedIndices.add(index)
+                    ) {
+                        isInvalid = true
+                    } else {
+                        covers[index] = retrieveImageData(part)
+                        if (covers[index] == null) isInvalid = true
+                    }
                 }
-
-                else -> {
-                    /*no-op*/
-                }
+                else -> isInvalid = true
             }
             part.dispose()
         }
 
-        return if (modifiedMusic != null) {
-            CloudyResult.Success(
-                Pair(fileData, modifiedMusic!!)
-            )
+        return if (!isInvalid && metadata != null) {
+            CloudyResult.Success(covers to metadata!!)
         } else {
-            CloudyResult.Error()
+            val message = if (isInvalid) {
+                "Data is invalid"
+            } else {
+                "No metadata found"
+            }
+            CloudyResult.Error(message)
         }
     }
 

@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.repository.PlaylistRepository
@@ -8,7 +9,7 @@ import com.github.enteraname74.cloudy.domain.util.DateUtils
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
 import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.PlaylistDataSource
-import com.github.enteraname74.cloudy.repository.ext.getCoverName
+import java.util.concurrent.CancellationException
 import kotlin.uuid.Uuid
 
 class PlaylistRepositoryImpl(
@@ -43,39 +44,39 @@ class PlaylistRepositoryImpl(
 
     override suspend fun upsert(
         playlist: Playlist,
-        coverData: FileData?,
+        coversData: List<FileData?>,
+        coverMode: Cover.Mode?,
     ): Playlist {
-        val savedId: Uuid? = coverData?.let { cover ->
-            // We will delete the previous cover if any
-            val previousName: String? =
-                playlist
-                    .coverPath
-                    .getCoverName(Playlist.COVER_PATH)
-
-            previousName?.let { name ->
-                coverDataSource.delete(
-                    name = name,
-                    userId = playlist.userId,
-                )
+        val savedIds = List(Cover.MAX_PATHS) { index ->
+            coverMode?.let {
+                coversData.getOrNull(index)?.let { saveCoverOrNull(playlist.userId, it) }
             }
-
-            coverDataSource.save(
-                userId = playlist.userId,
-                data = cover,
+        }
+        return try {
+            playlistDataSource.upsert(
+                playlist.copy(
+                    lastUpdateAtMillis = DateUtils.now(),
+                    cover = coverMode?.let { mode ->
+                        Cover.update(
+                            cover = playlist.cover,
+                            mode = mode,
+                            paths = savedIds.map { it?.let { id -> "${Playlist.COVER_PATH}$id" } },
+                        )
+                    } ?: playlist.cover,
+                ),
             )
+        } catch (throwable: Throwable) {
+            coverDataSource.deleteAll(playlist.userId, savedIds.mapNotNull { it?.toString() })
+            throw throwable
         }
+    }
 
-        val newCoverPath = savedId?.let {
-            "${Playlist.COVER_PATH}$it"
-        }
-
-        val now = DateUtils.now()
-        return playlistDataSource.upsert(
-            playlist = playlist.copy(
-                lastUpdateAtMillis = now,
-                coverPath = newCoverPath ?: playlist.coverPath,
-            ),
-        )
+    private suspend fun saveCoverOrNull(userId: Uuid, data: FileData): Uuid? = try {
+        coverDataSource.save(userId, data)
+    } catch (exception: CancellationException) {
+        throw exception
+    } catch (_: Exception) {
+        null
     }
 
     override suspend fun upsertAll(playlists: List<Playlist>): List<Playlist> =

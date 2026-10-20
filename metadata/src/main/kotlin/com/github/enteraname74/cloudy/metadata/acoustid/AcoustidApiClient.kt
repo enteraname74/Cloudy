@@ -28,9 +28,9 @@ internal class AcoustidApiClient {
         try {
             val apiKey = System.getenv("ACOUSTID_API_KEY")
             val uri = "https://api.acoustid.org/v2/lookup?client=$apiKey" +
-                    "&meta=recordings+releasegroups+compress&duration=" +
-                    fingerprintData.duration +
-                    "&fingerprint=${fingerprintData.fingerprint}"
+                "&meta=recordings+releasegroups+compress&duration=" +
+                fingerprintData.duration +
+                "&fingerprint=${fingerprintData.fingerprint}"
 
             val requestResult: HttpResponse = defaultHttpClient.get(
                 urlString = uri
@@ -43,7 +43,7 @@ internal class AcoustidApiClient {
                 initialMetadata = fileMetadata,
             )
 
-           resultAnalyzer.getMusicMetadataFromRequest()
+            resultAnalyzer.getMusicMetadataFromRequest()
         } catch (e: Exception) {
             logger.error("Failed to retrieve music metadata from Acoustid with error: ${e.message}")
             fileMetadata

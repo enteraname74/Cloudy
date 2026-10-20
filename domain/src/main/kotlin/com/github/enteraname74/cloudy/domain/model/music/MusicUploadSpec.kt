@@ -33,6 +33,8 @@ data class MusicUploadSpec(
             albumPosition = albumPosition,
             duration = duration,
             addedDateMillis = DateUtils.now(),
+            nbPlayed = nbPlayed,
+            isInQuickAccess = isInQuickAccess,
             scope = Music.Scope.User,
         )
 }

@@ -7,17 +7,22 @@ import com.github.enteraname74.cloudy.domain.repository.SettingsRepository
 import com.github.enteraname74.cloudy.domain.util.CloudyResult
 import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionAlbumTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionArtistTable
+import com.github.enteraname74.cloudy.localdb.table.CollectionTable
 import com.github.enteraname74.cloudy.localdb.table.ListeningStatisticsTable
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicPlaylistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.table.PlaylistTable
+import com.github.enteraname74.cloudy.localdb.table.SoulSearchingSettingsTable
 import com.github.enteraname74.cloudy.localdb.table.UserInscriptionCodeTable
 import com.github.enteraname74.cloudy.localdb.table.UserTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListMusicTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListTable
 import com.github.enteraname74.cloudy.localdb.table.player.PlayedListUserTable
 import com.github.enteraname74.cloudy.logging.CloudyLogger
+import org.jetbrains.exposed.v1.core.statements.StatementType
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.migration.jdbc.MigrationUtils
@@ -35,8 +40,10 @@ class DatabaseManagerImpl(
             )
             if (migrationStatements.isNotEmpty()) {
                 logger.info("Database migration required")
-                migrationStatements.forEach {
-                    exec(it)
+                migrationStatements.forEach { statement ->
+                    // Raw ALTER statements are classified as OTHER by Exposed, which makes the
+                    // SQLite JDBC driver use executeUpdate() and fail when it reports a result.
+                    exec(statement, explicitStatementType = StatementType.MULTI)
                 }
                 logger.info("Database migration done")
             }
@@ -106,13 +113,17 @@ class DatabaseManagerImpl(
             AlbumTable,
             UserTable,
             PlaylistTable,
+            CollectionTable,
             MusicArtistTable,
             MusicPlaylistTable,
+            CollectionArtistTable,
+            CollectionAlbumTable,
             PlayedListTable,
             PlayedListUserTable,
             PlayedListMusicTable,
             UserInscriptionCodeTable,
             ListeningStatisticsTable,
+            SoulSearchingSettingsTable,
         )
 
         val MIGRATIONS: List<DatabaseMigration> = listOf()

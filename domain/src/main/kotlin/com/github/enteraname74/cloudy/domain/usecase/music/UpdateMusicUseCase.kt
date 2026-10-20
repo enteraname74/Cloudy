@@ -58,7 +58,12 @@ class UpdateMusicUseCase(
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase(userId)
-                result
+                CloudyResult.Success(
+                    musicRepository.getFromUser(
+                        musicId = result.data.id,
+                        userId = userId,
+                    ) ?: result.data
+                )
             }
         }
     }

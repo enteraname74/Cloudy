@@ -18,6 +18,7 @@ import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.core.isNotNull
+import org.jetbrains.exposed.v1.core.or
 import org.jetbrains.exposed.v1.jdbc.deleteWhere
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.update
@@ -49,7 +50,12 @@ class PlaylistDataSourceImpl(
     override suspend fun getFromCoverPath(coverPath: String): Playlist? =
         workTransaction {
             PlaylistEntity
-                .find { PlaylistTable.coverPath eq coverPath }
+                .find {
+                    (PlaylistTable.coverUrl0 eq coverPath) or
+                        (PlaylistTable.coverUrl1 eq coverPath) or
+                        (PlaylistTable.coverUrl2 eq coverPath) or
+                        (PlaylistTable.coverUrl3 eq coverPath)
+                }
                 .firstOrNull()
                 ?.toPlaylist()
         }
@@ -107,10 +113,22 @@ class PlaylistDataSourceImpl(
 
     override suspend fun getAllCoverNamesOfUser(userId: Uuid): List<String> =
         workTransaction {
+            val coverColumns = listOf(
+                PlaylistTable.coverUrl0,
+                PlaylistTable.coverUrl1,
+                PlaylistTable.coverUrl2,
+                PlaylistTable.coverUrl3,
+            )
             PlaylistTable
-                .select(PlaylistTable.coverPath)
-                .where { (PlaylistTable.userId eq userId) and PlaylistTable.coverPath.isNotNull() }
-                .mapNotNull { it[PlaylistTable.coverPath]?.getCoverName(Playlist.COVER_PATH) }
+                .select(coverColumns)
+                .where {
+                    (PlaylistTable.userId eq userId) and
+                        (PlaylistTable.coverUrl0.isNotNull() or
+                            PlaylistTable.coverUrl1.isNotNull() or
+                            PlaylistTable.coverUrl2.isNotNull() or
+                            PlaylistTable.coverUrl3.isNotNull())
+                }
+                .flatMap { row -> coverColumns.mapNotNull { row[it]?.getCoverName(Playlist.COVER_PATH) } }
                 .distinct()
         }
 

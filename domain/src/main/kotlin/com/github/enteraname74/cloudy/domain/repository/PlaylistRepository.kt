@@ -1,6 +1,7 @@
 package com.github.enteraname74.cloudy.domain.repository
 
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.cover.Cover
 import com.github.enteraname74.cloudy.domain.model.playlist.Playlist
 import com.github.enteraname74.cloudy.domain.model.playlist.PlaylistWithMusics
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
@@ -31,7 +32,8 @@ interface PlaylistRepository {
 
     suspend fun upsert(
         playlist: Playlist,
-        coverData: FileData?,
+        coversData: List<FileData?>,
+        coverMode: Cover.Mode?,
     ): Playlist
 
     suspend fun upsertAll(playlists: List<Playlist>): List<Playlist>

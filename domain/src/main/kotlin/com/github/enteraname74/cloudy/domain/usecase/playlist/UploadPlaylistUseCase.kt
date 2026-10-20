@@ -15,20 +15,20 @@ class UploadPlaylistUseCase(
 ) {
     suspend operator fun invoke(
         playlistUpload: PlaylistUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
     ): CloudyResult<PlaylistWithMusics> {
         val savedPlaylist: Playlist = if (playlistUpload.isFavorite) {
             handleFavorite(
                 playlistUpload = playlistUpload,
                 userId = userId,
-                coverData = coverData,
+                coversData = coversData,
             )
         } else {
             handlePlaylist(
                 playlistUpload = playlistUpload,
                 userId = userId,
-                coverData = coverData,
+                coversData = coversData,
             )
         }
 
@@ -45,7 +45,7 @@ class UploadPlaylistUseCase(
 
     private suspend fun handlePlaylist(
         playlistUpload: PlaylistUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
     ): Playlist {
         val existingPlaylist: Playlist? = playlistUpload.id?.let {
@@ -60,33 +60,37 @@ class UploadPlaylistUseCase(
         return if (existingPlaylist != null) {
             playlistRepository.upsert(
                 playlist = existingPlaylist.merge(playlistUpload),
-                coverData = coverData,
+                coversData = coversData,
+                coverMode = playlistUpload.coverMode,
             )
         } else {
             playlistRepository.upsert(
                 playlist = playlistUpload.toNewPlaylist(userId),
-                coverData = coverData,
+                coversData = coversData,
+                coverMode = playlistUpload.coverMode,
             )
         }
     }
 
     private suspend fun handleFavorite(
         playlistUpload: PlaylistUpload,
-        coverData: FileData?,
+        coversData: List<FileData?>,
         userId: Uuid,
     ): Playlist {
         val favorite: Playlist? = playlistRepository.getFavorite(userId = userId)
         return if (favorite != null) {
             playlistRepository.upsert(
                 playlist = favorite.merge(playlistUpload),
-                coverData = coverData,
+                coversData = coversData,
+                coverMode = playlistUpload.coverMode,
             )
         } else {
             playlistRepository.upsert(
                 playlist = playlistUpload.toNewPlaylist(userId).copy(
                     isFavorite = true,
                 ),
-                coverData = coverData,
+                coversData = coversData,
+                coverMode = playlistUpload.coverMode,
             )
         }
     }

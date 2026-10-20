@@ -4,7 +4,7 @@ import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.routingmessages.RoutingMessages
 import kotlin.uuid.Uuid
 
-object FrRoutingMessages: RoutingMessages {
+object FrRoutingMessages : RoutingMessages {
     override val USERNAME_TAKEN: String = "Ce nom d'utilisateur est déjà pris."
     override val WRONG_INFORMATION: String = "Les informations fournies sont incorrectes."
     override val INVALID_INFORMATION: String = "Les informations fournies ne sont pas valables."
@@ -54,6 +54,11 @@ object FrRoutingMessages: RoutingMessages {
 
     override fun playlistNotPossessedByUser(playlistId: Uuid): String =
         "La playlist ayant l'identifiant : $playlistId, n'est pas possédée par l'utilisateur."
+
+    override val COLLECTIONS_DELETED: String = "Les collections ont été supprimées."
+    override val COLLECTION_NOT_POSSESSED_BY_USER: String = "Cette collection n'est pas possédée par l'utilisateur."
+    override fun collectionNotPossessedByUser(collectionId: Uuid): String =
+        "La collection ayant l'identifiant : $collectionId, n'est pas possédée par l'utilisateur."
 
     override val MISSING_TOKEN_INFORMATION: String = "Il manque des informations dans le token fournis."
     override val NOT_A_REFRESH_TOKEN: String = "Le token fournis n'est pas un token de rafraîchissement."

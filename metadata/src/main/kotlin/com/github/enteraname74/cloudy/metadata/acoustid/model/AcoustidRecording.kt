@@ -20,7 +20,6 @@ internal data class AcoustidRecording(
         return isMatchingWithAlbum && isMatchingWithArtist
     }
 
-
     fun hasUsefulInformation(): Boolean =
         title != null && !artists.isNullOrEmpty() && !releaseGroups.isNullOrEmpty()
 

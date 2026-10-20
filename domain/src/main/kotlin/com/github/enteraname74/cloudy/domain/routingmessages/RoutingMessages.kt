@@ -52,6 +52,10 @@ interface RoutingMessages {
 
     fun playlistNotPossessedByUser(playlistId: Uuid): String
 
+    val COLLECTIONS_DELETED: String
+    val COLLECTION_NOT_POSSESSED_BY_USER: String
+    fun collectionNotPossessedByUser(collectionId: Uuid): String
+
     val MISSING_TOKEN_INFORMATION: String
     val NOT_A_REFRESH_TOKEN: String
 

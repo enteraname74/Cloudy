@@ -12,11 +12,13 @@ internal val repositoryModule = module {
     singleOf(::AlbumRepositoryImpl) bind AlbumRepository::class
     singleOf(::ArtistRepositoryImpl) bind ArtistRepository::class
     singleOf(::PlaylistRepositoryImpl) bind PlaylistRepository::class
+    singleOf(::CollectionRepositoryImpl) bind CollectionRepository::class
     singleOf(::CoverRepositoryImpl) bind CoverRepository::class
     singleOf(::MusicArtistRepositoryImpl) bind MusicArtistRepository::class
     singleOf(::MusicPlaylistRepositoryImpl) bind MusicPlaylistRepository::class
     singleOf(::PlayerRepositoryImpl) bind PlayerRepository::class
     singleOf(::UserInscriptionCodeRepositoryImpl) bind UserInscriptionCodeRepository::class
     singleOf(::SettingsRepositoryImpl) bind SettingsRepository::class
+    singleOf(::SoulSearchingSettingsRepositoryImpl) bind SoulSearchingSettingsRepository::class
     singleOf(::ListeningStatisticsRepositoryImpl) bind ListeningStatisticsRepository::class
 }
