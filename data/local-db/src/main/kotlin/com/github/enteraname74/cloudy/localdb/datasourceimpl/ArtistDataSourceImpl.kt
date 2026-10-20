@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.localdb.datasourceimpl
 
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.util.PaginatedRequest
+import com.github.enteraname74.cloudy.localdb.table.AlbumTable
 import com.github.enteraname74.cloudy.localdb.table.ArtistEntity
 import com.github.enteraname74.cloudy.localdb.table.ArtistTable
 import com.github.enteraname74.cloudy.localdb.table.MusicArtistTable
