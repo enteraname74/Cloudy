@@ -7,8 +7,8 @@ import com.github.enteraname74.cloudy.controller.routing.collection.collectionRo
 import com.github.enteraname74.cloudy.controller.routing.music.musicRouting
 import com.github.enteraname74.cloudy.controller.routing.player.playerRouting
 import com.github.enteraname74.cloudy.controller.routing.playlist.playlistRouting
-import com.github.enteraname74.cloudy.controller.routing.statistics.statisticsRouting
 import com.github.enteraname74.cloudy.controller.routing.soulsearching.soulSearchingRouting
+import com.github.enteraname74.cloudy.controller.routing.statistics.statisticsRouting
 import com.github.enteraname74.cloudy.controller.routing.user.userRoutes
 import io.ktor.http.ContentType
 import io.ktor.openapi.OpenApiInfo
@@ -27,8 +27,10 @@ fun Application.configureRouting() {
     install(DefaultHeaders) {
         header("Cross-Origin-Resource-Policy", "cross-origin")
     }
+    val useSwagger = System.getenv("SWAGGER").orEmpty().toBooleanStrictOrNull() ?: false
+
     routing {
-        if (developmentMode) {
+        if (useSwagger) {
             configureSwagger()
         }
         userRoutes()

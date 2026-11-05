@@ -15,7 +15,6 @@ interface MusicDataSource {
     ): Uuid?
 
     suspend fun upsert(music: Music): Music
-    suspend fun upsertAll(musics: List<Music>)
 
     suspend fun getFile(
         name: String,

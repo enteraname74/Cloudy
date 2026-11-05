@@ -61,9 +61,8 @@ class MusicService(
 
             is UploadProcessState.ContinueProcess -> {
                 uploadMusicUseCase(
-                    musicUploadSpec = uploadProcess.musicUploadSpec,
-                    cover = payload.musicCover,
-                    fingerprint = uploadProcess.fingerprint,
+                    metadata = uploadProcess.metadata,
+                    cover = uploadProcess.cover,
                     userId = userId,
                 )
             }

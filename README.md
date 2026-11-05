@@ -75,3 +75,23 @@ Launch the server with docker compose and ensure that the image is always up to 
 ```
 docker compose build --no-cache --pull ktor && docker compose up
 ```
+
+## Additional resources
+### Send songs to Cloudy without Soul Searching
+Some pre-made scripts are available in case you cannot use Soul Searching to send songs to Cloudy, 
+or if you don't want to use the API directly.
+You will find Python scripts in `scripts` folder. 
+The `cloudy_uploader.py` script lets you upload songs from a selected folder to the cloud. Here are recommends steps to use it, 
+in a terminal (linux):
+```bash
+# Move to a python virtual environment setup
+python3 -m venv .venv
+
+source .venv/bin/activate
+
+# Install the dependencies
+python -m pip install -r requirements.txt
+
+# Launch the uploader. The script will ask you for your cloudy password
+python cloudy_upload.py --server https://your-server --user your-username folder-to-upload
+```

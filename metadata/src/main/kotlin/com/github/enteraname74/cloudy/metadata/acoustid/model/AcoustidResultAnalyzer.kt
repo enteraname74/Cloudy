@@ -1,100 +1,92 @@
 package com.github.enteraname74.cloudy.metadata.acoustid.model
 
+import com.github.enteraname74.cloudy.metadata.acoustid.matching.TextSimilarity
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
 
 internal class AcoustidResultAnalyzer(
     private val requestResult: AcoustidLookupRequestResult,
     private val initialMetadata: MusicMetadata,
 ) {
+    /**
+     * A possible recording to use, with the release group picked for it.
+     * The score is between 0 and 1, whether it was computed with the tags of the file or not.
+     */
+    private data class Candidate(
+        val recording: AcoustidRecording,
+        val release: AcoustidReleaseGroup?,
+        val tagSimilarity: Float?,
+        val score: Float,
+    )
+
+    private val byScore: Comparator<Candidate> =
+        compareBy<Candidate> { it.score }.thenBy { it.recording.sources }
 
     /**
-     * Retrieve the music title from a recording.
-     *
-     * @param recording the recording containing the music title.
-     * @return the title of the music. If nothing was found, returns the title from the initial metadata.
+     * Retrieve the useful recordings of the matches with a sufficient fingerprint score, with their match score.
      */
-    private fun getMusicTitle(recording: AcoustidRecording): String =
-        recording.title ?: initialMetadata.name
+    private fun getUsefulRecordings(): List<Pair<AcoustidRecording, Float>> =
+        requestResult.results
+            .filter { it.score >= MIN_MATCH_SCORE }
+            .flatMap { match -> match.recordings.map { it to match.score } }
+            .filter { (recording, _) -> recording.hasUsefulInformation() }
 
     /**
-     * Retrieve the album name of a recording.
+     * Retrieve the best candidate when comparing the recordings with the tags of the file.
      *
-     * @param recording the recording containing the album name.
-     * @return the name of the album. If nothing was found, returns the album from the initial metadata.
+     * @return the best candidate, or nothing if the file has no useful tags.
      */
-    private fun getAlbumName(recording: AcoustidRecording): String =
-        if (recording.releaseGroups.isNullOrEmpty()) {
-            initialMetadata.album.name
-        } else {
-            recording.releaseGroups.find { album ->
-                album.title == initialMetadata.album.name
-            }?.title ?: recording.releaseGroups.first().title
+    private fun getBestCandidateWithTags(recordings: List<Pair<AcoustidRecording, Float>>): Candidate? =
+        recordings
+            .mapNotNull { (recording, matchScore) ->
+                val tagSimilarity = recording.tagSimilarity(initialMetadata) ?: return@mapNotNull null
+                val release = recording.optimalRelease(initialMetadata)
+                Candidate(
+                    recording = recording,
+                    release = release,
+                    tagSimilarity = tagSimilarity,
+                    score = TAGS_MATCH_WEIGHT * matchScore +
+                        TAGS_WEIGHT * tagSimilarity +
+                        TAGS_RELEASE_WEIGHT * (release?.preference() ?: 0f),
+                )
+            }
+            .maxWithOrNull(byScore)
+
+    /**
+     * Retrieve the best candidate using only the Acoustid data, without looking at the tags of the file.
+     */
+    private fun getBestCandidateFromAcoustid(recordings: List<Pair<AcoustidRecording, Float>>): Candidate? =
+        recordings
+            .map { (recording, matchScore) ->
+                val release = recording.optimalRelease()
+                Candidate(
+                    recording = recording,
+                    release = release,
+                    tagSimilarity = null,
+                    score = ACOUSTID_MATCH_WEIGHT * matchScore +
+                        ACOUSTID_RELEASE_WEIGHT * (release?.preference() ?: 0f),
+                )
+            }
+            .maxWithOrNull(byScore)
+
+    /**
+     * Retrieve the best candidate among all the useful recordings.
+     * - If a recording matches the tags of the file, it is used.
+     * - Otherwise, the tags are missing or make no sense, so we also look for the best recording using only
+     * the Acoustid data and keep the one with the highest score.
+     * - A candidate with a score too low for its pass is ignored, so if none is left, the file metadata is kept.
+     */
+    private fun getOptimalCandidate(): Candidate? {
+        val recordings = getUsefulRecordings()
+
+        val bestWithTags: Candidate? = getBestCandidateWithTags(recordings)
+            ?.takeIf { it.score >= MIN_SCORE_WITH_TAGS }
+        if (bestWithTags?.tagSimilarity != null && bestWithTags.tagSimilarity >= MIN_TAG_SIMILARITY) {
+            return bestWithTags
         }
 
-    /**
-     * Retrieve the artist name of a recording.
-     *
-     * @param recording the recording containing the artist name.
-     * @return the name of the artist. If nothing was found, returns the artist from the initial metadata.
-     */
-    private fun getArtistName(recording: AcoustidRecording): MusicMetadata.Artist =
-        if (recording.artists.isNullOrEmpty()) {
-            initialMetadata.getMainArtistOrUnknown()
-        } else {
-            MusicMetadata.Artist(
-                name = recording.artists.find { artist ->
-                    artist.name == initialMetadata.getMainArtistOrUnknown().name
-                }?.name ?: recording.artists.first().name
-            )
-        }
-
-    /**
-     * Retrieve the optimal match from the request result.
-     * The optimal match is the one with the better score.
-     *
-     * @return the optimal match from the request result. If no matches are found, return nothing.
-     */
-    private fun getOptimalMatch(): AcoustidMatch? {
-        if (requestResult.results.isEmpty()) return null
-
-        val sortedResult = requestResult.results.sortedByDescending { it.score }
-        return sortedResult.first()
-    }
-
-    /**
-     * Tries to fetch an optimal recording matching with the initial metadata given.
-     *
-     * @param match the match to analyze.
-     * @return a recording matching with the initial metadata or nothing.
-     */
-    private fun getOptimalRecordingMatchingMetadata(match: AcoustidMatch): AcoustidRecording? =
-        match.recordings.firstOrNull { recording ->
-            recording.hasUsefulInformation()
-                && recording.doesContainsAlbum()
-                && recording.isMatchingMetadata(musicMetadata = initialMetadata)
-        }
-
-    /**
-     * Retrieve the optimal recording between all the one proposed.
-     * - The optimal recording includes an album.
-     * - The optimal recording matches, if possible, with the given metadata.
-     *
-     * @param match the match containing all recordings.
-     * @return the optimal recording or nothing if there is no recordings.
-     */
-    private fun getOptimalRecording(match: AcoustidMatch): AcoustidRecording? {
-        if (match.recordings.isEmpty()) return null
-
-        // We first try to retrieve a recording matching with the initial metadata of the file.
-        val matchingMetadataRecording: AcoustidRecording? = getOptimalRecordingMatchingMetadata(
-            match = match
-        )
-        if (matchingMetadataRecording != null) return matchingMetadataRecording
-
-        // If nothing was found, we try to find another useful recording.
-        return match.recordings.firstOrNull { recording ->
-            recording.hasUsefulInformation() && recording.doesContainsAlbum()
-        }
+        val bestFromAcoustid: Candidate? = getBestCandidateFromAcoustid(recordings)
+            ?.takeIf { it.score >= MIN_SCORE_FROM_ACOUSTID }
+        return listOfNotNull(bestWithTags, bestFromAcoustid).maxWithOrNull(byScore)
     }
 
     /**
@@ -103,20 +95,61 @@ internal class AcoustidResultAnalyzer(
      * @return the music metadata from a request. If nothing is found, return the initial metadata.
      */
     fun getMusicMetadataFromRequest(): MusicMetadata {
-        val optimalMatch: AcoustidMatch = getOptimalMatch() ?: return initialMetadata
-        val optimalRecording: AcoustidRecording = getOptimalRecording(match = optimalMatch) ?: return initialMetadata
+        val candidate: Candidate = getOptimalCandidate() ?: return initialMetadata
+        val recording = candidate.recording
 
-        // TODO V2 ACOUSTID: Better system for multiple artists.
-        val mainArtist = getArtistName(optimalRecording)
+        // A candidate always has a title, artists and release groups.
+        val allArtists = recording.artists.orEmpty().map { it.toMusicMetadataArtist() }
+        val albumName = candidate.release?.title ?: initialMetadata.album.name
+        // The release group artist handles compilations ("Various Artists").
+        val albumArtist = candidate.release?.artists?.firstOrNull()?.toMusicMetadataArtist()
+            ?: allArtists.first()
+
+        val isSameAlbumAsFile = TextSimilarity.isKnown(initialMetadata.album.name) &&
+            TextSimilarity.similarity(albumName, initialMetadata.album.name) >= SAME_ALBUM_SIMILARITY
+
         return MusicMetadata(
-            name = getMusicTitle(optimalRecording),
+            name = recording.title ?: initialMetadata.name,
             album = MusicMetadata.Album(
-                name = getAlbumName(optimalRecording),
-                artist = mainArtist
+                name = albumName,
+                artist = albumArtist,
+                nbPlayed = 0,
+                isInQuickAccess = false,
             ),
-            artists = listOf(mainArtist),
+            artists = allArtists,
             duration = initialMetadata.duration,
-            albumPosition = null,
+            // The position from the file is only relevant if the album stays the same.
+            albumPosition = initialMetadata.albumPosition.takeIf { isSameAlbumAsFile },
+            nbPlayed = 0,
+            isInQuickAccess = false,
+            releaseGroupId = candidate.release?.id,
+        ).updateNbPlayedAndQuickAccessFromOther(initialMetadata)
+    }
+
+    private fun AcoustidArtist.toMusicMetadataArtist(): MusicMetadata.Artist =
+        MusicMetadata.Artist(
+            name = name,
+            nbPlayed = 0,
+            isInQuickAccess = false,
         )
+
+    private companion object {
+        // Matches below this fingerprint score are too uncertain to be used.
+        const val MIN_MATCH_SCORE = .8f
+
+        // Below this tag similarity, the tags of the file are considered missing or wrong.
+        const val MIN_TAG_SIMILARITY = .5f
+        const val SAME_ALBUM_SIMILARITY = .9f
+
+        // Below these scores, the candidate of a pass is too uncertain to replace the file metadata.
+        const val MIN_SCORE_WITH_TAGS = .6f
+        const val MIN_SCORE_FROM_ACOUSTID = .7f
+
+        const val TAGS_MATCH_WEIGHT = .3f
+        const val TAGS_WEIGHT = .5f
+        const val TAGS_RELEASE_WEIGHT = .2f
+
+        const val ACOUSTID_MATCH_WEIGHT = .6f
+        const val ACOUSTID_RELEASE_WEIGHT = .4f
     }
 }
