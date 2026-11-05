@@ -90,7 +90,7 @@ class MusicRepositoryImpl(
             musicDataSource.renameFile(
                 from = temporarySavedFileId.toString(),
                 userId = userId,
-                to = "${fingerprintData.fingerprint}.${data.extension}"
+                to = "${musicMetadata.fingerprint}.${data.extension}"
             )
         }
 
