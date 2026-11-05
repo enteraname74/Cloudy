@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.repository
 
+import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
@@ -23,7 +24,7 @@ interface MusicRepository {
         userId: Uuid,
         data: FileData,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec?,
+        musicUploadSpec: MusicUploadSpec,
         cover: FileData?,
     ): UploadProcessState
 
@@ -37,7 +38,6 @@ interface MusicRepository {
         cover: FileData?,
     ): CloudyResult<Music>
 
-    suspend fun upsertAll(musics: List<Music>): CloudyResult<Unit>
     suspend fun getFromUser(
         musicId: MusicId,
         userId: Uuid,
@@ -87,8 +87,7 @@ interface MusicRepository {
          * If we should continue the process and create the links of the music to save (artists, album...).
          */
         data class ContinueProcess(
-            val fingerprint: String,
-            val musicUploadSpec: MusicUploadSpec,
+            val metadata: MusicInformationRetriever.Metadata,
             val cover: FileData?,
         ) : UploadProcessState
     }

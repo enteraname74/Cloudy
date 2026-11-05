@@ -12,7 +12,6 @@ import com.github.enteraname74.cloudy.localdb.table.MusicTable
 import com.github.enteraname74.cloudy.localdb.util.paginated
 import com.github.enteraname74.cloudy.localdb.util.updatedAfter
 import com.github.enteraname74.cloudy.localdb.util.workTransaction
-import com.github.enteraname74.cloudy.repository.datasource.CoverDataSource
 import com.github.enteraname74.cloudy.repository.datasource.MusicDataSource
 import com.github.enteraname74.cloudy.repository.datasource.UserDataSource
 import org.jetbrains.exposed.v1.core.JoinType
@@ -35,12 +34,6 @@ class MusicDataSourceImpl(
                 buildScope = { Music.Scope.User }
             )
         }
-
-    override suspend fun upsertAll(musics: List<Music>) {
-        workTransaction {
-            MusicTable.upsertAll(musics)
-        }
-    }
 
     override suspend fun getFromUser(
         musicId: MusicId,

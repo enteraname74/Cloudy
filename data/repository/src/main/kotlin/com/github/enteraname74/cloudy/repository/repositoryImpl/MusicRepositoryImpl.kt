@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.repository.repositoryImpl
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FingerprintData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
@@ -29,7 +30,7 @@ class MusicRepositoryImpl(
         userId: Uuid,
         data: FileData,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec?,
+        musicUploadSpec: MusicUploadSpec,
         cover: FileData?,
     ): UploadProcessState = runCatching {
         // We save the file
@@ -39,7 +40,7 @@ class MusicRepositoryImpl(
         )
 
         if (temporarySavedFileId == null) {
-            logger.error("Temporary saved file for ${musicUploadSpec?.name} couldn't be saved")
+            logger.error("Temporary saved file for ${musicUploadSpec.name} couldn't be saved")
             return UploadProcessState.Error
         }
 
@@ -54,21 +55,18 @@ class MusicRepositoryImpl(
             return@runCatching UploadProcessState.Error
         }
 
-        //        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getInformationAboutMusicFile(
-        //            musicFile = temporarySavedFile,
-        //            customMetadata = customMusicMetadata,
-        //            shouldSearchForMetadata = shouldSearchForMetadata,
-        //        )
-
-        val fingerprint: String? = musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile)
-        if (fingerprint == null) {
+        val fingerprintData: FingerprintData? = musicInformationRetriever.getFingerprint(musicFile = temporarySavedFile)
+        if (fingerprintData == null) {
             logger.error("Fingerprint not found for music file")
             return@runCatching UploadProcessState.Error
         }
 
-        val finalMusicUploadSpec: MusicUploadSpec = musicUploadSpec ?: musicFileMetadataManager
-            .getMetadataOfFile(musicFile = temporarySavedFile)
-            .toMusicUpload()
+        val musicMetadata: MusicInformationRetriever.Metadata = musicInformationRetriever.getMetadataOfFile(
+            musicFile = temporarySavedFile,
+            musicUploadSpec = musicUploadSpec,
+            shouldSearchForMetadata = shouldSearchForMetadata,
+            fingerprintData = fingerprintData,
+        )
 
         /*
         We check if a music with the same fingerprint and user id has already been saved.
@@ -76,7 +74,7 @@ class MusicRepositoryImpl(
          */
         val existingMusic: Music? = getFromUser(
             musicId = MusicId(
-                fingerprint = fingerprint,
+                fingerprint = musicMetadata.fingerprint,
                 userId = userId,
             ),
             userId = userId,
@@ -92,14 +90,14 @@ class MusicRepositoryImpl(
             musicDataSource.renameFile(
                 from = temporarySavedFileId.toString(),
                 userId = userId,
-                to = "$fingerprint.${data.extension}"
+                to = "${fingerprintData.fingerprint}.${data.extension}"
             )
         }
 
         return UploadProcessState.ContinueProcess(
-            fingerprint = fingerprint,
-            musicUploadSpec = finalMusicUploadSpec,
-            cover = cover,
+            metadata = musicMetadata,
+            // A cover uploaded by the user is preferred over a remote one.
+            cover = cover ?: musicMetadata.remoteCover,
         )
     }.getOrElse {
         logger.error(
@@ -138,31 +136,6 @@ class MusicRepositoryImpl(
                 )
             )
         )
-    }
-
-    override suspend fun upsertAll(musics: List<Music>): CloudyResult<Unit> {
-        musics.forEach { music ->
-            val musicFile: File = musicDataSource.getFile(
-                userId = music.userId,
-                name = music.fingerprint,
-            ) ?: return CloudyResult.Error()
-
-            musicFileMetadataManager.setMetadataOfFile(
-                musicFile = musicFile,
-                music = music,
-                cover = null,
-            )
-        }
-
-        musicDataSource.upsertAll(
-            musics.map {
-                it.copy(
-                    lastUpdateAtMillis = DateUtils.now(),
-                )
-            }
-        )
-
-        return CloudyResult.Success(Unit)
     }
 
     override suspend fun getFromUser(

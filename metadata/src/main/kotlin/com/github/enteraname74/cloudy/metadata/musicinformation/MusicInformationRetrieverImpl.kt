@@ -1,12 +1,12 @@
 package com.github.enteraname74.cloudy.metadata.musicinformation
 
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
-import com.github.enteraname74.cloudy.domain.model.CustomMusicMetadata
-import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.model.FileData
+import com.github.enteraname74.cloudy.domain.model.FingerprintData
+import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.metadata.acoustid.AcoustidApiClient
-import com.github.enteraname74.cloudy.metadata.cover.RemoteMusicCoverRetriever
+import com.github.enteraname74.cloudy.metadata.cover.CoverArtArchiveClient
 import com.github.enteraname74.cloudy.metadata.filemetadata.MusicFileMetadataManager
-import com.github.enteraname74.cloudy.metadata.fingerprint.FingerprintData
 import com.github.enteraname74.cloudy.metadata.fingerprint.FingerprintRetriever
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
 import java.io.File
@@ -15,53 +15,43 @@ import java.security.MessageDigest
 class MusicInformationRetrieverImpl : MusicInformationRetriever {
     private val metadataManager = MusicFileMetadataManager()
     private val fingerprintRetriever = FingerprintRetriever()
-    private val remoteMusicCoverRetriever = RemoteMusicCoverRetriever()
+    private val coverArtArchiveClient = CoverArtArchiveClient()
+    private val acoustidClient = AcoustidApiClient()
 
-    override suspend fun getFingerprint(musicFile: File): String? =
+    override suspend fun getFingerprint(musicFile: File): FingerprintData? =
         fingerprintRetriever
             .getFingerprintFromMusic(musicPath = musicFile.path)
-            ?.fingerprint
-            ?.hashed()
 
-    override suspend fun getInformationAboutMusicFile(
+    override suspend fun getMetadataOfFile(
         musicFile: File,
-        customMetadata: CustomMusicMetadata?,
+        musicUploadSpec: MusicUploadSpec,
+        fingerprintData: FingerprintData?,
         shouldSearchForMetadata: Boolean,
     ): MusicInformationRetriever.Metadata {
+        // File metadata keeps some info from the music upload spec if any.
         val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
-
-        val fingerprintData: FingerprintData? = fingerprintRetriever
-            .getFingerprintFromMusic(musicPath = musicFile.path)
+            .updateNbPlayedAndQuickAccessFromOther(MusicMetadata.fromUploadSpec(musicUploadSpec))
 
         // TODO V2: Handle duration missing for OPUS format (JaudioTagger crashing)
         return if (!shouldSearchForMetadata || fingerprintData == null) {
             MusicInformationRetriever.Metadata(
-                name = customMetadata?.name ?: fileMetadata.name,
-                artists = customMetadata?.artists?.takeIf { it.isNotEmpty() } ?: fileMetadata.artists.map { it.name },
-                album = customMetadata?.album ?: fileMetadata.album.name,
+                uploadSpec = musicUploadSpec,
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
-                coverPath = Music.buildLocalCoverPath(),
-                duration = customMetadata?.duration ?: fileMetadata.duration,
             )
         } else {
-            val acoustidClient = AcoustidApiClient()
             val finalMetadata = acoustidClient.getMusicMetadata(
                 fingerprintData = fingerprintData,
-                fileMetadata = fileMetadata
+                fileMetadata = fileMetadata,
             ).replaceBlank()
 
-            val coverPath: String? = remoteMusicCoverRetriever.getCoverURL(
-                musicName = finalMetadata.name,
-                musicArtist = finalMetadata.getMainArtistOrUnknown().name,
-            )
+            val remoteCover: FileData? = finalMetadata.releaseGroupId?.let { releaseGroupId ->
+                coverArtArchiveClient.getReleaseGroupCover(releaseGroupId = releaseGroupId)
+            }
 
             MusicInformationRetriever.Metadata(
-                name = finalMetadata.name,
-                artists = finalMetadata.artists.map { it.name },
-                album = finalMetadata.album.name,
+                uploadSpec = finalMetadata.toMusicUpload(),
                 fingerprint = fingerprintData.fingerprint.hashed(),
-                coverPath = coverPath ?: Music.buildLocalCoverPath(),
-                duration = finalMetadata.duration,
+                remoteCover = remoteCover,
             )
         }
     }

@@ -1,11 +1,11 @@
 package com.github.enteraname74.cloudy.domain.usecase.music
 
+import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.album.Album
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicId
-import com.github.enteraname74.cloudy.domain.model.music.MusicUploadSpec
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
 import com.github.enteraname74.cloudy.domain.usecase.DeleteEmptyAlbumsAndArtistsUseCase
 import com.github.enteraname74.cloudy.domain.usecase.album.UploadAlbumUseCase
@@ -25,11 +25,13 @@ class UploadMusicUseCase(
     private val logger = CloudyLogger(this::class)
 
     suspend operator fun invoke(
-        musicUploadSpec: MusicUploadSpec,
+        metadata: MusicInformationRetriever.Metadata,
         cover: FileData?,
-        fingerprint: String,
         userId: Uuid,
     ): CloudyResult<Music> {
+        val musicUploadSpec = metadata.uploadSpec
+        val fingerprint = metadata.fingerprint
+
         val artistOfMusic: List<Artist> = musicUploadSpec.artists.map { artistUpload ->
             uploadArtistUseCase(
                 artistUpload = artistUpload,
