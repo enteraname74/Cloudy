@@ -50,6 +50,25 @@ http:
           - url: "http://ktor:8080"
 ```
 
+### Import folder
+Cloudy can watch a folder and import every song put in it, without going through the API
+(useful for drag and drop, or for another service downloading songs directly to the server).
+
+Set the `IMPORT_FOLDER_PATH` env variable to enable it. With the docker setup, use `/cloudy_import`:
+it is mounted from the `import` folder next to your `compose.yaml` file.
+
+- Put songs in `import/<username>/`. A folder is created when a user is created (and at startup for existing users).
+- Folders matching no user are deleted with their content, and the folder of a user is deleted when the user is deleted.
+- Songs are processed like an upload (fingerprint, artists, album...), using the metadata of the file.
+- Every processed file is removed from the import folder, **including files that can't be imported** (unsupported file, storage full...): check the server logs to know why a file was not imported.
+- A song is only imported once it hasn't changed for a few seconds, so files still being downloaded are left alone. Files ending with `.part`, `.tmp`, `.crdownload`... and hidden files are ignored.
+
+> **Permissions (docker)**: the server runs as the `cloudy` user of the container, which is not your user on the host.
+> - Create the `import` folder yourself and make it writable by everyone, before starting the server:
+>   `mkdir -p import && chmod 777 import`. Otherwise, docker creates it as `root` and the server can't use it.
+> - User folders created by the server are writable by everyone, so that you (or another service) can put songs in them.
+> - Songs must be readable by everyone (the default for most tools). Unreadable songs are kept and logged until their permissions are fixed.
+
 ## Development mode
 ### Launch locally without docker
 You can launch the app locally using a premade bash script. Be sure to make the bash script executable on your device:

@@ -19,12 +19,13 @@ interface MusicRepository {
      * @param userId the id of user that possess the music
      * @param data the file data of the music
      * @param shouldSearchForMetadata if the system should search music metadata from remote sources
+     * @param musicUploadSpec information given by the client. If null, it is read from the music file.
      */
     suspend fun startUploadProcess(
         userId: Uuid,
         data: FileData,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec,
+        musicUploadSpec: MusicUploadSpec?,
         cover: FileData?,
     ): UploadProcessState
 

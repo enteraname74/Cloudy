@@ -4,8 +4,8 @@ RUN apk add --no-cache chromaprint
 
 RUN addgroup -S cloudy && adduser -S cloudy -G cloudy
 
-RUN mkdir -p /cloudy_data \
- && chown -R cloudy:cloudy /cloudy_data
+RUN mkdir -p /cloudy_data /cloudy_import \
+ && chown -R cloudy:cloudy /cloudy_data /cloudy_import
 
 WORKDIR /app
 

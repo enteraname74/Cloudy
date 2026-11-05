@@ -30,7 +30,7 @@ class MusicRepositoryImpl(
         userId: Uuid,
         data: FileData,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec,
+        musicUploadSpec: MusicUploadSpec?,
         cover: FileData?,
     ): UploadProcessState = runCatching {
         // We save the file
@@ -40,7 +40,7 @@ class MusicRepositoryImpl(
         )
 
         if (temporarySavedFileId == null) {
-            logger.error("Temporary saved file for ${musicUploadSpec.name} couldn't be saved")
+            logger.error("Temporary saved file for ${musicUploadSpec?.name ?: "music without upload spec"} couldn't be saved")
             return UploadProcessState.Error
         }
 

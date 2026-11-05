@@ -24,18 +24,21 @@ class MusicInformationRetrieverImpl : MusicInformationRetriever {
 
     override suspend fun getMetadataOfFile(
         musicFile: File,
-        musicUploadSpec: MusicUploadSpec,
+        musicUploadSpec: MusicUploadSpec?,
         fingerprintData: FingerprintData?,
         shouldSearchForMetadata: Boolean,
     ): MusicInformationRetriever.Metadata {
         // File metadata keeps some info from the music upload spec if any.
-        val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile)
-            .updateNbPlayedAndQuickAccessFromOther(MusicMetadata.fromUploadSpec(musicUploadSpec))
+        val fileMetadata: MusicMetadata = metadataManager.getMetadataOfFile(musicFile = musicFile).let { metadata ->
+            musicUploadSpec?.let { spec ->
+                metadata.updateNbPlayedAndQuickAccessFromOther(MusicMetadata.fromUploadSpec(spec))
+            } ?: metadata
+        }
 
         // TODO V2: Handle duration missing for OPUS format (JaudioTagger crashing)
         return if (!shouldSearchForMetadata || fingerprintData == null) {
             MusicInformationRetriever.Metadata(
-                uploadSpec = musicUploadSpec,
+                uploadSpec = musicUploadSpec ?: fileMetadata.toMusicUpload(),
                 fingerprint = fingerprintData?.fingerprint?.hashed() ?: fileMetadata.name,
             )
         } else {
