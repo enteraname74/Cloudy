@@ -54,6 +54,11 @@ interface MusicRepository {
 
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(fingerprint: String, userId: Uuid): File?
+
+    /**
+     * Deletes only the file of a music, without touching the db.
+     */
+    suspend fun deleteMusicFile(fingerprint: String, userId: Uuid)
     suspend fun getAll(ids: List<MusicId>): List<Music>
 
     /**

@@ -174,6 +174,13 @@ class MusicRepositoryImpl(
             userId = userId,
         )
 
+    override suspend fun deleteMusicFile(fingerprint: String, userId: Uuid) {
+        musicDataSource.deleteFile(
+            name = fingerprint,
+            userId = userId,
+        )
+    }
+
     override suspend fun getAll(ids: List<MusicId>): List<Music> =
         musicDataSource.getAll(ids)
 

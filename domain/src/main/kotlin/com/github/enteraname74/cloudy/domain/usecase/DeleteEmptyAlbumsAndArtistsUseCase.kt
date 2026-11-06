@@ -11,8 +11,9 @@ class DeleteEmptyAlbumsAndArtistsUseCase(
     private val coverRepository: CoverRepository,
 ) {
     suspend operator fun invoke(userId: Uuid) {
-        artistRepository.deleteAllEmpty()
+        // Albums first: an artist is only empty if it has no music and no album.
         albumRepository.deleteAllEmpty()
+        artistRepository.deleteAllEmpty()
         coverRepository.deletedUnusedCovers(userId)
     }
 }

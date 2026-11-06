@@ -81,16 +81,29 @@ class UploadMusicUseCase(
                 setArtistsOfMusicUseCase(
                     musicId = music.id,
                     artistIds = artistOfMusic.map { it.id },
+                    albumArtistId = albumOfMusic.artist.id,
                     userId = userId,
                 )
                 // Clean up after saving updated data
                 deleteEmptyAlbumsAndArtistsUseCase(userId)
-                CloudyResult.Success(
-                    musicRepository.getFromUser(
-                        musicId = music.id,
-                        userId = userId,
-                    ) ?: music
+
+                val savedMusic: Music? = musicRepository.getFromUser(
+                    musicId = music.id,
+                    userId = userId,
                 )
+                if (savedMusic == null) {
+                    // Should not happen: the music was deleted during its upload. We don't keep a file without a db entry.
+                    logger.warn(
+                        "Music ${music.name} (${music.id}) cannot be found after being saved, deleting its file"
+                    )
+                    musicRepository.deleteMusicFile(
+                        fingerprint = music.fingerprint,
+                        userId = userId,
+                    )
+                    CloudyResult.Error()
+                } else {
+                    CloudyResult.Success(savedMusic)
+                }
             }
         }
     }

@@ -12,8 +12,13 @@ import java.io.File
  * so user folders created in it are shared with that group too.
  *
  * @param root the root of the import folder, or null if the feature is disabled.
+ * @param shouldSearchMetadata if metadata of imported files should be searched on remote sources (Acoustid),
+ * instead of only using the metadata of the files.
  */
-class ImportFolder(val root: File?) {
+class ImportFolder(
+    val root: File?,
+    val shouldSearchMetadata: Boolean = false,
+) {
     private val logger = CloudyLogger(this::class)
 
     /**
@@ -65,6 +70,9 @@ class ImportFolder(val root: File?) {
                 root = System.getenv("IMPORT_FOLDER_PATH")
                     ?.takeIf { it.isNotBlank() }
                     ?.let { File(it) },
+                shouldSearchMetadata = System.getenv("IMPORT_FOLDER_SEARCH_METADATA")
+                    ?.toBooleanStrictOrNull()
+                    ?: false,
             )
 
         /**

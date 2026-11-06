@@ -61,6 +61,7 @@ Without docker, set `IMPORT_FOLDER_PATH` to an absolute path to enable it.
 - Put songs in `import/<username>/`. A folder is created when a user is created (and at startup for existing users).
 - Folders matching no user are deleted with their content, and the folder of a user is deleted when the user is deleted.
 - Songs are processed like an upload (fingerprint, artists, album...), using the metadata of the file.
+  Set `IMPORT_FOLDER_SEARCH_METADATA=true` to search their metadata (and cover) on remote sources instead (requires `ACOUSTID_API_KEY`).
 - Every processed file is removed from the import folder, **including files that can't be imported** (unsupported file, storage full...): check the server logs to know why a file was not imported.
 - A song is only imported once it hasn't changed for a few seconds, so files still being downloaded are left alone. Files ending with `.part`, `.tmp`, `.crdownload`... and hidden files are ignored.
 

@@ -86,6 +86,7 @@ services:
       DEV_MODE: ${DEV_MODE}
       # Enabled by default, set IMPORT_FOLDER_PATH to an empty value in .env to disable it.
       IMPORT_FOLDER_PATH: ${IMPORT_FOLDER_PATH-/cloudy_import}
+      IMPORT_FOLDER_SEARCH_METADATA: ${IMPORT_FOLDER_SEARCH_METADATA:-false}
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
       ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
       CLOUDY_LOG_LEVEL: ${CLOUDY_LOG_LEVEL}

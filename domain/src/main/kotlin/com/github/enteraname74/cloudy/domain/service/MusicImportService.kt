@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.domain.service
 
+import com.github.enteraname74.cloudy.domain.filepersistence.ImportFolder
 import com.github.enteraname74.cloudy.domain.model.FileData
 import com.github.enteraname74.cloudy.domain.model.music.Music
 import com.github.enteraname74.cloudy.domain.model.music.MusicUploadPayload
@@ -13,12 +14,13 @@ import java.io.File
  * Imports music files that were put directly on the server (in the import folder of a user),
  * instead of being uploaded through the API.
  *
- * It uses the same process as an upload, without a client spec (metadata are read from the file)
- * and without searching for remote metadata.
+ * It uses the same process as an upload, without a client spec (metadata are read from the file).
+ * Remote metadata are searched only if enabled for the import folder (see [ImportFolder.shouldSearchMetadata]).
  */
 class MusicImportService(
     private val musicService: MusicService,
     private val userService: UserService,
+    private val importFolder: ImportFolder,
 ) {
     private val logger = CloudyLogger(this::class)
 
@@ -56,7 +58,7 @@ class MusicImportService(
                 musicCover = null,
                 spec = null,
             ),
-            shouldSearchForMetadata = false,
+            shouldSearchForMetadata = importFolder.shouldSearchMetadata,
         )
 
         return when (result) {

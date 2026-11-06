@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.domain.service
 
 import com.github.enteraname74.cloudy.domain.model.artist.Artist
 import com.github.enteraname74.cloudy.domain.model.music.Music
+import com.github.enteraname74.cloudy.domain.repository.AlbumRepository
 import com.github.enteraname74.cloudy.domain.repository.ArtistRepository
 import com.github.enteraname74.cloudy.domain.repository.CoverRepository
 import com.github.enteraname74.cloudy.domain.repository.MusicRepository
@@ -10,6 +11,7 @@ import kotlin.uuid.Uuid
 
 class ArtistService(
     private val artistRepository: ArtistRepository,
+    private val albumRepository: AlbumRepository,
     private val musicRepository: MusicRepository,
     private val coverRepository: CoverRepository,
 ) {
@@ -57,7 +59,9 @@ class ArtistService(
         )
         artistRepository.deleteAll(artistIds = artistIds)
 
-        // We check if we can delete the related artists (other artists of songs).
+        // We check if we can delete the related albums and artists (other artists of songs).
+        // Albums first: an artist is only empty if it has no music and no album.
+        albumRepository.deleteAllEmpty()
         artistRepository.deleteAllEmpty()
         coverRepository.deletedUnusedCovers(userId)
     }
