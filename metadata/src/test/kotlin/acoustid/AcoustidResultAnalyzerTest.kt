@@ -1,13 +1,16 @@
 package acoustid
 
 import com.github.enteraname74.cloudy.metadata.acoustid.matching.TextSimilarity
+import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidArtist
 import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidLookupRequestResult
 import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidResultAnalyzer
+import com.github.enteraname74.cloudy.metadata.acoustid.model.distinctArtists
 import com.github.enteraname74.cloudy.metadata.acoustid.model.AcoustidReleaseGroup
 import com.github.enteraname74.cloudy.metadata.model.MusicMetadata
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -194,5 +197,69 @@ class AcoustidResultAnalyzerTest {
         assertEquals(1f, TextSimilarity.similarity("Album (Deluxe Edition)", "album"))
         assertEquals(1f, TextSimilarity.similarity("Song feat. Someone", "Song"))
         assertEquals(0f, TextSimilarity.similarity("", ""))
+    }
+
+    @Test
+    fun `album artist credited differently with the same id uses the song artist name`() {
+        val initial = metadata()
+        val response = """{"status":"ok","results":[{"id":"a","score":0.95,"recordings":[
+            {"title":"girl’s in love with me","artists":[{"id":"2e2ab6e6","name":"芳野藤丸"}],"releasegroups":[
+                {"title":"Yoshino Fujimal","type":"Album","artists":[{"id":"2e2ab6e6","name":"Yoshino Fujimal"}]}
+            ]}
+        ]}]}"""
+        val result = analyze(response, initial)
+        assertEquals(listOf("芳野藤丸"), result.artists.map { it.name })
+        assertEquals("芳野藤丸", result.album.artist.name)
+    }
+
+    @Test
+    fun `album artist with another id is kept`() {
+        val initial = metadata()
+        val response = """{"status":"ok","results":[{"id":"a","score":0.95,"recordings":[
+            {"title":"Song","artists":[{"id":"artist","name":"Artist"}],"releasegroups":[
+                {"title":"Best Of","type":"Album","artists":[{"id":"various","name":"Various Artists"}]}
+            ]}
+        ]}]}"""
+        val result = analyze(response, initial)
+        assertEquals(listOf("Artist"), result.artists.map { it.name })
+        assertEquals("Various Artists", result.album.artist.name)
+    }
+
+    @Test
+    fun `album artist without id matching a song artist name uses the song artist name`() {
+        val initial = metadata()
+        val response = """{"status":"ok","results":[{"id":"a","score":0.95,"recordings":[
+            {"title":"Song","artists":[{"id":"artist","name":"Beyoncé"}],"releasegroups":[
+                {"title":"Album","type":"Album","artists":[{"name":"BEYONCE"}]}
+            ]}
+        ]}]}"""
+        val result = analyze(response, initial)
+        assertEquals("Beyoncé", result.album.artist.name)
+    }
+
+    @Test
+    fun `song artists credited twice are kept once`() {
+        val initial = metadata()
+        val response = """{"status":"ok","results":[{"id":"a","score":0.95,"recordings":[
+            {"title":"Song","artists":[{"id":"a1","name":"芳野藤丸"},{"id":"a1","name":"Yoshino Fujimal"},{"id":"a2","name":"Other"}],"releasegroups":[
+                {"title":"Album","type":"Album"}
+            ]}
+        ]}]}"""
+        val result = analyze(response, initial)
+        assertEquals(listOf("芳野藤丸", "Other"), result.artists.map { it.name })
+        assertEquals("芳野藤丸", result.album.artist.name)
+    }
+
+    @Test
+    fun `artists with the same name but different ids are different artists`() {
+        val first = AcoustidArtist(id = "a1", name = "Nirvana")
+        val second = AcoustidArtist(id = "a2", name = "Nirvana")
+        assertFalse(first.isSameArtistAs(second))
+        assertEquals(listOf(first, second), listOf(first, second).distinctArtists())
+    }
+
+    @Test
+    fun `artists without comparable names are never the same`() {
+        assertFalse(AcoustidArtist(name = "!!!").isSameArtistAs(AcoustidArtist(name = "???")))
     }
 }

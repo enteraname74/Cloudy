@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.domain.auth.HashedPassword
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.ext.roundToTwoDecimals
 import com.github.enteraname74.cloudy.domain.ext.toGb
+import com.github.enteraname74.cloudy.domain.filepersistence.ImportFolder
 import com.github.enteraname74.cloudy.domain.model.user.User
 import com.github.enteraname74.cloudy.domain.model.user.UserInscriptionCode
 import com.github.enteraname74.cloudy.domain.model.user.UserStorage
@@ -22,6 +23,7 @@ class UserService(
     private val hashedPasswordManager: HashedPasswordManager,
     private val playerRepository: PlayerRepository,
     private val deleteUserDataUseCase: DeleteUserDataUseCase,
+    private val importFolder: ImportFolder,
 ) {
     suspend fun getUserFromUsername(username: String): User? =
         userRepository.getFromUsername(username = username)
@@ -46,6 +48,7 @@ class UserService(
         )
 
         val savedUser: User = userRepository.upsert(user = user)
+        importFolder.createUserFolder(username = savedUser.username)
 
         return CloudyResult.Success(data = savedUser)
     }
@@ -72,7 +75,11 @@ class UserService(
             user = user,
             inscriptionCode = inscriptionCode,
             routingMessages = routingMessages,
-        )
+        ).also { result ->
+            if (result is CloudyResult.Success) {
+                importFolder.createUserFolder(username = result.data.username)
+            }
+        }
     }
 
     suspend fun logUser(username: String, password: String): CloudyResult<User> {
@@ -95,7 +102,9 @@ class UserService(
     }
 
     suspend fun deleteUser(userId: Uuid) {
+        val user: User? = userRepository.getFromId(userId = userId)
         userRepository.delete(id = userId)
+        user?.let { importFolder.deleteUserFolder(username = it.username) }
         // TODO V2: broadcast deleted played lists or updated played lists because of user deletion
         playerRepository.deleteAllIfEmpty()
     }

@@ -6,6 +6,7 @@ import com.github.enteraname74.cloudy.domain.service.CoverService
 import com.github.enteraname74.cloudy.domain.service.CollectionService
 import com.github.enteraname74.cloudy.domain.service.ListeningStatisticsService
 import com.github.enteraname74.cloudy.domain.service.MusicArtistService
+import com.github.enteraname74.cloudy.domain.service.MusicImportService
 import com.github.enteraname74.cloudy.domain.service.MusicPlaylistService
 import com.github.enteraname74.cloudy.domain.service.MusicService
 import com.github.enteraname74.cloudy.domain.service.PlayerService
@@ -17,6 +18,7 @@ import org.koin.dsl.module
 
 internal val serviceModule = module {
     singleOf(::MusicService)
+    singleOf(::MusicImportService)
     singleOf(::ArtistService)
     singleOf(::AlbumService)
     singleOf(::PlaylistService)

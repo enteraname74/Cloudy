@@ -4,6 +4,7 @@ import com.github.enteraname74.cloudy.config.plugin.configureAuthentication
 import com.github.enteraname74.cloudy.config.plugin.configureDI
 import com.github.enteraname74.cloudy.config.plugin.configureDatabase
 import com.github.enteraname74.cloudy.config.plugin.configureHTTP
+import com.github.enteraname74.cloudy.config.plugin.configureImportFolder
 import com.github.enteraname74.cloudy.config.plugin.configureSerialization
 import com.github.enteraname74.cloudy.config.plugin.configureSockets
 import com.github.enteraname74.cloudy.config.plugin.manageBackendMigration
@@ -22,6 +23,7 @@ suspend fun Application.configureApplication() {
     configureHTTP()
     configureSockets()
     upsertAdmin()
+    configureImportFolder()
 }
 
 suspend fun Application.upsertAdmin() {

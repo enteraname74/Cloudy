@@ -13,10 +13,11 @@ interface MusicInformationRetriever {
     /**
      * Retrieves information about a music file.
      * If [shouldSearchForMetadata] is true, the primary source of information will be a remote service (Acoustid).
+     * Otherwise, [musicUploadSpec] is used, or the metadata of the file itself if it is null.
      */
     suspend fun getMetadataOfFile(
         musicFile: File,
-        musicUploadSpec: MusicUploadSpec,
+        musicUploadSpec: MusicUploadSpec?,
         fingerprintData: FingerprintData?,
         shouldSearchForMetadata: Boolean,
     ): Metadata

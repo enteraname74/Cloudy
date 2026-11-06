@@ -99,10 +99,15 @@ internal class AcoustidResultAnalyzer(
         val recording = candidate.recording
 
         // A candidate always has a title, artists and release groups.
-        val allArtists = recording.artists.orEmpty().map { it.toMusicMetadataArtist() }
+        val songArtists: List<AcoustidArtist> = recording.artists.orEmpty().distinctArtists()
+        val allArtists = songArtists.map { it.toMusicMetadataArtist() }
         val albumName = candidate.release?.title ?: initialMetadata.album.name
         // The release group artist handles compilations ("Various Artists").
-        val albumArtist = candidate.release?.artists?.firstOrNull()?.toMusicMetadataArtist()
+        // If it is one of the song artists credited differently (ex: "ARTISTE UN" and "ARTIST ONE"),
+        // the song artist is used, to avoid having two artists for the same person.
+        val albumArtist = candidate.release?.artists?.firstOrNull()
+            ?.let { releaseArtist -> songArtists.firstOrNull { it.isSameArtistAs(releaseArtist) } ?: releaseArtist }
+            ?.toMusicMetadataArtist()
             ?: allArtists.first()
 
         val isSameAlbumAsFile = TextSimilarity.isKnown(initialMetadata.album.name) &&

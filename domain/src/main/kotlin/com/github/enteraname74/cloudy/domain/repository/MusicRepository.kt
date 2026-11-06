@@ -19,12 +19,13 @@ interface MusicRepository {
      * @param userId the id of user that possess the music
      * @param data the file data of the music
      * @param shouldSearchForMetadata if the system should search music metadata from remote sources
+     * @param musicUploadSpec information given by the client. If null, it is read from the music file.
      */
     suspend fun startUploadProcess(
         userId: Uuid,
         data: FileData,
         shouldSearchForMetadata: Boolean,
-        musicUploadSpec: MusicUploadSpec,
+        musicUploadSpec: MusicUploadSpec?,
         cover: FileData?,
     ): UploadProcessState
 
@@ -53,6 +54,11 @@ interface MusicRepository {
 
     suspend fun getFromCoverPath(coverPath: String): Music?
     suspend fun getMusicFile(fingerprint: String, userId: Uuid): File?
+
+    /**
+     * Deletes only the file of a music, without touching the db.
+     */
+    suspend fun deleteMusicFile(fingerprint: String, userId: Uuid)
     suspend fun getAll(ids: List<MusicId>): List<Music>
 
     /**
