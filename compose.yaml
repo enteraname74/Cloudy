@@ -37,6 +37,32 @@ services:
     networks:
       - backend
 
+  # Prepares the import folder, then exits before the server starts.
+  # It is the only part running as root, with only the rights to change ownership and permissions.
+  import-init:
+    image: busybox:1.36.1
+    user: "0:0"
+    # The import folder (and the user folders in it) belongs to the host user (PUID),
+    # and is shared with its group (PGID). The setgid bit (2775) makes every file and folder created in it
+    # belong to that group, so that the server (member of the group) can read and delete them.
+    command: >
+      sh -c 'chown ${PUID:-1000}:${PGID:-1000} /cloudy_import
+      && chmod 2775 /cloudy_import
+      && find /cloudy_import -mindepth 1 -maxdepth 1 -type d
+      -exec chown ${PUID:-1000}:${PGID:-1000} {} +
+      -exec chmod 2775 {} +'
+    volumes:
+      - ./import:/cloudy_import:z
+    network_mode: none
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - FOWNER
+
   ktor:
     build:
       context: .
@@ -46,6 +72,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      import-init:
+        condition: service_completed_successfully
     environment:
       ACOUSTID_API_KEY: ${ACOUSTID_API_KEY}
       AUTH_SECRET: ${AUTH_SECRET}
@@ -56,7 +84,8 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       DEV_MODE: ${DEV_MODE}
-      IMPORT_FOLDER_PATH: ${IMPORT_FOLDER_PATH}
+      # Enabled by default, set IMPORT_FOLDER_PATH to an empty value in .env to disable it.
+      IMPORT_FOLDER_PATH: ${IMPORT_FOLDER_PATH-/cloudy_import}
       TOTAL_SPACE_PER_FOLDER: ${TOTAL_SPACE_PER_FOLDER}
       ROOT_LOG_LEVEL: ${ROOT_LOG_LEVEL}
       CLOUDY_LOG_LEVEL: ${CLOUDY_LOG_LEVEL}
@@ -69,6 +98,10 @@ services:
       - cloudy_data:/cloudy_data:z
       # Import folder, see IMPORT_FOLDER_PATH
       - ./import:/cloudy_import:z
+    # The server keeps running as the cloudy user, but joins the group of the host user
+    # to read the files put in the import folder.
+    group_add:
+      - "${PGID:-1000}"
     networks:
       - proxy
       - backend

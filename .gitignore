@@ -40,6 +40,7 @@ cloudyDB.db
 
 *.db
 .env
+.DS_Store
 cloudy_data
 postgres_docker_data
 

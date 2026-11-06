@@ -54,8 +54,9 @@ http:
 Cloudy can watch a folder and import every song put in it, without going through the API
 (useful for drag and drop, or for another service downloading songs directly to the server).
 
-Set the `IMPORT_FOLDER_PATH` env variable to enable it. With the docker setup, use `/cloudy_import`:
-it is mounted from the `import` folder next to your `compose.yaml` file.
+With the docker setup, it is enabled by default: the watched folder is the `import` folder next to your `compose.yaml` file,
+created at the first start. Set `IMPORT_FOLDER_PATH=` (empty) in your `.env` file to disable it.
+Without docker, set `IMPORT_FOLDER_PATH` to an absolute path to enable it.
 
 - Put songs in `import/<username>/`. A folder is created when a user is created (and at startup for existing users).
 - Folders matching no user are deleted with their content, and the folder of a user is deleted when the user is deleted.
@@ -63,11 +64,14 @@ it is mounted from the `import` folder next to your `compose.yaml` file.
 - Every processed file is removed from the import folder, **including files that can't be imported** (unsupported file, storage full...): check the server logs to know why a file was not imported.
 - A song is only imported once it hasn't changed for a few seconds, so files still being downloaded are left alone. Files ending with `.part`, `.tmp`, `.crdownload`... and hidden files are ignored.
 
-> **Permissions (docker)**: the server runs as the `cloudy` user of the container, which is not your user on the host.
-> - Create the `import` folder yourself and make it writable by everyone, before starting the server:
->   `mkdir -p import && chmod 777 import`. Otherwise, docker creates it as `root` and the server can't use it.
-> - User folders created by the server are writable by everyone, so that you (or another service) can put songs in them.
-> - Songs must be readable by everyone (the default for most tools). Unreadable songs are kept and logged until their permissions are fixed.
+> **Permissions (docker)**: nothing to do if your user on the host is the first one (`id` shows `uid=1000` and `gid=1000`).
+> Otherwise, set `PUID` and `PGID` in your `.env` file to the values shown by `id`.
+>
+> The server still runs as the unprivileged `cloudy` user of the container. At each start, a short-lived container
+> (the only one running as root, without network and only allowed to change ownership) gives the `import` folder to your user,
+> shared with your group. The server is a member of this group: it can read and remove the songs you put in it.
+> - Songs must be readable by their group (the default for most tools). Unreadable songs are kept and logged until their permissions are fixed.
+> - If another service (in another container) puts songs in the import folder, run it with the same group (`PGID`).
 
 ## Development mode
 ### Launch locally without docker

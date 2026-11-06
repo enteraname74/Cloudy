@@ -13,4 +13,5 @@ ARG JAR_FILE=./controller/build/libs/*.jar
 COPY --chown=cloudy:cloudy ${JAR_FILE} application.jar
 
 USER cloudy
-ENTRYPOINT ["java", "-jar", "application.jar"]
+# Files and folders created by the server are writable by their group (needed to share the import folder).
+ENTRYPOINT ["sh", "-c", "umask 0002 && exec java -jar application.jar"]
