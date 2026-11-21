@@ -1,5 +1,6 @@
 package com.github.enteraname74.cloudy.metadata.fingerprint
 
+import com.github.enteraname74.cloudy.domain.model.FingerprintData
 import com.github.enteraname74.cloudy.logging.CloudyLogger
 import java.io.BufferedReader
 import java.io.InputStreamReader

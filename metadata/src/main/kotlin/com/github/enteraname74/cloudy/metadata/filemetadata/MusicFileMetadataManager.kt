@@ -31,9 +31,21 @@ class MusicFileMetadataManager {
 
             val artists: List<MusicMetadata.Artist> = buildList {
                 if (albumArtist != null && albumArtist != artist) {
-                    add(MusicMetadata.Artist(name = albumArtist))
+                    add(
+                        MusicMetadata.Artist(
+                            name = albumArtist,
+                            nbPlayed = 0,
+                            isInQuickAccess = false,
+                        )
+                    )
                 }
-                add(MusicMetadata.Artist(name = artist))
+                add(
+                    MusicMetadata.Artist(
+                        name = artist,
+                        nbPlayed = 0,
+                        isInQuickAccess = false,
+                    )
+                )
             }
 
             MusicMetadata(
@@ -42,9 +54,13 @@ class MusicFileMetadataManager {
                 album = MusicMetadata.Album(
                     name = tag.getFirst(FieldKey.ALBUM),
                     artist = artists.firstOrNull() ?: MusicMetadata.unknownArtist(),
+                    nbPlayed = 0,
+                    isInQuickAccess = false,
                 ),
                 duration = (audioFile.audioHeader.trackLength * 1_000).toLong(),
                 albumPosition = tag.getFirst(FieldKey.TRACK)?.toIntOrNull(),
+                nbPlayed = 0,
+                isInQuickAccess = false,
             ).replaceBlank()
         } catch (e: Exception) {
             logger.error("Failed to retrieve metadata of file ${musicFile.name} with error ${e.message}")

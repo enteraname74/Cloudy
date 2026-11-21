@@ -2,6 +2,7 @@ package com.github.enteraname74.cloudy.config.di
 
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManager
 import com.github.enteraname74.cloudy.domain.auth.HashedPasswordManagerImpl
+import com.github.enteraname74.cloudy.domain.filepersistence.ImportFolder
 import com.github.enteraname74.cloudy.domain.filepersistence.MusicInformationRetriever
 import com.github.enteraname74.cloudy.domain.migration.BackendMigrationManager
 import com.github.enteraname74.cloudy.domain.websocket.PlayerUserCommunication
@@ -19,4 +20,6 @@ internal val otherModule = module {
     singleOf(::PlayerUserCommunication)
 
     singleOf(::BackendMigrationManager)
+
+    single { ImportFolder.fromEnvironment() }
 }

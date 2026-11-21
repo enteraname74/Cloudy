@@ -54,6 +54,7 @@ class UpdateMusicUseCase(
                 setArtistsOfMusicUseCase(
                     musicId = result.data.id,
                     artistIds = artistOfMusic.map { it.id },
+                    albumArtistId = albumOfMusic.artist.id,
                     userId = userId,
                 )
                 // Clean up after saving updated data

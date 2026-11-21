@@ -7,7 +7,7 @@ Cloud server for the multiplatform music player application [***Soul Searching**
 - support for multiple users (optimized for a group of friends, a family) with inscription codes
 - shared played list between multiple users (like Spotify)
 
-> Check the matching Cloudy releases with [Soul Searching](https://github.com/enteraname74/SoulSearching) ones in the [compatibilities](compatibilities.md) file in this repository
+> Check the matching Cloudy releases with [Soul Searching](https://github.com/enteraname74/SoulSearching) ones in the [releases notes](releases_notes.md) file in this repository
 
 ## Set up the server
 
@@ -50,6 +50,30 @@ http:
           - url: "http://ktor:8080"
 ```
 
+### Import folder
+Cloudy can watch a folder and import every song put in it, without going through the API
+(useful for drag and drop, or for another service downloading songs directly to the server).
+
+With the docker setup, it is enabled by default: the watched folder is the `import` folder next to your `compose.yaml` file,
+created at the first start. Set `IMPORT_FOLDER_PATH=` (empty) in your `.env` file to disable it.
+Without docker, set `IMPORT_FOLDER_PATH` to an absolute path to enable it.
+
+- Put songs in `import/<username>/`. A folder is created when a user is created (and at startup for existing users).
+- Folders matching no user are deleted with their content, and the folder of a user is deleted when the user is deleted.
+- Songs are processed like an upload (fingerprint, artists, album...), using the metadata of the file.
+  Set `IMPORT_FOLDER_SEARCH_METADATA=true` to search their metadata (and cover) on remote sources instead (requires `ACOUSTID_API_KEY`).
+- Every processed file is removed from the import folder, **including files that can't be imported** (unsupported file, storage full...): check the server logs to know why a file was not imported.
+- A song is only imported once it hasn't changed for a few seconds, so files still being downloaded are left alone. Files ending with `.part`, `.tmp`, `.crdownload`... and hidden files are ignored.
+
+> **Permissions (docker)**: nothing to do if your user on the host is the first one (`id` shows `uid=1000` and `gid=1000`).
+> Otherwise, set `PUID` and `PGID` in your `.env` file to the values shown by `id`.
+>
+> The server still runs as the unprivileged `cloudy` user of the container. At each start, a short-lived container
+> (the only one running as root, without network and only allowed to change ownership) gives the `import` folder to your user,
+> shared with your group. The server is a member of this group: it can read and remove the songs you put in it.
+> - Songs must be readable by their group (the default for most tools). Unreadable songs are kept and logged until their permissions are fixed.
+> - If another service (in another container) puts songs in the import folder, run it with the same group (`PGID`).
+
 ## Development mode
 ### Launch locally without docker
 You can launch the app locally using a premade bash script. Be sure to make the bash script executable on your device:
@@ -74,4 +98,24 @@ Ensure that the ktor service in `compose.yaml` is built from the `Dockerfile` of
 Launch the server with docker compose and ensure that the image is always up to date
 ```
 docker compose build --no-cache --pull ktor && docker compose up
+```
+
+## Additional resources
+### Send songs to Cloudy without Soul Searching
+Some pre-made scripts are available in case you cannot use Soul Searching to send songs to Cloudy, 
+or if you don't want to use the API directly.
+You will find Python scripts in `scripts` folder. 
+The `cloudy_uploader.py` script lets you upload songs from a selected folder to the cloud. Here are recommends steps to use it, 
+in a terminal (linux):
+```bash
+# Move to a python virtual environment setup
+python3 -m venv .venv
+
+source .venv/bin/activate
+
+# Install the dependencies
+python -m pip install -r requirements.txt
+
+# Launch the uploader. The script will ask you for your cloudy password
+python cloudy_upload.py --server https://your-server --user your-username folder-to-upload
 ```

@@ -108,6 +108,11 @@ class ArtistDataSourceImpl : ArtistDataSource {
         }
     }
 
+    /**
+     * Deletes artists that are linked to no music and are the artist of no album.
+     * An album artist may not be an artist of its musics (ex: "Various Artists" for compilations),
+     * and deleting it would delete its albums and their musics.
+     */
     override suspend fun deleteAllEmpty() {
         workTransaction {
             ArtistTable.deleteWhere {
@@ -115,6 +120,10 @@ class ArtistDataSourceImpl : ArtistDataSource {
                     MusicArtistTable
                         .selectAll()
                         .where { MusicArtistTable.artistId eq ArtistTable.id }
+                ) and notExists(
+                    AlbumTable
+                        .selectAll()
+                        .where { AlbumTable.artistId eq ArtistTable.id }
                 )
             }
         }
